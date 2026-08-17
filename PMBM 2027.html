@@ -1,0 +1,2683 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMBM - MI Al-Irsyad Al-Islamiyyah Kota Banjarmasin</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        },
+                        amber: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .tab-active { border-bottom: 3px solid #059669; color: #059669; font-weight: 700; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .pulse-subtle { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* ISOLASI PENCETAKAN RESMI (PRINT ENGINE) */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            body > *:not(#modalPrintCard) {
+                display: none !important;
+            }
+            #modalPrintCard {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+                z-index: 99999 !important;
+                box-shadow: none !important;
+            }
+            #modalPrintCard > div {
+                box-shadow: none !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+            }
+            .print-hidden, .print\:hidden {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
+
+    <div id="topBanner" class="bg-slate-900 text-white text-xs py-2 px-4 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+            <div class="flex items-center space-x-2">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="font-bold tracking-wide uppercase text-emerald-400">LIGHTSPEED PMBM ENGINE v3.5</span>
+                <span class="text-slate-400 hidden sm:inline">| MI Al-Irsyad Al-Islamiyyah Banjarmasin</span>
+            </div>
+            
+            <div class="flex items-center gap-2 bg-slate-800 p-1 rounded-lg border border-slate-700">
+                <span class="text-slate-400 text-[11px] px-2 font-medium">MODE SWITCH:</span>
+                <button onclick="switchRole('USER')" id="roleBtnUser" class="px-3 py-1 text-xs rounded-md font-semibold transition-all duration-150 text-slate-300 hover:text-white hover:bg-slate-700">
+                    🎓 Calon Murid
+                </button>
+                <button onclick="switchRole('ADMIN')" id="roleBtnAdmin" class="px-3 py-1 text-xs rounded-md font-semibold transition-all duration-150 text-slate-300 hover:text-white hover:bg-slate-700">
+                    ⚙️ Admin Utama
+                </button>
+                <button onclick="switchRole('ASESMEN')" id="roleBtnAsesmen" class="px-3 py-1 text-xs rounded-md font-semibold transition-all duration-150 text-slate-300 hover:text-white hover:bg-slate-700">
+                    📋 Admin Asesmen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <header class="bg-white border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-4 cursor-pointer" onclick="showLoginView()">
+                <img src="https://imgh.in/host/7sfkdf" alt="Logo MI" class="w-12 h-12 object-contain">
+                <div>
+                    <h1 class="text-xl font-black text-slate-900 tracking-tight">PMBM ONLINE 2027/2028</h1>
+                    <p class="text-xs text-emerald-700 font-semibold flex items-center gap-1">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> MI Al-Irsyad Al-Islamiyyah Kota Banjarmasin
+                    </p>
+                </div>
+            </div>
+
+            <!-- Header Quick Stats & Active Session Info -->
+            <div class="flex items-center space-x-3 text-sm">
+                <div class="text-right hidden sm:block" id="headerUserDetails">
+                    <p id="activeUserLabel" class="font-bold text-slate-800">Belum Login</p>
+                    <p id="activeRoleLabel" class="text-xs text-emerald-600 font-medium">Silakan masuk ke sistem</p>
+                </div>
+                <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm border border-emerald-300" id="userAvatar">
+                    ?
+                </div>
+                <button id="logoutBtn" onclick="handleLogout()" class="hidden px-3 py-1.5 text-xs font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1">
+                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Keluar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Notification Engine Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ========================================== -->
+        <!-- VIEW 0: MULTI-ROLE LOGIN PAGE & DEMO PANEL -->
+        <!-- ========================================== -->
+        <section id="viewLogin" class="space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                
+                <!-- Left Info & Banner (7 cols) -->
+                <div class="lg:col-span-7 bg-[#1A644D] rounded-3xl p-8 text-white shadow-2xl relative flex flex-col justify-between min-h-[520px]">
+                    <div class="relative z-10 space-y-6">
+                        <div class="flex items-center gap-3">
+                            <span id="loginWaveBadge" class="bg-[#2D7B64] text-white border-none text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider">
+                                Gelombang 1 T.A. 2027/2028 (01 Agu - 31 Agu 2027)
+                            </span>
+                            <span class="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-bold px-4 py-2 rounded-full">
+                                Sisa Kuota: <span id="loginQuotaCount">116</span> Siswa
+                            </span>
+                        </div>
+
+                        <div class="space-y-3">
+                            <h2 class="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
+                                Penerimaan Murid Baru Madrasah (PMBM)
+                            </h2>
+                            <p class="text-emerald-100 text-sm leading-relaxed max-w-xl text-justify">
+                                AHLAN WA SAHLAN di Portal Resmi PMBM Online MI Al-Irsyad Al-Islamiyyah Banjarmasin. Dengan bismillahirrahmanirrahim, kami menghadirkan sistem pendaftaran terpadu dengan akses cepat tanpa hambatan demi memberikan kemudahan dan kenyamanan pelayanan bagi calon peserta didik baru Tahun Ajaran 2027/2028..
+                            </p>
+                        </div>
+
+                        <!-- 4 Step Info Cards -->
+                        <div class="grid grid-cols-2 gap-4 pt-4">
+                            <div class="p-4 bg-[#14523E] rounded-2xl">
+                                <i data-lucide="user-plus" class="w-5 h-5 text-emerald-400 mb-2"></i>
+                                <h4 class="text-xs font-bold">1. Buat Akun / Registrasi</h4>
+                                <p class="text-[11px] text-emerald-300/80 mt-1">Dapatkan No. Registrasi unik murid</p>
+                            </div>
+                            <div class="p-4 bg-[#14523E] rounded-2xl">
+                                <i data-lucide="credit-card" class="w-5 h-5 text-amber-400 mb-2"></i>
+                                <h4 class="text-xs font-bold">2. Biaya Rp 200.000</h4>
+                                <p class="text-[11px] text-emerald-300/80 mt-1">Transfer via BANK KALSEL SYARIAH & Upload Bukti</p>
+                            </div>
+                            <div class="p-4 bg-[#14523E] rounded-2xl">
+                                <i data-lucide="file-text" class="w-5 h-5 text-blue-400 mb-2"></i>
+                                <h4 class="text-xs font-bold">3. Isi Form Lengkap</h4>
+                                <p class="text-[11px] text-emerald-300/80 mt-1">Buka otomatis setelah verifikasi</p>
+                            </div>
+                            <div class="p-4 bg-[#14523E] rounded-2xl">
+                                <i data-lucide="clipboard-check" class="w-5 h-5 text-purple-400 mb-2"></i>
+                                <h4 class="text-xs font-bold">4. Observasi & Hasil</h4>
+                                <p class="text-[11px] text-emerald-300/80 mt-1">Ujian tatap muka & kelulusan</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Status Footer -->
+                    <div class="relative z-10 pt-6 mt-6 border-t border-emerald-700/50 flex flex-col sm:flex-row justify-start items-start sm:items-center text-xs text-emerald-200 gap-2">
+                        <span class="flex items-center gap-2 uppercase tracking-wider font-semibold">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i> ALAMAT MADRASAH:
+                        </span>
+                        <span class="font-mono text-[11px] text-emerald-300 ml-2">JL.SULAWESI NO.5 RT.6 RW.02, PASAR LAMA, BANJARMASIN TENGAH, KOTA BANJARMASIN</span>
+                    </div>
+                </div>
+
+                <!-- Right Login Form & Quick Demo Box (5 cols) -->
+                <div class="lg:col-span-5 flex flex-col justify-between space-y-6">
+                    
+                    <!-- Login Box Card -->
+                    <div class="bg-white rounded-3xl p-6 shadow-xl border border-slate-200 space-y-6">
+                        
+                        <!-- Login Tabs -->
+                        <div class="flex border-b border-slate-200">
+                            <button onclick="switchLoginTab('USER')" id="tabUserLogin" class="w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-emerald-600 text-emerald-700 transition">
+                                🎓 Calon Murid
+                            </button>
+                            <button onclick="switchLoginTab('STAFF')" id="tabStaffLogin" class="w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition">
+                                ⚙️ Staff / Evaluator
+                            </button>
+                        </div>
+
+                        <!-- User Login Form -->
+                        <form id="formUserLogin" onsubmit="handleUserLoginSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">No. Registrasi / NIK Siswa *</label>
+                                <div class="relative">
+                                    <i data-lucide="id-card" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+                                    <input type="text" id="loginUserReg" required placeholder="PMBM-2027-001 atau NIK" class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Password (No. WA Wali) *</label>
+                                <div class="relative">
+                                    <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+                                    <input type="password" id="loginUserPass" required placeholder="08125551234" class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
+                                <i data-lucide="log-in" class="w-4 h-4"></i> Masuk Dashboard Calon Murid
+                            </button>
+                        </form>
+
+                        <!-- Staff Login Form (Hidden by default) -->
+                        <form id="formStaffLogin" onsubmit="handleStaffLoginSubmit(event)" class="hidden space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Username Admin / Evaluator *</label>
+                                <div class="relative">
+                                    <i data-lucide="user-check" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+                                    <input type="text" id="loginStaffUser" required placeholder="admin / asesmen" class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Kata Sandi *</label>
+                                <div class="relative">
+                                    <i data-lucide="key" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+                                    <input type="password" id="loginStaffPass" required placeholder="••••••••" class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
+                                <i data-lucide="shield" class="w-4 h-4"></i> Masuk Panel Admin
+                            </button>
+                        </form>
+
+                        <!-- New Registration Link -->
+                        <div class="pt-2 text-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">Belum punya akun calon murid?</span>
+                            <button onclick="openRegisterModal()" class="text-xs font-bold text-emerald-600 hover:underline block mx-auto mt-1">
+                                + Daftar Akun Calon Murid Baru
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Instant Demo Access Panel -->
+                    <div id="demoAccessPanel" class="bg-slate-900 text-white p-5 rounded-3xl shadow-xl border border-slate-800 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <i data-lucide="zap" class="w-3.5 h-3.5"></i> Mode Demo Instan (Langsung Akses)
+                            </span>
+                            <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono">Bypass Login</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">Klik salah satu role di bawah untuk mencoba aplikasi secara langsung tanpa mengisi form login:</p>
+                        
+                        <div class="grid grid-cols-3 gap-2 pt-1">
+                            <button onclick="quickDemoLogin('USER')" class="p-2.5 bg-slate-800 hover:bg-emerald-700/80 border border-slate-700 rounded-xl text-center transition group">
+                                <span class="text-lg block mb-0.5 group-hover:scale-110 transition-transform">🎓</span>
+                                <span class="text-[11px] font-bold text-white block">Calon Murid</span>
+                                <span class="text-[9px] text-slate-400 block group-hover:text-emerald-200">Rayyan</span>
+                            </button>
+                            <button onclick="quickDemoLogin('ADMIN')" class="p-2.5 bg-slate-800 hover:bg-emerald-700/80 border border-slate-700 rounded-xl text-center transition group">
+                                <span class="text-lg block mb-0.5 group-hover:scale-110 transition-transform">⚙️</span>
+                                <span class="text-[11px] font-bold text-white block">Admin Utama</span>
+                                <span class="text-[9px] text-slate-400 block group-hover:text-emerald-200">Super Admin</span>
+                            </button>
+                            <button onclick="quickDemoLogin('ASESMEN')" class="p-2.5 bg-slate-800 hover:bg-emerald-700/80 border border-slate-700 rounded-xl text-center transition group">
+                                <span class="text-lg block mb-0.5 group-hover:scale-110 transition-transform">📋</span>
+                                <span class="text-[11px] font-bold text-white block">Admin Asesmen</span>
+                                <span class="text-[9px] text-slate-400 block group-hover:text-emerald-200">Evaluator</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: USER / CALON MURID BARU DASHBOARD  -->
+        <!-- ========================================== -->
+        <section id="viewUser" class="hidden space-y-8">
+            <!-- Status Progress Banner -->
+            <div class="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <span id="userWaveBadge" class="bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                                Gelombang 1 T.A. 2027/2028 (01 Agu - 31 Agu 2027)
+                            </span>
+                            <span id="userQuotaBadge" class="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                                <i data-lucide="users" class="w-3.5 h-3.5"></i> Sisa Kuota: <span id="userQuotaRemaining">116</span> / <span id="userQuotaTotal">120</span> Murid
+                            </span>
+                        </div>
+                        <h2 class="text-2xl font-black mt-2">Selamat Datang, Bapak/Ibu Wali Murid!</h2>
+                        <p class="text-emerald-100 text-sm mt-1 max-w-2xl">
+                            Pantau status pendaftaran, pelunasan biaya registrasi awal, dan jadwal tes observasi & wawancara di dashboard ini.
+                        </p>
+                    </div>
+                    <div class="bg-white/10 border border-white/20 backdrop-blur-md rounded-xl p-4 text-center min-w-[200px]">
+                        <span class="text-xs text-emerald-200 uppercase font-bold tracking-wider block">Status Berkas</span>
+                        <span id="userStatusBadge" class="inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-slate-900">
+                            MENUNGGU PEMBAYARAN
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 5-Step Pipeline Progress Indicator -->
+                <div class="mt-8 pt-6 border-t border-emerald-600/50 grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <div class="flex flex-col items-center text-center p-2 rounded-lg bg-emerald-900/40 border border-emerald-500/30">
+                        <div class="w-8 h-8 rounded-full bg-emerald-400 text-slate-900 font-bold flex items-center justify-center text-xs mb-1">1</div>
+                        <span class="text-xs font-semibold text-white">Buat Akun</span>
+                        <span class="text-[10px] text-emerald-300">Selesai</span>
+                    </div>
+                    <div id="step2Indicator" class="flex flex-col items-center text-center p-2 rounded-lg bg-amber-500/20 border border-amber-400/40">
+                        <div id="step2Badge" class="w-8 h-8 rounded-full bg-amber-400 text-slate-900 font-bold flex items-center justify-center text-xs mb-1">2</div>
+                        <span class="text-xs font-semibold text-white">Bayar Rp 200rb</span>
+                        <span id="step2Subtext" class="text-[10px] text-amber-300 font-medium">Perlu Tindakan</span>
+                    </div>
+                    <div id="step3Indicator" class="flex flex-col items-center text-center p-2 rounded-lg bg-emerald-900/20 opacity-50 border border-emerald-500/20">
+                        <div id="step3Badge" class="w-8 h-8 rounded-full bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-xs mb-1">3</div>
+                        <span class="text-xs font-semibold text-white">Isi Formulir</span>
+                        <span id="step3Subtext" class="text-[10px] text-slate-300">Terkunci</span>
+                    </div>
+                    <div id="step4Indicator" class="flex flex-col items-center text-center p-2 rounded-lg bg-emerald-900/20 opacity-50 border border-emerald-500/20">
+                        <div id="step4Badge" class="w-8 h-8 rounded-full bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-xs mb-1">4</div>
+                        <span class="text-xs font-semibold text-white">Observasi & Wawancara</span>
+                        <span id="step4Subtext" class="text-[10px] text-slate-300">Belum Dijadwalkan</span>
+                    </div>
+                    <div id="step5Indicator" class="flex flex-col items-center text-center p-2 rounded-lg bg-emerald-900/20 opacity-50 border border-emerald-500/20">
+                        <div id="step5Badge" class="w-8 h-8 rounded-full bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-xs mb-1">5</div>
+                        <span class="text-xs font-semibold text-white">Pengumuman</span>
+                        <span id="step5Subtext" class="text-[10px] text-slate-300">Menunggu</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Layout User: Left Payment & Schedule, Right Form -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Left Column (5 cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    
+                    <!-- Card 1: Pembayaran Biaya Pendaftaran -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
+                                    <i data-lucide="credit-card" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-900">Biaya Pendaftaran</h3>
+                                    <p class="text-xs text-slate-500">Gelombang 1 T.A. 2027/2028</p>
+                                </div>
+                            </div>
+                            <span class="text-lg font-black text-emerald-700">Rp 200.000</span>
+                        </div>
+
+                        <!-- Payment Transfer Info -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-3 mb-5">
+                            <p class="text-xs font-bold text-slate-700 uppercase tracking-wider">Rekening Bank Tujuan:</p>
+                            <div class="flex justify-between items-center text-sm bg-white p-2.5 rounded-lg border border-slate-200">
+                                <div>
+                                    <p class="font-bold text-slate-800" id="displayBankName">Bank KALSEL Syariah</p>
+                                    <p class="text-xs text-slate-500" id="displayBankHolder">A.n. Yayasan Al Irsyad Al Islamiyyah Kalimantan Selatan</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-mono font-bold text-emerald-700" id="displayBankNo">7300-402-091</p>
+                                    <button onclick="copyAccountNo()" class="text-[11px] text-emerald-600 font-semibold hover:underline">Salin No.Rek</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload Proof Box -->
+                        <div id="paymentUploadBox" class="space-y-4">
+                            <label class="block text-xs font-bold text-slate-700 uppercase">Upload Bukti Transfer (JPG/PNG/PDF):</label>
+                            <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-emerald-500 transition-colors bg-slate-50 hover:bg-emerald-50/50 cursor-pointer" onclick="document.getElementById('filePaymentProof').click()">
+                                <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-emerald-600 mb-2"></i>
+                                <p class="text-xs font-medium text-slate-700">Klik untuk upload bukti pembayaran</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Maksimal file 5MB</p>
+                                <input type="file" id="filePaymentProof" class="hidden" accept="image/*,.pdf" onchange="handlePaymentProofUpload(event)">
+                            </div>
+                        </div>
+
+                        <!-- Uploaded Status Box (Hidden by default) -->
+                        <div id="paymentUploadedBox" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-600"></i>
+                                <div>
+                                    <p class="text-xs font-bold text-emerald-900">Bukti Transfer Berhasil Diunggah!</p>
+                                    <p class="text-[11px] text-emerald-700" id="paymentUploadedTime">Diunggah: Baru saja</p>
+                                </div>
+                            </div>
+                            <div class="p-2 bg-white rounded-lg border border-emerald-100 flex items-center justify-between">
+                                <span class="text-xs text-slate-600 truncate max-w-[200px]" id="paymentFileName">bukti_transfer_Pendaftaran_200k.jpg</span>
+                                <button onclick="previewPaymentFile()" class="text-xs text-emerald-700 font-semibold underline">Lihat File</button>
+                            </div>
+                            <p class="text-[11px] text-slate-500 italic">Admin sedang memverifikasi pembayaran Anda. Setelah diverifikasi, formulir pendaftaran lengkap di sebelah kanan akan terbuka secara otomatis.</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Jadwal Observasi & Wawancara -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                        <div class="flex items-center space-x-3 pb-4 mb-4 border-b border-slate-100">
+                            <div class="p-2.5 rounded-xl bg-blue-50 text-blue-600">
+                                <i data-lucide="calendar" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900">Jadwal Asesmen</h3>
+                                <p class="text-xs text-slate-500">Observasi Murid & Wawancara Ortu</p>
+                            </div>
+                        </div>
+
+                        <div id="schedulePendingBox" class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+                            <i data-lucide="clock" class="w-6 h-6 text-amber-600 mx-auto mb-1"></i>
+                            <p class="text-xs font-bold text-amber-900">Belum Dijadwalkan</p>
+                            <p class="text-[11px] text-amber-700 mt-1">Jadwal akan ditentukan oleh Admin setelah bukti pembayaran diverifikasi & formulir lengkap terisi.</p>
+                        </div>
+
+                        <div id="scheduleActiveBox" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-blue-900">JADWAL TERKONFIRMASI</span>
+                                <span class="px-2 py-0.5 text-[10px] font-bold bg-blue-600 text-white rounded">Tatap Muka</span>
+                            </div>
+                            <div class="text-sm space-y-1">
+                                <p class="font-bold text-slate-800" id="userScheduleDate">Sabtu, 22 Agustus 2027</p>
+                                <p class="text-xs text-slate-600" id="userScheduleTime">Pukul: 08:30 - 10:00 WITA</p>
+                                <p class="text-xs text-slate-600" id="userScheduleLoc">Lokasi: Aula Utama MI Al-Irsyad Banjarmasin</p>
+                            </div>
+                            <div class="pt-2 border-t border-blue-200/60">
+                                <button onclick="printKartuUjian()" class="w-full py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2">
+                                    <i data-lucide="printer" class="w-3.5 h-3.5"></i> Cetak Kartu Observasi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Hasil Akhir Kelulusan -->
+                    <div id="userResultCard" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                        <div class="flex items-center space-x-3 pb-4 mb-4 border-b border-slate-100">
+                            <div class="p-2.5 rounded-xl bg-purple-50 text-purple-600">
+                                <i data-lucide="award" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900">Pengumuman Kelulusan</h3>
+                                <p class="text-xs text-slate-500">Hasil Verifikasi & Asesmen PMBM</p>
+                            </div>
+                        </div>
+
+                        <div id="userResultContent" class="text-center p-4 rounded-xl">
+                <!-- Injected dynamically: LULUS or TIDAK LULUS -->
+            </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column (7 cols): Formulir Pendaftaran PMBM -->
+                <div class="lg:col-span-7">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 relative overflow-hidden">
+                        
+                        <!-- Lock Overlay (Active if payment not verified) -->
+                        <div id="formLockOverlay" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-30 flex flex-col items-center justify-center p-6 text-center text-white transition-opacity duration-300">
+                            <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-4 border border-white/20">
+                                <i data-lucide="lock" class="w-8 h-8 text-amber-400"></i>
+                            </div>
+                            <h3 class="text-xl font-bold">Formulir Masih Terkunci</h3>
+                            <p class="text-xs text-slate-200 mt-2 max-w-md">
+                                Silakan Lakukan Pembayaran Biaya Pendaftaran sebesar <span class="text-amber-300 font-bold">Rp 200.000</span> dan upload bukti transfer di menu sebelah kiri. Formulir akan otomatis terbuka setelah diverifikasi oleh Admin.
+                            </p>
+                            <button id="demoUnlockBtn" onclick="demoUnlockForm()" class="mt-5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                                🚀 Simulasi: ACC Pembayaran Instan (Bypass Demo)
+                            </button>
+                        </div>
+
+                        <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Formulir Pendaftaran Murid Baru</h3>
+                                <p class="text-xs text-slate-500">Lengkapi data diri calon murid dan orang tua / wali</p>
+                            </div>
+                            <span class="text-xs px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800 font-bold">Akses Terbuka</span>
+                        </div>
+
+                        <form id="pmbmForm" onsubmit="handleFormSubmit(event)" class="space-y-6">
+                            
+                            <!-- Section A: Data Calon Murid -->
+                            <div class="space-y-4">
+                                <h4 class="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-emerald-100 pb-2">
+                                    <i data-lucide="user" class="w-4 h-4"></i> A. Data Calon Murid
+                                </h4>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">NIK (Nomor Induk Kependudukan) *</label>
+                                        <input type="text" id="inputNik" required value="6371011405190002" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap *</label>
+                                        <input type="text" id="inputNamaLengkap" required value="Muhammad Rayyan Al-Fatih" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Panggilan</label>
+                                        <input type="text" id="inputNamaPanggilan" value="Rayyan" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Jenis Kelamin *</label>
+                                        <select id="inputJenisKelamin" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                            <option value="Laki-laki" selected>Laki-laki</option>
+                                            <option value="Perempuan">Perempuan</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tempat Lahir *</label>
+                                        <input type="text" id="inputTempatLahir" required value="Banjarmasin" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Lahir *</label>
+                                        <input type="date" id="inputTglLahir" required value="2019-05-14" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Sekolah Asal (TK / RA / PAUD) *</label>
+                                        <input type="text" id="inputSekolahAsal" required value="RA Al-Irsyad Banjarmasin" placeholder="Contoh: TK Negeri Pembina / RA Al-Irsyad" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Status Kebutuhan Khusus (ABK) *</label>
+                                        <select id="inputStatusAbk" onchange="toggleAbkDetailInput()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                            <option value="Non-ABK / Reguler" selected>Non-ABK / Reguler (Siswa Umum)</option>
+                                            <option value="ABK - Autisme">ABK - Autisme</option>
+                                            <option value="ABK - ADHD / GPPH">ABK - ADHD / GPPH</option>
+                                            <option value="ABK - Tunagrahita / Down Syndrome">ABK - Tunagrahita / Down Syndrome</option>
+                                            <option value="ABK - Tunawicara / Tunarungu">ABK - Tunawicara / Tunarungu</option>
+                                            <option value="ABK - Tunanetra / Low Vision">ABK - Tunanetra / Low Vision</option>
+                                            <option value="ABK - Tunafisik / Daksa">ABK - Tunafisik / Daksa</option>
+                                            <option value="ABK - Lainnya">ABK - Kebutuhan Khusus Lainnya</option>
+                                        </select>
+                                    </div>
+                                    <div id="wrapperDetailAbk" class="md:col-span-2 hidden p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-3">
+                                        <div>
+                                            <label class="block text-xs font-bold text-amber-900 mb-1">Detail / Keterangan Kebutuhan Khusus (ABK)</label>
+                                            <input type="text" id="inputDetailAbk" placeholder="Tuliskan catatan khusus atau kebutuhan pendampingan siswa..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                            <p class="text-[10px] text-amber-700 italic mt-1">Informasi ini penting untuk penyiapan instrumen observasi & sarana pendampingan madrasah.</p>
+                                        </div>
+
+                                        <!-- Upload Surat Dokter Box -->
+                                        <div id="abkUploadBox" class="space-y-2 pt-2 border-t border-amber-200/60">
+                                            <label class="block text-[11px] font-bold text-amber-900 uppercase">Upload Surat Keterangan Dokter/Psikolog (Opsional):</label>
+                                            <div class="border-2 border-dashed border-amber-300 rounded-xl p-5 text-center hover:border-amber-500 transition-colors bg-white/60 hover:bg-amber-100/50 cursor-pointer" onclick="document.getElementById('fileAbkSurat').click()">
+                                                <i data-lucide="upload-cloud" class="w-7 h-7 mx-auto text-amber-600 mb-1.5"></i>
+                                                <p class="text-xs font-semibold text-amber-900">Klik untuk upload surat medis</p>
+                                                <p class="text-[10px] text-amber-700/80 mt-0.5">Format: JPG, PNG, atau PDF (Maks. 5MB)</p>
+                                                <input type="file" id="fileAbkSurat" class="hidden" accept="image/*,.pdf" onchange="handleAbkSuratUpload(event)">
+                                            </div>
+                                        </div>
+
+                                        <!-- Uploaded Status Box -->
+                                        <div id="abkUploadedBox" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3 space-y-2 pt-2 mt-3">
+                                            <div class="flex items-center space-x-2">
+                                                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>
+                                                <div>
+                                                    <p class="text-[11px] font-bold text-emerald-900">Surat Keterangan Berhasil Diunggah!</p>
+                                                </div>
+                                            </div>
+                                            <div class="p-2 bg-white rounded-lg border border-emerald-100 flex items-center justify-between">
+                                                <span class="text-[11px] text-slate-600 truncate max-w-[200px]" id="abkFileName">surat_dokter.pdf</span>
+                                                <button type="button" onclick="previewAbkFile()" class="text-[11px] text-emerald-700 font-bold underline hover:text-emerald-800">Lihat File</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section B: Data Orang Tua / Wali -->
+                            <div class="space-y-4">
+                                <h4 class="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-emerald-100 pb-2">
+                                    <i data-lucide="users" class="w-4 h-4"></i> B. Data Orang Tua / Wali
+                                </h4>
+
+                                <!-- Data Ayah & Ibu -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Ayah Kandung *</label>
+                                        <input type="text" id="inputNamaAyah" required value="Ahmad Fauzi, S.T." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Pekerjaan Ayah *</label>
+                                        <input type="text" id="inputPekerjaanAyah" required value="Karyawan Swasta" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Penghasilan Ayah Per Bulan *</label>
+                                        <select id="inputPenghasilanAyah" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                            <option value="Tidak Berpenghasilan">Tidak Berpenghasilan</option>
+                                            <option value="< 2 Juta">&lt; Rp 2.000.000</option>
+                                            <option value="2 - 5 Juta" selected>Rp 2.000.000 - Rp 5.000.000</option>
+                                            <option value="5 - 10 Juta">Rp 5.000.000 - Rp 10.000.000</option>
+                                            <option value="> 10 Juta">&gt; Rp 10.000.000</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Ibu Kandung *</label>
+                                        <input type="text" id="inputNamaIbu" required value="Siti Nurhaliza, S.Pd." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Pekerjaan Ibu *</label>
+                                        <input type="text" id="inputPekerjaanIbu" required value="Ibu Rumah Tangga / Guru" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Penghasilan Ibu Per Bulan *</label>
+                                        <select id="inputPenghasilanIbu" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                            <option value="Tidak Berpenghasilan">Tidak Berpenghasilan</option>
+                                            <option value="< 2 Juta" selected>&lt; Rp 2.000.000</option>
+                                            <option value="2 - 5 Juta">Rp 2.000.000 - Rp 5.000.000</option>
+                                            <option value="5 - 10 Juta">Rp 5.000.000 - Rp 10.000.000</option>
+                                            <option value="> 10 Juta">&gt; Rp 10.000.000</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Kontak WhatsApp -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">No. WhatsApp Orang Tua (Aktif) *</label>
+                                    <input type="tel" id="inputNoWa" required value="08125551234" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                </div>
+
+                                <!-- Data Wali (Opsional) -->
+                                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                            <i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i> Data Wali (Opsional / Jika Diwakilkan)
+                                        </span>
+                                        <span class="text-[10px] text-slate-500 italic">Isi jika siswa tidak tinggal bersama orang tua kandung</span>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Wali</label>
+                                            <input type="text" id="inputNamaWali" placeholder="Nama lengkap wali" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Pekerjaan Wali</label>
+                                            <input type="text" id="inputPekerjaanWali" placeholder="Pekerjaan wali" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Hubungan dengan Calon Murid</label>
+                                            <input type="text" id="inputHubunganWali" placeholder="Contoh: Paman / Kakek" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Lengkap (Banjarmasin) *</label>
+                                    <textarea id="inputAlamat" rows="2" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">Jl. Sultan Adam No. 45 RT 12, Banjarmasin Utara</textarea>
+                                </div>
+                            </div>
+
+                            <!-- Section C: Berkas Persyaratan -->
+                            <div class="space-y-4">
+                                <h4 class="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-emerald-100 pb-2">
+                                    <i data-lucide="file-check" class="w-4 h-4"></i> C. Upload Berkas Lampiran
+                                </h4>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                                        <label class="block text-xs font-bold text-slate-700">Kartu Keluarga (KK) *</label>
+                                        <input type="file" id="fileKk" accept="image/*,.pdf" onchange="handleKkChange(event)" class="text-xs w-full text-slate-500 file:mr-2 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                                        <p id="kkFileStatus" class="text-[11px] text-slate-500 font-medium">Belum ada file dipilih</p>
+                                    </div>
+                                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                                        <label class="block text-xs font-bold text-slate-700">Akta Kelahiran *</label>
+                                        <input type="file" id="fileAkta" accept="image/*,.pdf" onchange="handleAktaChange(event)" class="text-xs w-full text-slate-500 file:mr-2 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                                        <p id="aktaFileStatus" class="text-[11px] text-slate-500 font-medium">Belum ada file dipilih</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Action -->
+                            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                                <span class="text-xs text-slate-500 flex items-center gap-1">
+                                    <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i> Data Tersimpan Aman
+                                </span>
+                                <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+                                    <i data-lucide="send" class="w-4 h-4"></i> Simpan & Kirim Formulir
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: ADMIN UTAMA (SUPER ADMIN) DASHBOARD -->
+        <!-- ========================================== -->
+        <section id="viewAdmin" class="hidden space-y-8">
+            <!-- Header Admin Bar -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900">PANEL CONTROL ADMIN PMBM</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">MI Al-Irsyad Al-Islamiyyah Kota Banjarmasin</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openGelombangModal()" class="px-3.5 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition flex items-center gap-1.5">
+                        <i data-lucide="settings" class="w-4 h-4"></i> Kelola Gelombang
+                    </button>
+                    <button onclick="exportToExcelSimulated()" class="px-3.5 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition flex items-center gap-1.5">
+                        <i data-lucide="download" class="w-4 h-4"></i> Export (Google Sheets)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center text-slate-500 mb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider">Total Pendaftar</span>
+                        <i data-lucide="users" class="w-5 h-5 text-emerald-600"></i>
+                    </div>
+                    <span id="statTotal" class="text-2xl font-black text-slate-900">0</span>
+                    <span class="text-[11px] text-slate-400 block mt-1">Gelombang 1 Active</span>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center text-slate-500 mb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider">Perlu Verifikasi Bayar</span>
+                        <i data-lucide="clock" class="w-5 h-5 text-amber-500"></i>
+                    </div>
+                    <span id="statPendingPay" class="text-2xl font-black text-amber-600">0</span>
+                    <span class="text-[11px] text-slate-400 block mt-1">Biaya @ Rp 200.000</span>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center text-slate-500 mb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider">Siap Asesmen</span>
+                        <i data-lucide="clipboard-check" class="w-5 h-5 text-blue-600"></i>
+                    </div>
+                    <span id="statReadyAssess" class="text-2xl font-black text-blue-600">0</span>
+                    <span class="text-[11px] text-slate-400 block mt-1">Bayar verified & Form terisi</span>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center text-slate-500 mb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider">Dinyatakan Lulus</span>
+                        <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
+                    </div>
+                    <span id="statPassed" class="text-2xl font-black text-emerald-600">0</span>
+                    <span class="text-[11px] text-slate-400 block mt-1">Siap Registrasi Ulang</span>
+                </div>
+            </div>
+
+            <!-- Master Data Applicants Table -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <!-- Table Controls -->
+                <div class="p-4 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-50/50">
+                    <div class="relative w-full md:w-80">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+                        <input type="text" id="adminSearchInput" oninput="renderAdminTable()" placeholder="Cari Nama / No Reg / Ortu..." class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    
+                    <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto">
+                        <button onclick="filterAdminTable('ALL')" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white hover:bg-slate-100" id="filterAll">Semua</button>
+                        <button onclick="filterAdminTable('PENDING')" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100" id="filterPending">Perlu Verifikasi Bayar</button>
+                        <button onclick="filterAdminTable('VERIFIED')" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-blue-300 bg-blue-50 text-blue-800 hover:bg-blue-100" id="filterVerified">Form Terbuka</button>
+                    </div>
+                </div>
+
+                <!-- Table Content -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="p-3.5">No. Reg</th>
+                                <th class="p-3.5">Calon Murid</th>
+                                <th class="p-3.5">Orang Tua / HP</th>
+                                <th class="p-3.5">Status Bayar (200k)</th>
+                                <th class="p-3.5">Jadwal Asesmen</th>
+                                <th class="p-3.5">Nilai & Rekomendasi</th>
+                                <th class="p-3.5 text-center">Keputusan Akhir</th>
+                                <th class="p-3.5 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody" class="divide-y divide-slate-100 font-medium">
+                            <!-- Injected dynamically by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Integrasi Google Sheets & Apps Script Architecture Code -->
+            <div id="gasCodeSnippetPanel" class="bg-slate-900 rounded-2xl p-6 text-white space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-emerald-400 flex items-center gap-2">
+                            <i data-lucide="database" class="w-5 h-5"></i> Integrasi Google Sheets + Google Drive + Google Apps Script (GAS)
+                        </h3>
+                        <p class="text-xs text-slate-400">Salin kode backend ini ke Extensions > Apps Script pada Spreadsheet Anda. Klik 1x pada fungsi <code>setupDatabase()</code> untuk membuat Sheet & Folder Drive otomatis!</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="triggerAutoSetupDatabaseSimulated()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-bold flex items-center gap-1 shadow-md">
+                            <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> ⚡ Auto Setup DB
+                        </button>
+                        <button onclick="copyGasCode()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-bold flex items-center gap-1">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin Kode Code.gs
+                        </button>
+                    </div>
+                </div>
+                <pre class="bg-slate-950 p-4 rounded-xl text-[11px] font-mono text-emerald-300 overflow-x-auto border border-slate-800 max-h-56 scrollbar-thin">
+// LIGHTSPEED PMBM BACKEND ENGINE - MI AL-IRSYAD AL-ISLAMIYYAH BANJARMASIN
+// Complete Drive Upload & Multi-Sheet Architecture (v4.3)
+function setupDatabase() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let rootFolder;
+  const folders = DriveApp.getFoldersByName("PMBM_MI_AL_IRSYAD_DRIVE_STORAGE");
+  if (folders.hasNext()) {
+    rootFolder = folders.next();
+  } else {
+    rootFolder = DriveApp.createFolder("PMBM_MI_AL_IRSYAD_DRIVE_STORAGE");
+    rootFolder.createFolder("Bukti_Transfer_Pembayaran");
+    rootFolder.createFolder("Berkas_KK_Dan_Akta");
+  }
+  return "Database & Drive Structure Ready!";
+}
+                </pre>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: ADMIN ASESMEN (OBSERVASI & WAWANCARA) -->
+        <!-- ========================================== -->
+        <section id="viewAsesmen" class="hidden space-y-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900">MODUL ASESMEN TERPADU</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Penilaian Observasi Perilaku Murid & Wawancara Orang Tua dalam 1 Halaman</p>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5">
+                    <i data-lucide="user-check" class="w-4 h-4"></i> Admin Evaluator Active
+                </div>
+            </div>
+
+            <!-- Asesmen Split View Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Left: Candidate Selector (4 cols) -->
+                <div class="lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="text-xs font-bold uppercase text-slate-700 tracking-wider">Pilih Calon Murid Diuji:</h3>
+                    
+                    <div id="asesmenCandidateList" class="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                        <!-- Dynamic list of candidates ready for assessment -->
+                    </div>
+                </div>
+
+                <!-- Right: Combined Assessment Form (8 cols) -->
+                <div class="lg:col-span-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div id="asesmenActiveHeader" class="pb-4 border-b border-slate-100 flex justify-between items-center">
+                        <div>
+                            <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Target Observasi</span>
+                            <h3 class="text-lg font-black text-slate-900" id="asesmenTargetName">Muhammad Rayyan Al-Fatih</h3>
+                            <p class="text-xs text-slate-500" id="asesmenTargetDetail">No. Reg: PMBM-2027-001 | Wali: Ahmad Fauzi</p>
+                        </div>
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full" id="asesmenStatusBadge">Siap Diuji</span>
+                    </div>
+
+                    <form id="asesmenForm" onsubmit="handleAsesmenSubmit(event)" class="space-y-6">
+                        
+                        <!-- Part 1: Observasi Calon Murid -->
+                        <div class="space-y-4">
+                            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider bg-slate-100 p-2.5 rounded-lg flex items-center justify-between">
+                                <span>1. Observasi Kemampuan & Motorik Calon Murid</span>
+                                <span class="text-[10px] text-slate-500">Skala Skor: 1 - 100</span>
+                            </h4>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="p-3 border border-slate-200 rounded-xl space-y-2">
+                                    <label class="block text-xs font-bold text-slate-800">Motorik Halus & Kemandirian</label>
+                                    <p class="text-[11px] text-slate-500">Mewarnai, memegang pensil, melepas sepatu sendiri.</p>
+                                    <input type="number" min="0" max="100" id="scoreMotorik" required value="85" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500">
+                                </div>
+
+                                <div class="p-3 border border-slate-200 rounded-xl space-y-2">
+                                    <label class="block text-xs font-bold text-slate-800">Kemampuan Berbahasa & Interaksi</label>
+                                    <p class="text-[11px] text-slate-500">Merujuk benda, menjawab pertanyaan sederhana, keberanian.</p>
+                                    <input type="number" min="0" max="100" id="scoreBahasa" required value="90" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500">
+                                </div>
+
+                                <div class="p-3 border border-slate-200 rounded-xl space-y-2 sm:col-span-2">
+                                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-800">Pengenalan Hijaiyah / Tartili & Doa Harian</label>
+                                            <p class="text-[11px] text-slate-500">Mengenal huruf hijaiyah tunggal, doa sebelum makan/tidur.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Skor Nilai (1 - 100) *</label>
+                                            <input type="number" min="0" max="100" id="scoreHijaiyah" required value="88" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-emerald-800 mb-1">📖 Penempatan Hasil Jilid / Tartili *</label>
+                                            <select id="scoreJilid" required class="w-full px-3 py-1.5 border border-emerald-300 bg-emerald-50/50 rounded-lg text-xs font-bold text-emerald-900 focus:ring-2 focus:ring-emerald-500">
+                                                <option value="Pra-Jilid / Belum Mengenal">Pra-Jilid / Belum Mengenal</option>
+                                                <option value="Tartili Jilid 1">Tartili Jilid 1</option>
+                                                <option value="Tartili Jilid 2">Tartili Jilid 2</option>
+                                                <option value="Tartili Jilid 3" selected>Tartili Jilid 3</option>
+                                                <option value="Tartili Jilid 4">Tartili Jilid 4</option>
+                                                <option value="Tartili Jilid 5">Tartili Jilid 5</option>
+                                                <option value="Tartili Jilid 6">Tartili Jilid 6</option>
+                                                <option value="Al-Qur'an / Tadarus">Al-Qur'an / Tadarus</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Part 2: Wawancara Orang Tua / Wali -->
+                        <div class="space-y-4">
+                            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider bg-slate-100 p-2.5 rounded-lg flex items-center justify-between">
+                                <span>2. Wawancara Komitmen Orang Tua / Wali</span>
+                                <span class="text-[10px] text-slate-500">Skala Skor: 1 - 100</span>
+                            </h4>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="p-3 border border-slate-200 rounded-xl space-y-2">
+                                    <label class="block text-xs font-bold text-slate-800">Komitmen Pendampingan Belajar</label>
+                                    <p class="text-[11px] text-slate-500">Kesediaan mendampingi hafalan Al-Qur'an di rumah.</p>
+                                    <input type="number" min="0" max="100" id="scoreKomitmen" required value="95" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500">
+                                </div>
+
+                                <div class="p-3 border border-slate-200 rounded-xl space-y-2">
+                                    <label class="block text-xs font-bold text-slate-800">Kesepahaman Program Madrasah</label>
+                                    <p class="text-[11px] text-slate-500">Dukungan terhadap kegiatan keislaman & tata tertib MI.</p>
+                                    <input type="number" min="0" max="100" id="scoreKesepahaman" required value="92" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Catatan Tambahan Evaluator</label>
+                                <textarea id="asesmenNotes" rows="2" placeholder="Tuliskan catatan khusus observasi/wawancara..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500">Anak sangat aktif dan percaya diri. Orang tua sangat mendukung program tahfidz.</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Assessment Action -->
+                        <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-slate-500 block">Rekomendasi Evaluator:</span>
+                                <select id="asesmenRecommendation" class="mt-0.5 text-xs font-bold border border-slate-300 rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-emerald-500">
+                                    <option value="Lulus">Lulus</option>
+                                    <option value="Tidak Lulus">Tidak Lulus</option>
+                                    <option value="Sangat Direkomendasikan">Sangat Direkomendasikan</option>
+                                    <option value="Direkomendasikan">Direkomendasikan</option>
+                                    <option value="Dipertimbangkan">Dipertimbangkan</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-2">
+                                <i data-lucide="check-square" class="w-4 h-4"></i> Simpan Hasil Asesmen Complete
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL 1: PREVIEW BUKTI TRANSFER PEMBAYARAN -->
+    <div id="modalPaymentProof" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
+            <button onclick="closeModal('modalPaymentProof')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">Bukti Transfer Pembayaran - Rp 200.000</h3>
+            
+            <div id="modalPaymentContainer" class="bg-slate-100 rounded-xl p-3 text-center min-h-[250px] flex flex-col items-center justify-center border border-slate-200 gap-2">
+                <img id="modalPaymentImage" src="https://placehold.co/400x600/059669/ffffff?text=Bukti+Transfer+BSI+200.000+MI+Al-Irsyad" alt="Bukti Transfer" class="max-h-80 object-contain rounded-lg shadow-sm">
+                <a id="modalPaymentExternalLink" href="#" target="_blank" class="hidden text-xs text-emerald-700 font-bold hover:underline flex items-center gap-1 mt-1">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Buka File Asli di Tab Baru
+                </a>
+            </div>
+
+            <div id="modalPaymentActions" class="flex justify-end gap-2 pt-2">
+                <button onclick="adminVerifyPayment(activeModalApplicantId, false)" class="px-4 py-2 bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold">
+                    Tolak Pembayaran
+                </button>
+                <button onclick="adminVerifyPayment(activeModalApplicantId, true)" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md">
+                    Verifikasi (Buka Form)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: SETTING JADWAL ASESMEN (ADMIN) -->
+    <div id="modalSchedule" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+            <button onclick="closeModal('modalSchedule')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">Atur Jadwal Observasi & Wawancara</h3>
+            
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Pilih Tanggal Observasi:</label>
+                    <input type="date" id="inputScheduleDate" value="2027-08-22" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Waktu / Sesi:</label>
+                    <input type="text" id="inputScheduleTime" value="08:30 - 10:00 WITA" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Ruangan / Tempat:</label>
+                    <input type="text" id="inputScheduleLoc" value="Gedung Utama MI Al-Irsyad Banjarmasin" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="saveScheduleFromModal()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md">
+                    Simpan & Kirim Notifikasi Jadwal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: KELOLA GELOMBANG (ADMIN) -->
+    <div id="modalGelombang" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+            <button onclick="closeModal('modalGelombang')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                <i data-lucide="settings" class="w-5 h-5 text-emerald-600"></i> Pengaturan Gelombang PMBM
+            </h3>
+            
+            <div class="space-y-3 text-xs">
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block font-semibold text-slate-700">Pilih Gelombang Pendaftaran:</label>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="addNewWavePrompt()" class="text-xs text-emerald-600 font-bold hover:text-emerald-700 flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 transition">
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Baru
+                            </button>
+                            <button type="button" onclick="deleteCurrentWavePrompt()" class="text-xs text-rose-600 font-bold hover:text-rose-700 flex items-center gap-1 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 transition" title="Hapus Gelombang Ini">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="inputGelombangSelect" onchange="onWaveSelectChange()" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <!-- Injected dynamically by JS -->
+                        </select>
+                        <button type="button" onclick="addNewWavePrompt()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-sm" title="Tambah Gelombang Baru">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Input Nama Gelombang (Editable oleh Admin) -->
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Nama Gelombang (Editable) *</label>
+                    <input type="text" id="inputGelombangName" placeholder="Contoh: Gelombang 1 T.A. 2027/2028" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <!-- Rentang Tanggal Gelombang -->
+                <div class="grid grid-cols-2 gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Tanggal Mulai *</label>
+                        <input type="date" id="inputGelombangStartDate" value="2027-08-01" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Tanggal Selesai *</label>
+                        <input type="date" id="inputGelombangEndDate" value="2027-08-31" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block font-semibold text-slate-700">Kuota Terbatas (Siswa):</label>
+                        <span id="modalQuotaSummary" class="text-[11px] font-bold text-emerald-700">Terisi: 0 dari 120</span>
+                    </div>
+                    <input type="number" id="inputGelombangQuota" value="120" min="1" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Biaya Pendaftaran (Rp):</label>
+                    <input type="number" id="inputGelombangFee" value="200000" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Status Gelombang:</label>
+                    <select id="inputGelombangStatus" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="OPEN">DIBUKA (Menerima Pendaftaran & Aktif di Landing Page)</option>
+                        <option value="CLOSED">DITUTUP (Kuota Penuh / Lewat Tanggal)</option>
+                    </select>
+                </div>
+
+                <!-- Section Pengaturan Rekening Bank (Editable Admin Utama) -->
+                <div class="p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-2 mt-2">
+                    <span class="text-xs font-bold text-emerald-800 flex items-center gap-1">
+                        <i data-lucide="credit-card" class="w-4 h-4 text-emerald-600"></i> Pengaturan Rekening Bank Tujuan (Admin)
+                    </span>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-0.5 text-[11px]">Nama Bank *</label>
+                        <input type="text" id="inputBankName" value="Bank KALSEL Syariah" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-0.5 text-[11px]">Atas Nama (A.n.) *</label>
+                        <input type="text" id="inputBankHolder" value="A.n. Yayasan Al Irsyad Al Islamiyyah Kalimantan Selatan" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-0.5 text-[11px]">Nomor Rekening *</label>
+                        <input type="text" id="inputAccountNo" value="7300-402-091" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold font-mono focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="saveGelombangSetting()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition">
+                    Simpan Pengaturan Gelombang
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: REGISTRASI AKUN CALON MURID BARU -->
+    <div id="modalRegisterAccount" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+            <button onclick="closeModal('modalRegisterAccount')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-base font-black text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                <i data-lucide="user-plus" class="w-5 h-5 text-emerald-600"></i> Buat Akun Calon Murid Baru
+            </h3>
+            
+            <form onsubmit="handleNewAccountRegister(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Nama Lengkap Calon Murid *</label>
+                    <input type="text" id="regNamaMurid" required placeholder="Contoh: Muhammad Ali" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">NIK Calon Murid *</label>
+                    <input type="text" id="regNikMurid" required placeholder="16 Digit NIK di KK" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Nama Ayah / Ibu Kandung *</label>
+                    <input type="text" id="regNamaOrtu" required placeholder="Nama orang tua" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">No. WhatsApp Aktif (Untuk Login & Password) *</label>
+                    <input type="tel" id="regWaOrtu" required placeholder="0812xxxxxxxx" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+                </div>
+
+                <div class="pt-3 border-t border-slate-100">
+                    <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-md transition">
+                        Daftarkan Akun & Dapatkan No. Reg
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 5: KARTU OBSERVASI & SKL PRINT PREVIEW (OFFICIAL DOCUMENT) -->
+    <div id="modalPrintCard" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-8 shadow-2xl relative my-auto max-h-[92vh] flex flex-col justify-between print:p-0 print:shadow-none print:max-w-none print:m-0 print:max-h-none">
+            
+            <button onclick="closeModal('modalPrintCard')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 print:hidden z-10 p-1 bg-slate-100 rounded-full">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <!-- Dynamic Document Container -->
+            <div id="printableCardContent" class="space-y-6 text-slate-900 overflow-y-auto pr-1 pb-4 print:overflow-visible print:pr-0">
+                <!-- Injected dynamically via JS (Kartu Observasi / SKL) -->
+            </div>
+
+            <!-- Action Buttons Footer -->
+            <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 print:hidden bg-white sticky bottom-0 z-20">
+                <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">
+                    💡 Tips: Pilih "Save as PDF" di dialog printer.
+                </span>
+                <div class="flex items-center gap-2 ml-auto">
+                    <button onclick="closeModal('modalPrintCard')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+                        Tutup
+                    </button>
+                    <button onclick="executeBrowserPrint()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition flex items-center gap-2">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Cetak / Simpan PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Production vs Demo Environment Flag
+        const IS_PRODUCTION = false;
+
+        // Backend Endpoint for Google Apps Script
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyda6US4SpqOlASXnD_W6KBnqAcetp8OVGOOUIHx3hRlbeoKgOyAFRCVmXh0LRiJKup/exec";
+
+        let isLoggedIn = false;
+        let currentRole = 'LOGIN'; // LOGIN | USER | ADMIN | ASESMEN
+        let activeModalApplicantId = null;
+        let selectedAsesmenCandidateId = 'PMBM-2027-001';
+        let currentTableFilter = 'ALL';
+        let loggedInUserId = 'PMBM-2027-001';
+
+        // Temporary storage for Form Files (Base64)
+        let tempKkFile = null;
+        let tempAktaFile = null;
+        let tempAbkSuratFile = null;
+
+        // Global variable to store current print document title
+        let currentPrintDocTitle = 'Dokumen PMBM';
+
+        function handleKkChange(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById('kkFileStatus');
+            if (statusEl) statusEl.innerText = `✓ Terpilih: ${file.name}`;
+            
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                tempKkFile = {
+                    name: file.name,
+                    base64: evt.target.result
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleAktaChange(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById('aktaFileStatus');
+            if (statusEl) statusEl.innerText = `✓ Terpilih: ${file.name}`;
+            
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                tempAktaFile = {
+                    name: file.name,
+                    base64: evt.target.result
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleAbkSuratUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                tempAbkSuratFile = {
+                    name: file.name,
+                    base64: evt.target.result,
+                    type: file.type
+                };
+                document.getElementById('abkUploadBox').classList.add('hidden');
+                document.getElementById('abkUploadedBox').classList.remove('hidden');
+                document.getElementById('abkFileName').innerText = file.name;
+                lucide.createIcons();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function previewAbkFile() {
+            if (tempAbkSuratFile && tempAbkSuratFile.base64) {
+                const newTab = window.open();
+                if (newTab) {
+                    newTab.document.write(`<iframe src="${tempAbkSuratFile.base64}" width="100%" height="100%" style="border:none; margin:0; padding:0;"></iframe>`);
+                } else {
+                    showToast("Pop-up diblokir! Tidak dapat menampilkan preview file.", "error");
+                }
+            }
+        }
+
+        // Master Multi-Wave Configuration Engine
+        let wavesList = [
+            {
+                id: 'wave-1',
+                name: 'Gelombang 1 T.A. 2027/2028',
+                startDate: '2027-08-01',
+                endDate: '2027-08-31',
+                totalQuota: 120,
+                fee: 200000,
+                status: 'OPEN'
+            }
+        ];
+        let selectedWaveId = 'wave-1';
+
+        // Master Bank Details (Editable by Super Admin)
+        let bankSettings = {
+            bankName: 'Bank KALSEL Syariah',
+            bankHolder: 'A.n. Yayasan Al Irsyad Al Islamiyyah Kalimantan Selatan',
+            accountNo: '7300-402-091'
+        };
+
+        async function loadDataFromBackend() {
+            if (!GAS_API_URL || GAS_API_URL.includes("TEMPEL_URL_WEB_APP_GAS_DISINI")) return;
+            try {
+                const response = await fetch(`${GAS_API_URL}?action=GET_ALL_DATA`);
+                const result = await response.json();
+                if (result.status === "SUCCESS" && Array.isArray(result.applicants)) {
+                    if (result.applicants.length > 0) {
+                        applicantsData = result.applicants;
+                    }
+                    if (result.waves && result.waves.length > 0) {
+                        wavesList = result.waves;
+                        updateWaveDisplay();
+                    }
+                    if (result.bank) {
+                        bankSettings = result.bank;
+                        updateBankDisplay();
+                    }
+                    if (currentRole === 'ADMIN') renderAdminTable();
+                    if (currentRole === 'ASESMEN') renderAsesmenCandidates();
+                    if (currentRole === 'USER') updateUserViewState();
+                }
+            } catch (err) {
+                console.error("Gagal menarik data dari Google Sheets:", err);
+            }
+        }
+
+        function updateBankDisplay() {
+            const elName = document.getElementById('displayBankName');
+            const elHolder = document.getElementById('displayBankHolder');
+            const elNo = document.getElementById('displayBankNo');
+            if (elName) elName.innerText = bankSettings.bankName;
+            if (elHolder) elHolder.innerText = bankSettings.bankHolder;
+            if (elNo) elNo.innerText = bankSettings.accountNo;
+        }
+
+        function getActiveWave() {
+            return wavesList.find(w => w.status === 'OPEN') || wavesList[0];
+        }
+
+        function updateWaveDisplay() {
+            const activeWave = getActiveWave();
+            if (!activeWave) return;
+            const quotaRemaining = Math.max(0, activeWave.totalQuota - applicantsData.length);
+
+            const waveText = `${activeWave.name} (${formatDateReadable(activeWave.startDate)} - ${formatDateReadable(activeWave.endDate)})`;
+            
+            const loginBadge = document.getElementById('loginWaveBadge');
+            if (loginBadge) loginBadge.innerText = waveText;
+
+            const userWaveBadge = document.getElementById('userWaveBadge');
+            if (userWaveBadge) userWaveBadge.innerText = waveText;
+
+            const elLoginQuota = document.getElementById('loginQuotaCount');
+            if (elLoginQuota) elLoginQuota.innerText = quotaRemaining;
+
+            const elUserQuotaRem = document.getElementById('userQuotaRemaining');
+            if (elUserQuotaRem) elUserQuotaRem.innerText = quotaRemaining;
+
+            const elUserQuotaTot = document.getElementById('userQuotaTotal');
+            if (elUserQuotaTot) elUserQuotaTot.innerText = activeWave.totalQuota;
+        }
+
+        function onWaveSelectChange() {
+            const select = document.getElementById('inputGelombangSelect');
+            if (select) {
+                selectedWaveId = select.value;
+                updateWaveModalControls();
+            }
+        }
+
+        function addNewWavePrompt() {
+            const newIndex = wavesList.length + 1;
+            const newWave = {
+                id: `wave-${newIndex}`,
+                name: `Gelombang ${newIndex} T.A. 2027/2028`,
+                startDate: '2027-09-01',
+                endDate: '2027-09-30',
+                totalQuota: 80,
+                fee: 250000,
+                status: 'OPEN'
+            };
+            wavesList.push(newWave);
+            selectedWaveId = newWave.id;
+            updateWaveModalControls();
+            updateWaveDisplay();
+            showToast(`Gelombang ${newIndex} Berhasil Ditambahkan!`);
+        }
+
+        function deleteCurrentWavePrompt() {
+            if (wavesList.length <= 1) {
+                showToast("Minimal harus ada 1 Gelombang pendaftaran!", "error");
+                return;
+            }
+            wavesList = wavesList.filter(w => w.id !== selectedWaveId);
+            selectedWaveId = wavesList[0].id;
+            updateWaveModalControls();
+            updateWaveDisplay();
+            showToast("Gelombang berhasil dihapus.");
+        }
+
+        function triggerAutoSetupDatabaseSimulated() {
+            showToast("Menjalankan Auto Setup Database & Folder Drive...");
+            setTimeout(() => {
+                showToast("Berhasil! 6 Sheet Rapi & Folder Google Drive Terbuat Otomatis!");
+            }, 1200);
+        }
+
+        function copyGasCode() {
+            const gasCodeSnippet = `// Salin isi dari berkas Code.gs ke Google Apps Script Editor Anda. Lalu jalankan setupDatabase() sekali.`;
+            copyToClipboard(gasCodeSnippet);
+            showToast("Instruksi & Kode Backend GAS disalin!");
+        }
+
+        const dummyApplicantsSample = [
+            {
+                id: 'PMBM-2027-001',
+                name: 'Muhammad Rayyan Al-Fatih',
+                nickname: 'Rayyan',
+                gender: 'Laki-laki',
+                birthPlace: 'Banjarmasin',
+                birthDate: '2020-05-14',
+                sekolahAsal: 'RA Al-Irsyad Banjarmasin',
+                statusAbk: 'Non-ABK / Reguler',
+                detailAbk: '',
+                nik: '6371011405200002',
+                ayah: 'Ahmad Fauzi, S.T.',
+                pekerjaanAyah: 'Karyawan Swasta',
+                penghasilanAyah: '2 - 5 Juta',
+                ibu: 'Siti Nurhaliza, S.Pd.',
+                pekerjaanIbu: 'Ibu Rumah Tangga',
+                penghasilanIbu: '< 2 Juta',
+                wa: '08125551234',
+                wali: '',
+                pekerjaanWali: '',
+                hubunganWali: '',
+                alamat: 'Jl. Sultan Adam No. 45 RT 12, Banjarmasin Utara',
+                paymentStatus: 'UNPAID',
+                paymentFile: null,
+                paymentTime: null,
+                formCompleted: true,
+                scheduleDate: null,
+                scheduleTime: null,
+                scheduleLoc: null,
+                scoreMotorik: null,
+                scoreBahasa: null,
+                scoreHijaiyah: null,
+                scoreKomitmen: null,
+                scoreKesepahaman: null,
+                notes: null,
+                recommendation: null,
+                totalScore: null,
+                scoreCompleted: false,
+                finalStatus: 'MENUNGGU'
+            },
+            {
+                id: 'PMBM-2027-002',
+                name: 'Aisyah Kencana',
+                nickname: 'Aisyah',
+                gender: 'Perempuan',
+                birthPlace: 'Banjarmasin',
+                birthDate: '2020-03-20',
+                sekolahAsal: 'TK Pembina Banjarmasin',
+                statusAbk: 'Non-ABK / Reguler',
+                detailAbk: '',
+                nik: '6371026003200001',
+                ayah: 'H. Muhammad Rizki',
+                pekerjaanAyah: 'Wiraswasta',
+                penghasilanAyah: '5 - 10 Juta',
+                ibu: 'Hj. Noor Janah',
+                pekerjaanIbu: 'Pedagang',
+                penghasilanIbu: '2 - 5 Juta',
+                wa: '08134449876',
+                wali: '',
+                pekerjaanWali: '',
+                hubunganWali: '',
+                alamat: 'Jl. Veteran Gg. Musyawarah No. 12 Banjarmasin',
+                paymentStatus: 'VERIFIED',
+                paymentFile: 'bukti_transfer_aisyah.jpg',
+                paymentTime: '2027-08-05 09:15',
+                formCompleted: true,
+                scheduleDate: '2027-08-22',
+                scheduleTime: '08:30 - 10:00 WITA',
+                scheduleLoc: 'Aula Utama MI Al-Irsyad',
+                scoreMotorik: 92,
+                scoreBahasa: 88,
+                scoreHijaiyah: 95,
+                scoreKomitmen: 90,
+                scoreKesepahaman: 94,
+                jilidResult: 'Tartili Jilid 3',
+                notes: 'Bisa membaca huruf hijaiyah berharakat.',
+                recommendation: 'Sangat Direkomendasikan',
+                totalScore: 91.8,
+                scoreCompleted: true,
+                finalStatus: 'LULUS'
+            }
+        ];
+
+        let applicantsData = IS_PRODUCTION ? [...dummyApplicantsSample] : [];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+            applyProductionMode();
+            updateWaveDisplay();
+            updateBankDisplay();
+            showLoginView();
+            loadDataFromBackend();
+        });
+
+        function applyProductionMode() {
+            const topBanner = document.getElementById('topBanner');
+            const demoBox = document.getElementById('demoAccessPanel');
+            const gasCodeBox = document.getElementById('gasCodeSnippetPanel');
+            const demoUnlockBtn = document.getElementById('demoUnlockBtn');
+
+            if (!IS_PRODUCTION) {
+                if (topBanner) topBanner.classList.add('hidden');
+                if (demoBox) demoBox.classList.add('hidden');
+                if (gasCodeBox) gasCodeBox.classList.add('hidden');
+                if (demoUnlockBtn) demoUnlockBtn.classList.add('hidden');
+            } else {
+                if (topBanner) topBanner.classList.remove('hidden');
+                if (demoBox) demoBox.classList.remove('hidden');
+                if (gasCodeBox) gasCodeBox.classList.remove('hidden');
+                if (demoUnlockBtn) demoUnlockBtn.classList.remove('hidden');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-rose-900 border-rose-700 text-rose-100' : 'bg-slate-900 border-slate-700 text-emerald-300';
+            
+            toast.className = `p-3.5 rounded-xl border text-xs font-semibold shadow-xl flex items-center gap-2 pointer-events-auto transform transition-all duration-300 translate-y-2 opacity-0 ${bgClass}`;
+            toast.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> ${message}`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function showLoginView() {
+            currentRole = 'LOGIN';
+            document.getElementById('viewLogin').classList.remove('hidden');
+            document.getElementById('viewUser').classList.add('hidden');
+            document.getElementById('viewAdmin').classList.add('hidden');
+            document.getElementById('viewAsesmen').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+
+            document.getElementById('activeUserLabel').innerText = 'Belum Login';
+            document.getElementById('activeRoleLabel').innerText = 'Silakan masuk ke sistem';
+            document.getElementById('userAvatar').innerText = '?';
+
+            ['roleBtnUser', 'roleBtnAdmin', 'roleBtnAsesmen'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.className = 'px-3 py-1 text-xs rounded-md font-semibold transition-all duration-150 text-slate-300 hover:text-white hover:bg-slate-700';
+            });
+            lucide.createIcons();
+        }
+
+        function switchRole(role) {
+            isLoggedIn = true;
+            currentRole = role;
+
+            document.getElementById('viewLogin').classList.add('hidden');
+            document.getElementById('viewUser').classList.add('hidden');
+            document.getElementById('viewAdmin').classList.add('hidden');
+            document.getElementById('viewAsesmen').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+
+            const btnUser = document.getElementById('roleBtnUser');
+            const btnAdmin = document.getElementById('roleBtnAdmin');
+            const btnAsesmen = document.getElementById('roleBtnAsesmen');
+            
+            [btnUser, btnAdmin, btnAsesmen].forEach(btn => {
+                if (btn) btn.className = 'px-3 py-1 text-xs rounded-md font-semibold transition-all duration-150 text-slate-300 hover:text-white hover:bg-slate-700';
+            });
+
+            if (role === 'USER') {
+                if (btnUser) btnUser.className = 'px-3 py-1 text-xs rounded-md font-semibold transition-all duration-150 bg-emerald-600 text-white shadow-sm';
+                document.getElementById('viewUser').classList.remove('hidden');
+                
+                const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0] || { name: 'Calon Murid', id: 'PMBM-2027-XXX', nickname: 'Murid' };
+                document.getElementById('activeUserLabel').innerText = `Calon Murid: ${user.nickname || user.name}`;
+                document.getElementById('activeRoleLabel').innerText = `No. Reg: ${user.id}`;
+                document.getElementById('userAvatar').innerText = getInitials(user.name);
+                updateUserViewState();
+            } else if (role === 'ADMIN') {
+                if (btnAdmin) btnAdmin.className = 'px-3 py-1 text-xs rounded-md font-semibold transition-all duration-150 bg-emerald-600 text-white shadow-sm';
+                document.getElementById('viewAdmin').classList.remove('hidden');
+                document.getElementById('activeUserLabel').innerText = 'Administrator Utama';
+                document.getElementById('activeRoleLabel').innerText = 'Super Admin Control';
+                document.getElementById('userAvatar').innerText = 'ADM';
+                renderAdminTable();
+            } else if (role === 'ASESMEN') {
+                if (btnAsesmen) btnAsesmen.className = 'px-3 py-1 text-xs rounded-md font-semibold transition-all duration-150 bg-emerald-600 text-white shadow-sm';
+                document.getElementById('viewAsesmen').classList.remove('hidden');
+                document.getElementById('activeUserLabel').innerText = 'Tim Asesmen & Evaluator';
+                document.getElementById('activeRoleLabel').innerText = 'Penguji Observasi';
+                document.getElementById('userAvatar').innerText = 'EV';
+                renderAsesmenCandidates();
+            }
+            lucide.createIcons();
+        }
+
+        function switchLoginTab(type) {
+            const tabUser = document.getElementById('tabUserLogin');
+            const tabStaff = document.getElementById('tabStaffLogin');
+            const formUser = document.getElementById('formUserLogin');
+            const formStaff = document.getElementById('formStaffLogin');
+
+            if (type === 'USER') {
+                tabUser.className = 'w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-emerald-600 text-emerald-700 transition';
+                tabStaff.className = 'w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition';
+                formUser.classList.remove('hidden');
+                formStaff.classList.add('hidden');
+            } else {
+                tabStaff.className = 'w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-emerald-600 text-emerald-700 transition';
+                tabUser.className = 'w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition';
+                formStaff.classList.remove('hidden');
+                formUser.classList.add('hidden');
+            }
+        }
+
+        function handleUserLoginSubmit(e) {
+            e.preventDefault();
+            const regInput = document.getElementById('loginUserReg').value.trim();
+            
+            loadDataFromBackend().then(() => {
+                const foundUser = applicantsData.find(a => a.id.toLowerCase() === regInput.toLowerCase() || a.nik === regInput);
+                
+                if (foundUser) {
+                    loggedInUserId = foundUser.id;
+                    switchRole('USER');
+                    showToast(`Selamat Datang, ${foundUser.name}!`);
+                } else {
+                    showToast(`Nomor Registrasi / NIK (${regInput}) tidak ditemukan!`, 'error');
+                }
+            });
+        }
+
+        function handleStaffLoginSubmit(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginStaffUser').value.trim().toLowerCase();
+            const pass = document.getElementById('loginStaffPass').value.trim();
+
+            if (!IS_PRODUCTION) {
+                if (username === 'admin' && pass === 'admin123') {
+                    switchRole('ADMIN');
+                    showToast('Login Admin Utama Berhasil!');
+                } else if (username === 'asesmen' && pass === 'asesmen123') {
+                    switchRole('ASESMEN');
+                    showToast('Login Admin Asesmen Berhasil!');
+                } else {
+                    showToast('Username atau kata sandi salah!', 'error');
+                }
+            } else {
+                if (username === 'asesmen' || username === 'evaluator') {
+                    switchRole('ASESMEN');
+                    showToast('Login Asesmen Berhasil!');
+                } else {
+                    switchRole('ADMIN');
+                    showToast('Login Admin Utama Berhasil!');
+                }
+            }
+        }
+
+        function quickDemoLogin(role) {
+            if (role === 'USER' && applicantsData.length > 0) loggedInUserId = applicantsData[0].id;
+            switchRole(role);
+            showToast(`Mode Demo Aktif: Role ${role}`);
+        }
+
+        function handleLogout() {
+            isLoggedIn = false;
+            showLoginView();
+            showToast('Anda telah keluar dari sistem.');
+        }
+
+        function openRegisterModal() {
+            const modal = document.getElementById('modalRegisterAccount');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function handleNewAccountRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regNamaMurid').value;
+            const nik = document.getElementById('regNikMurid').value;
+            const ortu = document.getElementById('regNamaOrtu').value;
+            const wa = document.getElementById('regWaOrtu').value;
+
+            const newId = `PMBM-2027-00${applicantsData.length + 1}`;
+            const newCandidate = {
+                id: newId,
+                name: name,
+                nickname: name.split(' ')[0],
+                gender: 'Laki-laki',
+                birthPlace: 'Banjarmasin',
+                birthDate: '2020-01-01',
+                sekolahAsal: 'TK / RA Asal',
+                statusAbk: 'Non-ABK / Reguler',
+                detailAbk: '',
+                nik: nik,
+                ayah: ortu,
+                pekerjaanAyah: 'Wiraswasta',
+                penghasilanAyah: '2 - 5 Juta',
+                ibu: '-',
+                pekerjaanIbu: '-',
+                penghasilanIbu: 'Tidak Berpenghasilan',
+                wa: wa,
+                wali: '',
+                pekerjaanWali: '',
+                hubunganWali: '',
+                alamat: 'Jl. Sultan Adam Banjarmasin',
+                paymentStatus: 'UNPAID',
+                paymentFile: null,
+                paymentTime: null,
+                formCompleted: false,
+                scheduleDate: null,
+                scheduleTime: null,
+                scheduleLoc: null,
+                scoreMotorik: null,
+                scoreBahasa: null,
+                scoreHijaiyah: null,
+                scoreKomitmen: null,
+                scoreKesepahaman: null,
+                notes: null,
+                recommendation: null,
+                totalScore: null,
+                scoreCompleted: false,
+                finalStatus: 'MENUNGGU'
+            };
+
+            applicantsData.push(newCandidate);
+            loggedInUserId = newId;
+            closeModal('modalRegisterAccount');
+            updateWaveDisplay();
+            switchRole('USER');
+            showToast(`Akun Baru Berhasil Dibuat! Nomor Registrasi Anda: ${newId}`);
+
+            sendToBackend('REGISTER_USER', {
+                id: newId,
+                nik: nik,
+                name: name,
+                parentName: ortu,
+                wa: wa
+            });
+        }
+
+        async function sendToBackend(action, dataPayload) {
+            if (!GAS_API_URL || GAS_API_URL.includes("TEMPEL_URL_WEB_APP_GAS_DISINI")) {
+                console.warn("GAS_API_URL belum dikonfigurasi. Data tersimpan di memori lokal.");
+                return;
+            }
+
+            try {
+                const response = await fetch(GAS_API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({
+                        action: action,
+                        data: dataPayload
+                    })
+                });
+                const result = await response.json();
+                if (result.status === "SUCCESS") {
+                    showToast("Data berhasil tersinkronisasi ke Google Sheets!");
+                }
+            } catch (err) {
+                console.error("Koneksi ke GAS gagal:", err);
+            }
+        }
+
+        function toggleAbkDetailInput() {
+            const statusSelect = document.getElementById('inputStatusAbk');
+            const wrapper = document.getElementById('wrapperDetailAbk');
+            if (!statusSelect || !wrapper) return;
+            if (statusSelect.value !== 'Non-ABK / Reguler') {
+                wrapper.classList.remove('hidden');
+            } else {
+                wrapper.classList.add('hidden');
+            }
+        }
+
+        function updateUserViewState() {
+            const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
+            if (!user) return;
+
+            const userStatusBadge = document.getElementById('userStatusBadge');
+            const lockOverlay = document.getElementById('formLockOverlay');
+            const paymentUploadBox = document.getElementById('paymentUploadBox');
+            const paymentUploadedBox = document.getElementById('paymentUploadedBox');
+            const schedulePendingBox = document.getElementById('schedulePendingBox');
+            const scheduleActiveBox = document.getElementById('scheduleActiveBox');
+            const userResultCard = document.getElementById('userResultCard');
+            const userResultContent = document.getElementById('userResultContent');
+
+            // Populate Form Fields
+            document.getElementById('inputNik').value = user.nik || '';
+            document.getElementById('inputNamaLengkap').value = user.name || '';
+            document.getElementById('inputNamaPanggilan').value = user.nickname || '';
+            document.getElementById('inputJenisKelamin').value = user.gender || 'Laki-laki';
+            document.getElementById('inputTempatLahir').value = user.birthPlace || '';
+            document.getElementById('inputTglLahir').value = user.birthDate || '';
+            document.getElementById('inputSekolahAsal').value = user.sekolahAsal || '';
+            document.getElementById('inputStatusAbk').value = user.statusAbk || 'Non-ABK / Reguler';
+            document.getElementById('inputDetailAbk').value = user.detailAbk || '';
+            toggleAbkDetailInput();
+
+            document.getElementById('inputNamaAyah').value = user.ayah || '';
+            document.getElementById('inputPekerjaanAyah').value = user.pekerjaanAyah || '';
+            document.getElementById('inputPenghasilanAyah').value = user.penghasilanAyah || '2 - 5 Juta';
+            document.getElementById('inputNamaIbu').value = user.ibu || '';
+            document.getElementById('inputPekerjaanIbu').value = user.pekerjaanIbu || '';
+            document.getElementById('inputPenghasilanIbu').value = user.penghasilanIbu || '< 2 Juta';
+            document.getElementById('inputNoWa').value = user.wa || '';
+            document.getElementById('inputNamaWali').value = user.wali || '';
+            document.getElementById('inputPekerjaanWali').value = user.pekerjaanWali || '';
+            document.getElementById('inputHubunganWali').value = user.hubunganWali || '';
+            document.getElementById('inputAlamat').value = user.alamat || '';
+
+            // Update file status labels
+            const kkStatus = document.getElementById('kkFileStatus');
+            if (kkStatus) {
+                kkStatus.innerText = user.kkFileName ? `✓ Berkas KK: ${user.kkFileName}` : 'Belum ada file dipilih';
+            }
+            const aktaStatus = document.getElementById('aktaFileStatus');
+            if (aktaStatus) {
+                aktaStatus.innerText = user.aktaFileName ? `✓ Berkas Akta: ${user.aktaFileName}` : 'Belum ada file dipilih';
+            }
+
+            const step2Indicator = document.getElementById('step2Indicator');
+            const step2Badge = document.getElementById('step2Badge');
+            const step2Subtext = document.getElementById('step2Subtext');
+            const step3Indicator = document.getElementById('step3Indicator');
+            const step3Badge = document.getElementById('step3Badge');
+            const step3Subtext = document.getElementById('step3Subtext');
+
+            if (user.paymentStatus === 'UNPAID') {
+                userStatusBadge.className = 'inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-slate-900';
+                userStatusBadge.innerText = 'MENUNGGU PEMBAYARAN';
+                lockOverlay.classList.remove('hidden');
+                paymentUploadBox.classList.remove('hidden');
+                paymentUploadedBox.classList.add('hidden');
+            } else if (user.paymentStatus === 'PENDING') {
+                userStatusBadge.className = 'inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-slate-900 animate-pulse';
+                userStatusBadge.innerText = 'VERIFIKASI PEMBAYARAN';
+                lockOverlay.classList.remove('hidden');
+                paymentUploadBox.classList.add('hidden');
+                paymentUploadedBox.classList.remove('hidden');
+                document.getElementById('paymentFileName').innerText = user.paymentFile || 'bukti_transfer.jpg';
+                document.getElementById('paymentUploadedTime').innerText = `Diunggah: ${user.paymentTime || 'Baru saja'}`;
+                
+                step2Subtext.innerText = 'Proses Verifikasi';
+            } else if (user.paymentStatus === 'VERIFIED') {
+                userStatusBadge.className = 'inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500 text-white';
+                userStatusBadge.innerText = 'TERVERIFIKASI & FORM AKTIF';
+                lockOverlay.classList.add('hidden');
+                paymentUploadBox.classList.add('hidden');
+                paymentUploadedBox.classList.remove('hidden');
+
+                step2Indicator.className = 'flex flex-col items-center text-center p-2 rounded-lg bg-emerald-900/40 border border-emerald-500/30';
+                step2Badge.className = 'w-8 h-8 rounded-full bg-emerald-400 text-slate-900 font-bold flex items-center justify-center text-xs mb-1';
+                step2Subtext.innerText = 'Lunas Rp 200rb';
+                step2Subtext.className = 'text-[10px] text-emerald-300';
+
+                step3Indicator.className = 'flex flex-col items-center text-center p-2 rounded-lg bg-amber-500/20 border border-amber-400/40';
+                step3Badge.className = 'w-8 h-8 rounded-full bg-amber-400 text-slate-900 font-bold flex items-center justify-center text-xs mb-1';
+                step3Subtext.innerText = 'Formulir Terbuka';
+                step3Subtext.className = 'text-[10px] text-amber-300 font-medium';
+            }
+
+            if (user.scheduleDate) {
+                schedulePendingBox.classList.add('hidden');
+                scheduleActiveBox.classList.remove('hidden');
+                document.getElementById('userScheduleDate').innerText = formatDateReadable(user.scheduleDate);
+                document.getElementById('userScheduleTime').innerText = `Pukul: ${user.scheduleTime}`;
+                document.getElementById('userScheduleLoc').innerText = `Lokasi: ${user.scheduleLoc}`;
+
+                const step4Indicator = document.getElementById('step4Indicator');
+                const step4Badge = document.getElementById('step4Badge');
+                const step4Subtext = document.getElementById('step4Subtext');
+                step4Indicator.className = 'flex flex-col items-center text-center p-2 rounded-lg bg-blue-900/40 border border-blue-500/30';
+                step4Badge.className = 'w-8 h-8 rounded-full bg-blue-400 text-slate-900 font-bold flex items-center justify-center text-xs mb-1';
+                step4Subtext.innerText = user.scheduleDate;
+                step4Subtext.className = 'text-[10px] text-blue-300 font-medium';
+            }
+
+            if (user.finalStatus === 'LULUS') {
+                userResultCard.classList.remove('hidden');
+                userResultContent.className = 'text-center p-5 rounded-xl bg-emerald-50 border border-emerald-200 space-y-3';
+                userResultContent.innerHTML = `
+                    <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto border border-emerald-300">
+                        <i data-lucide="check-circle-2" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-extrabold text-emerald-800 uppercase tracking-widest">SELAMAT! ANDA DINYATAKAN</span>
+                        <h4 class="text-2xl font-black text-emerald-700 mt-0.5">LULUS SELEKSI PMBM</h4>
+                        <p class="text-xs text-slate-600 mt-1">Nomor Registrasi: <strong>${user.id}</strong> | MI Al-Irsyad Al-Islamiyyah Banjarmasin</p>
+                    </div>
+
+                    <!-- Badge Rekomendasi Jilid untuk Calon Murid -->
+                    <div class="p-3 bg-white rounded-xl border border-emerald-200 max-w-sm mx-auto shadow-sm text-left flex items-center gap-3">
+                        <div class="p-2 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-lg">📖</div>
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Rekomendasi Penempatan Pembelajaran:</span>
+                            <span class="text-xs font-black text-emerald-800">${user.jilidResult || 'Tartili Jilid 3'}</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button onclick="printKartuKelulusan()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center justify-center gap-2 mx-auto">
+                            <i data-lucide="file-text" class="w-4 h-4"></i> Cetak Surat Keterangan Lulus (SKL)
+                        </button>
+                    </div>
+                `;
+            } else if (user.finalStatus === 'TIDAK_LULUS') {
+                userResultCard.classList.remove('hidden');
+                userResultContent.className = 'text-center p-5 rounded-xl bg-rose-50 border border-rose-200 space-y-3';
+                userResultContent.innerHTML = `
+                    <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center mx-auto border border-rose-300">
+                        <i data-lucide="x-circle" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-extrabold text-rose-800 uppercase tracking-widest">MOHON MAAF, ANDA DINYATAKAN</span>
+                        <h4 class="text-2xl font-black text-rose-700 mt-0.5">TIDAK LULUS</h4>
+                        <p class="text-xs text-slate-600 mt-1">Nomor Registrasi: <strong>${user.id}</strong></p>
+                    </div>
+                    <div class="p-3 bg-white rounded-xl border border-rose-200 max-w-sm mx-auto shadow-sm text-center">
+                        <p class="text-xs text-slate-600">Tetap semangat! Terima kasih telah berpartisipasi dalam PMBM MI Al-Irsyad Al-Islamiyyah Banjarmasin.</p>
+                    </div>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        function handlePaymentProofUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
+            if (!user) return;
+
+            user.paymentStatus = 'PENDING';
+            user.paymentFile = file.name;
+            user.paymentTime = new Date().toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' });
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                user.paymentFileUrl = evt.target.result;
+                updateUserViewState();
+                renderAdminTable();
+
+                sendToBackend('UPLOAD_PAYMENT_PROOF', {
+                    id: user.id,
+                    fileName: file.name,
+                    mimeType: file.type,
+                    fileBase64: evt.target.result
+                });
+            };
+            reader.readAsDataURL(file);
+
+            showToast('Bukti pembayaran berhasil diunggah! Menunggu konfirmasi Admin.');
+        }
+
+        function demoUnlockForm() {
+            const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
+            if (!user) return;
+            user.paymentStatus = 'VERIFIED';
+            user.paymentFile = 'bukti_transfer_bsi_200k_demo.jpg';
+            user.paymentTime = 'Instan Bypass Demo';
+            updateUserViewState();
+            renderAdminTable();
+            showToast('Simulasi Berhasil: Pembayaran Rp 200rb diverifikasi. Formulir kini terbuka!');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
+            if (!user) return;
+
+            user.nik = document.getElementById('inputNik').value;
+            user.name = document.getElementById('inputNamaLengkap').value;
+            user.nickname = document.getElementById('inputNamaPanggilan').value;
+            user.gender = document.getElementById('inputJenisKelamin').value;
+            user.birthPlace = document.getElementById('inputTempatLahir').value;
+            user.birthDate = document.getElementById('inputTglLahir').value;
+            user.sekolahAsal = document.getElementById('inputSekolahAsal').value;
+            user.statusAbk = document.getElementById('inputStatusAbk').value;
+            user.detailAbk = document.getElementById('inputDetailAbk').value;
+            user.ayah = document.getElementById('inputNamaAyah').value;
+            user.pekerjaanAyah = document.getElementById('inputPekerjaanAyah').value;
+            user.penghasilanAyah = document.getElementById('inputPenghasilanAyah').value;
+            user.ibu = document.getElementById('inputNamaIbu').value;
+            user.pekerjaanIbu = document.getElementById('inputPekerjaanIbu').value;
+            user.penghasilanIbu = document.getElementById('inputPenghasilanIbu').value;
+            user.wa = document.getElementById('inputNoWa').value;
+            user.wali = document.getElementById('inputNamaWali').value;
+            user.pekerjaanWali = document.getElementById('inputPekerjaanWali').value;
+            user.hubunganWali = document.getElementById('inputHubunganWali').value;
+            user.alamat = document.getElementById('inputAlamat').value;
+            user.formCompleted = true;
+
+            if (tempKkFile) {
+                user.kkFileName = tempKkFile.name;
+                user.kkFileBase64 = tempKkFile.base64;
+            }
+            if (tempAktaFile) {
+                user.aktaFileName = tempAktaFile.name;
+                user.aktaFileBase64 = tempAktaFile.base64;
+            }
+            if (tempAbkSuratFile) {
+                user.abkSuratName = tempAbkSuratFile.name;
+                user.abkSuratBase64 = tempAbkSuratFile.base64;
+            }
+
+            showToast('Formulir & Berkas Lampiran Pendaftaran Berhasil Disimpan!');
+            renderAdminTable();
+
+            sendToBackend('SAVE_FORM_DATA', user);
+        }
+
+        function filterAdminTable(filter) {
+            currentTableFilter = filter;
+            ['filterAll', 'filterPending', 'filterVerified'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('bg-slate-900', 'text-white');
+            });
+            renderAdminTable();
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('adminTableBody');
+            if (!tbody) return;
+
+            const searchKey = (document.getElementById('adminSearchInput')?.value || '').toLowerCase();
+            let filtered = applicantsData.filter(item => {
+                const matchSearch = item.name.toLowerCase().includes(searchKey) || item.id.toLowerCase().includes(searchKey) || (item.ayah && item.ayah.toLowerCase().includes(searchKey));
+                if (currentTableFilter === 'PENDING') return matchSearch && item.paymentStatus === 'PENDING';
+                if (currentTableFilter === 'VERIFIED') return matchSearch && item.paymentStatus === 'VERIFIED';
+                return matchSearch;
+            });
+
+            document.getElementById('statTotal').innerText = applicantsData.length;
+            document.getElementById('statPendingPay').innerText = applicantsData.filter(a => a.paymentStatus === 'PENDING').length;
+            document.getElementById('statReadyAssess').innerText = applicantsData.filter(a => a.paymentStatus === 'VERIFIED').length;
+            document.getElementById('statPassed').innerText = applicantsData.filter(a => a.finalStatus === 'LULUS').length;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 italic">Belum ada data calon murid terdaftar.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => {
+                let payBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600">Belum Bayar</span>';
+                if (item.paymentStatus === 'PENDING') {
+                    payBadge = `<button onclick="openPaymentProofModal('${item.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-300 flex items-center gap-1">
+                        <i data-lucide="clock" class="w-3 h-3"></i> Perlu Verifikasi
+                    </button>`;
+                } else if (item.paymentStatus === 'VERIFIED') {
+                    payBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✓ Rp 200k Terverifikasi</span>`;
+                }
+
+                let schedCell = item.scheduleDate ? `<span class="text-[11px] font-bold text-blue-700">${formatDateReadable(item.scheduleDate)}</span>` : `<button onclick="openScheduleModal('${item.id}')" class="text-[11px] text-blue-600 font-semibold hover:underline">+ Atur Jadwal</button>`;
+
+                let recColorClass = (item.recommendation && item.recommendation.toLowerCase() === 'tidak lulus') ? 'text-rose-600' : 'text-emerald-600';
+                let scoreCell = item.scoreCompleted ? `<div class="text-[11px]"><span class="font-bold text-slate-900">Skor: ${item.totalScore}</span> <span class="${recColorClass} block text-[10px]">${item.recommendation}</span></div>` : `<span class="text-[11px] text-slate-400 italic">Belum Diuji</span>`;
+
+                let statusDropdown = `
+                    <select onchange="setFinalStatus('${item.id}', this.value)" class="text-xs font-bold border border-slate-300 rounded-lg px-2 py-1 ${item.finalStatus === 'LULUS' ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : (item.finalStatus === 'TIDAK_LULUS' ? 'bg-rose-50 text-rose-700 border-rose-300' : 'bg-white text-slate-700')}">
+                        <option value="MENUNGGU" ${item.finalStatus === 'MENUNGGU' ? 'selected' : ''}>⏳ Menunggu</option>
+                        <option value="LULUS" ${item.finalStatus === 'LULUS' ? 'selected' : ''}>✅ LULUS</option>
+                        <option value="TIDAK_LULUS" ${item.finalStatus === 'TIDAK_LULUS' ? 'selected' : ''}>❌ Tidak Lulus</option>
+                    </select>
+                `;
+
+                return `
+                    <tr class="hover:bg-slate-50 border-b border-slate-100">
+                        <td class="p-3.5 font-mono font-bold text-emerald-700">${item.id}</td>
+                        <td class="p-3.5">
+                            <p class="font-bold text-slate-900">${item.name}</p>
+                            <p class="text-[10px] text-slate-400">${item.gender} | NIK: ${item.nik}</p>
+                        </td>
+                        <td class="p-3.5">
+                            <p class="text-xs text-slate-800 font-semibold">${item.ayah || '-'}</p>
+                            <p class="text-[10px] text-slate-500">Pekerjaan: ${item.pekerjaanAyah || '-'} | WA: ${item.wa}</p>
+                        </td>
+                        <td class="p-3.5">${payBadge}</td>
+                        <td class="p-3.5">${schedCell}</td>
+                        <td class="p-3.5">${scoreCell}</td>
+                        <td class="p-3.5 text-center">${statusDropdown}</td>
+                        <td class="p-3.5 text-right">
+                            <button onclick="openPaymentProofModal('${item.id}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700" title="Detail Bukti Transfer">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function openPaymentProofModal(id) {
+            activeModalApplicantId = id;
+            const item = applicantsData.find(a => a.id === id);
+            if (!item) return;
+
+            const modal = document.getElementById('modalPaymentProof');
+            const imgEl = document.getElementById('modalPaymentImage');
+            const extLink = document.getElementById('modalPaymentExternalLink');
+
+            const fileTarget = item.paymentFileUrl || item.paymentFile || '';
+
+            if (fileTarget.startsWith('data:image') || fileTarget.startsWith('http://') || fileTarget.startsWith('https://')) {
+                if (fileTarget.includes('drive.google.com')) {
+                    const match = fileTarget.match(/\/d\/([^\/]+)/) || fileTarget.match(/id=([^&]+)/);
+                    if (match && match[1]) {
+                        imgEl.src = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
+                    } else {
+                        imgEl.src = fileTarget;
+                    }
+                    extLink.href = fileTarget;
+                    extLink.classList.remove('hidden');
+                } else {
+                    imgEl.src = fileTarget;
+                    extLink.href = fileTarget;
+                    extLink.classList.remove('hidden');
+                }
+            } else {
+                imgEl.src = `https://placehold.co/400x600/059669/ffffff?text=Bukti+Transfer+${encodeURIComponent(item.name || item.id)}`;
+                extLink.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function adminVerifyPayment(id, isApproved) {
+            const item = applicantsData.find(a => a.id === id);
+            if (!item) return;
+
+            item.paymentStatus = isApproved ? 'VERIFIED' : 'UNPAID';
+            closeModal('modalPaymentProof');
+            renderAdminTable();
+            if (currentRole === 'USER') updateUserViewState();
+
+            showToast(isApproved ? `Pembayaran ${item.name} berhasil diverifikasi! Formulir terbuka.` : `Pembayaran ${item.name} ditolak.`, isApproved ? 'success' : 'error');
+
+            sendToBackend('VERIFY_PAYMENT', { id: id, isApproved: isApproved });
+        }
+
+        function previewPaymentFile() {
+            const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
+            if (user) openPaymentProofModal(user.id);
+        }
+
+        function openScheduleModal(id) {
+            activeModalApplicantId = id;
+            const modal = document.getElementById('modalSchedule');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function saveScheduleFromModal() {
+            const date = document.getElementById('inputScheduleDate').value;
+            const time = document.getElementById('inputScheduleTime').value;
+            const loc = document.getElementById('inputScheduleLoc').value;
+
+            const item = applicantsData.find(a => a.id === activeModalApplicantId);
+            if (item) {
+                item.scheduleDate = date;
+                item.scheduleTime = time;
+                item.scheduleLoc = loc;
+                renderAdminTable();
+                if (currentRole === 'USER') updateUserViewState();
+                showToast(`Jadwal Asesmen untuk ${item.name} berhasil disimpan!`);
+
+                sendToBackend('SAVE_SCHEDULE', { id: item.id, date: date, time: time, loc: loc });
+            }
+            closeModal('modalSchedule');
+        }
+
+        function openGelombangModal() {
+            const modal = document.getElementById('modalGelombang');
+            updateWaveModalControls();
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function updateWaveModalControls() {
+            const select = document.getElementById('inputGelombangSelect');
+            if (!select) return;
+
+            select.innerHTML = wavesList.map(w => `<option value="${w.id}" ${w.id === selectedWaveId ? 'selected' : ''}>${w.name}</option>`).join('');
+            
+            const currWave = wavesList.find(w => w.id === selectedWaveId) || wavesList[0];
+            if (currWave) {
+                document.getElementById('inputGelombangName').value = currWave.name;
+                document.getElementById('inputGelombangStartDate').value = currWave.startDate;
+                document.getElementById('inputGelombangEndDate').value = currWave.endDate;
+                document.getElementById('inputGelombangQuota').value = currWave.totalQuota;
+                document.getElementById('inputGelombangFee').value = currWave.fee;
+                document.getElementById('inputGelombangStatus').value = currWave.status;
+
+                const filledCount = applicantsData.length;
+                document.getElementById('modalQuotaSummary').innerText = `Terisi: ${filledCount} dari ${currWave.totalQuota}`;
+            }
+
+            if (document.getElementById('inputBankName')) {
+                document.getElementById('inputBankName').value = bankSettings.bankName;
+                document.getElementById('inputBankHolder').value = bankSettings.bankHolder;
+                document.getElementById('inputAccountNo').value = bankSettings.accountNo;
+            }
+        }
+
+        function saveGelombangSetting() {
+            const currWave = wavesList.find(w => w.id === selectedWaveId);
+            if (currWave) {
+                currWave.name = document.getElementById('inputGelombangName').value;
+                currWave.startDate = document.getElementById('inputGelombangStartDate').value;
+                currWave.endDate = document.getElementById('inputGelombangEndDate').value;
+                currWave.totalQuota = parseInt(document.getElementById('inputGelombangQuota').value);
+                currWave.fee = parseInt(document.getElementById('inputGelombangFee').value);
+                currWave.status = document.getElementById('inputGelombangStatus').value;
+
+                if (document.getElementById('inputBankName')) {
+                    bankSettings.bankName = document.getElementById('inputBankName').value || bankSettings.bankName;
+                    bankSettings.bankHolder = document.getElementById('inputBankHolder').value || bankSettings.bankHolder;
+                    bankSettings.accountNo = document.getElementById('inputAccountNo').value || bankSettings.accountNo;
+                }
+
+                updateBankDisplay();
+                updateWaveDisplay();
+                showToast("Pengaturan Gelombang & Rekening Bank Berhasil Disimpan!");
+
+                sendToBackend('SAVE_WAVE_SETTINGS', { wave: currWave, bank: bankSettings });
+            }
+            closeModal('modalGelombang');
+        }
+
+        function renderAsesmenCandidates() {
+            const container = document.getElementById('asesmenCandidateList');
+            if (!container) return;
+
+            const readyCandidates = applicantsData.filter(a => a.paymentStatus === 'VERIFIED');
+            
+            if (readyCandidates.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic p-4 text-center">Belum ada calon murid yang siap diuji (butuh verifikasi bayar).</p>`;
+                return;
+            }
+
+            container.innerHTML = readyCandidates.map(c => `
+                <div onclick="selectAsesmenCandidate('${c.id}')" class="p-3.5 rounded-xl border transition-all cursor-pointer ${c.id === selectedAsesmenCandidateId ? 'bg-emerald-50 border-emerald-500 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'}">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-bold text-xs text-slate-900">${c.name}</p>
+                            <p class="text-[10px] text-slate-500 font-mono">${c.id} | Wali: ${c.ayah || '-'}</p>
+                        </div>
+                        <span class="text-[9px] px-2 py-0.5 rounded font-bold ${c.scoreCompleted ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                            ${c.scoreCompleted ? 'Sudah Diuji' : 'Siap Diuji'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+
+            selectAsesmenCandidate(selectedAsesmenCandidateId || readyCandidates[0].id);
+        }
+
+        function selectAsesmenCandidate(id) {
+            selectedAsesmenCandidateId = id;
+            const item = applicantsData.find(a => a.id === id);
+            if (!item) return;
+
+            const nameEl = document.getElementById('asesmenTargetName');
+            const detailEl = document.getElementById('asesmenTargetDetail');
+            const statusEl = document.getElementById('asesmenStatusBadge');
+
+            if (nameEl) nameEl.innerText = item.name;
+            if (detailEl) detailEl.innerText = `No. Reg: ${item.id} | Wali: ${item.ayah || '-'}`;
+            if (statusEl) statusEl.innerText = item.scoreCompleted ? `Nilai: ${item.totalScore} | Jilid: ${item.jilidResult || 'Tartili Jilid 3'}` : 'Siap Diuji';
+
+            const motorik = document.getElementById('scoreMotorik');
+            const bahasa = document.getElementById('scoreBahasa');
+            const hijaiyah = document.getElementById('scoreHijaiyah');
+            const jilidSelect = document.getElementById('scoreJilid');
+            const komitmen = document.getElementById('scoreKomitmen');
+            const kesepahaman = document.getElementById('scoreKesepahaman');
+            const notes = document.getElementById('asesmenNotes');
+            const rec = document.getElementById('asesmenRecommendation');
+
+            if (motorik) motorik.value = item.scoreMotorik || 85;
+            if (bahasa) bahasa.value = item.scoreBahasa || 90;
+            if (hijaiyah) hijaiyah.value = item.scoreHijaiyah || 88;
+            if (jilidSelect) jilidSelect.value = item.jilidResult || 'Tartili Jilid 3';
+            if (komitmen) komitmen.value = item.scoreKomitmen || 95;
+            if (kesepahaman) kesepahaman.value = item.scoreKesepahaman || 92;
+            if (notes) notes.value = item.notes || 'Anak aktif dan siap mengikuti program madrasah.';
+            if (rec) rec.value = item.recommendation || 'Lulus';
+        }
+
+        function handleAsesmenSubmit(e) {
+            e.preventDefault();
+            const item = applicantsData.find(a => a.id === selectedAsesmenCandidateId);
+            if (!item) return;
+
+            const m = parseFloat(document.getElementById('scoreMotorik')?.value || '0');
+            const b = parseFloat(document.getElementById('scoreBahasa')?.value || '0');
+            const h = parseFloat(document.getElementById('scoreHijaiyah')?.value || '0');
+            const jilid = document.getElementById('scoreJilid')?.value || 'Tartili Jilid 3';
+            const k = parseFloat(document.getElementById('scoreKomitmen')?.value || '0');
+            const p = parseFloat(document.getElementById('scoreKesepahaman')?.value || '0');
+
+            item.scoreMotorik = m;
+            item.scoreBahasa = b;
+            item.scoreHijaiyah = h;
+            item.jilidResult = jilid;
+            item.scoreKomitmen = k;
+            item.scoreKesepahaman = p;
+            item.totalScore = parseFloat(((m + b + h + k + p) / 5).toFixed(1));
+            item.notes = document.getElementById('asesmenNotes')?.value || '';
+            item.recommendation = document.getElementById('asesmenRecommendation')?.value || '';
+            item.scoreCompleted = true;
+
+            showToast(`Hasil Asesmen & Penempatan ${jilid} untuk ${item.name} Berhasil Disimpan!`);
+            renderAsesmenCandidates();
+            renderAdminTable();
+
+            sendToBackend('SAVE_ASESMEN', {
+                id: item.id,
+                name: item.name,
+                m: m, b: b, h: h, k: k, p: p,
+                jilidResult: jilid,
+                notes: item.notes,
+                recommendation: item.recommendation,
+                evaluator: 'Evaluator'
+            });
+        }
+
+        function setFinalStatus(id, status) {
+            const item = applicantsData.find(a => a.id === id);
+            if (item) {
+                item.finalStatus = status;
+                renderAdminTable();
+                showToast(`Keputusan akhir ${item.name} diubah menjadi: ${status}`);
+
+                sendToBackend('SET_FINAL_STATUS', { id: id, status: status });
+            }
+        }
+
+        function exportToExcelSimulated() {
+            showToast("Mengunduh Rekapitulasi Data PMBM ke Excel/Google Sheets...");
+        }
+
+        function printKartuUjian() {
+            const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
+            if (!user) {
+                showToast("Data calon murid tidak ditemukan!", "error");
+                return;
+            }
+
+            const activeWave = getActiveWave();
+            const printContent = document.getElementById('printableCardContent');
+            if (!printContent) return;
+
+            printContent.innerHTML = `
+                <!-- Kop Surat Official -->
+                <div class="flex flex-col items-center justify-center text-center pb-4 border-b-2 border-emerald-600 space-y-3">
+                    <img src="https://imgh.in/host/7sfkdf" alt="Logo MI" class="w-16 h-16 object-contain drop-shadow-sm">
+                    <div>
+                        <h2 class="text-lg font-black tracking-tight text-slate-900 uppercase">MI AL-IRSYAD AL-ISLAMIYYAH BANJARMASIN</h2>
+                        <p class="text-[11px] text-slate-600 font-semibold mt-0.5">Panitia Penerimaan Murid Baru Madrasah (PMBM)</p>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Jl. Sulawesi No. 5, Ps.Lama, Banjarmasin Tengah | WA: 08-5151-2121-56</p>
+                    </div>
+                </div>
+
+                <!-- Title -->
+                <div class="text-center py-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                    <h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">KARTU PESERTA OBSERVASI & WAWANCARA PMBM</h3>
+                    <p class="text-[11px] text-emerald-700 font-bold mt-0.5">${activeWave.name}</p>
+                </div>
+
+                <!-- Grid Data Calon Murid & Jadwal -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 text-xs">
+                    <!-- Left: Data Calon Murid (7 cols) -->
+                    <div class="md:col-span-7 bg-slate-50/70 p-4 rounded-xl border border-slate-200 space-y-2">
+                        <h4 class="font-bold text-slate-800 uppercase text-[11px] border-b pb-1 text-emerald-700 flex items-center gap-1">
+                            <i data-lucide="user" class="w-3.5 h-3.5"></i> Data Calon Murid
+                        </h4>
+                        <div class="space-y-1.5 pt-1">
+                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">No. Registrasi</span><span class="col-span-7 font-mono font-bold text-emerald-700">: ${user.id}</span></div>
+                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">Nama Lengkap</span><span class="col-span-7 font-bold text-slate-900">: ${user.name}</span></div>
+                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">NIK Siswa</span><span class="col-span-7 font-mono">: ${user.nik || '-'}</span></div>
+                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">Jenis Kelamin</span><span class="col-span-7">: ${user.gender || 'Laki-laki'}</span></div>
+                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">Tempat, Tgl Lahir</span><span class="col-span-7">: ${user.birthPlace || 'Banjarmasin'}, ${formatDateReadable(user.birthDate)}</span></div>
+                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">Sekolah Asal</span><span class="col-span-7">: ${user.sekolahAsal || '-'}</span></div>
+                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">Nama Orang Tua</span><span class="col-span-7 font-semibold">: ${user.ayah || '-'}</span></div>
+                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">No. WhatsApp</span><span class="col-span-7">: ${user.wa || '-'}</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Jadwal & Ruangan (5 cols) -->
+                    <div class="md:col-span-5 bg-blue-50/60 p-4 rounded-xl border border-blue-200 space-y-3 flex flex-col justify-between">
+                        <div>
+                            <h4 class="font-bold text-blue-900 uppercase text-[11px] border-b border-blue-200 pb-1 flex items-center gap-1">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Jadwal Asesmen
+                            </h4>
+                            <div class="mt-2 space-y-2">
+                                <div>
+                                    <span class="text-[10px] text-blue-700 block font-semibold uppercase">Tanggal Observasi:</span>
+                                    <span class="font-bold text-sm text-slate-900">${formatDateReadable(user.scheduleDate || '2027-08-22')}</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-blue-700 block font-semibold uppercase">Waktu / Sesi:</span>
+                                    <span class="font-bold text-xs text-slate-800">${user.scheduleTime || '08:30 - 10:00 WITA'}</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-blue-700 block font-semibold uppercase">Lokasi Ruangan:</span>
+                                    <span class="font-bold text-xs text-slate-800">${user.scheduleLoc || 'Aula Utama MI Al-Irsyad Banjarmasin'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 border-t border-blue-200 text-center">
+                            <span class="inline-block px-2.5 py-1 bg-blue-600 text-white font-bold text-[10px] rounded-lg">Wajib Hadir Tatap Muka</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tata Tertib & Ketentuan -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-[11px] space-y-1.5">
+                    <h4 class="font-bold text-slate-800 uppercase text-[10px] flex items-center gap-1">
+                        <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-amber-600"></i> Petunjuk & Tata Tertib Peserta:
+                    </h4>
+                    <ol class="list-decimal list-inside text-slate-600 space-y-0.5">
+                        <li>Hadir sesuai dengan jadwal yang telah ditentukan.</li>
+                        <li>Hadir di lokasi madrasah 15 menit sebelum waktu observasi dimulai.</li>
+                        <li>Calon murid wajib didampingi oleh kedua orang tua / wali kandung.</li>
+                    </ol>
+                </div>
+
+                <!-- Footer Tanda Tangan & QR Code -->
+                <div class="flex justify-between items-end pt-4 border-t border-slate-200 text-xs">
+                    <div class="text-center space-y-1">
+                        <div class="w-20 h-20 bg-slate-100 border border-slate-300 rounded-lg p-1 flex items-center justify-center mx-auto">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(user.id + '_' + user.name)}" alt="QR Verifikasi" class="w-full h-full object-contain" onerror="this.outerHTML='<span class=\'text-[9px] text-slate-400 font-mono\'>[QR VERIFIED]</span>'">
+                        </div>
+                        <span class="text-[9px] text-slate-400 font-mono block">Kode Autentikasi PMBM</span>
+                    </div>
+
+                    <div class="text-center space-y-8">
+                        <div>
+                            <p class="text-[11px] text-slate-500">Banjarmasin, ${formatDateReadable(new Date().toISOString().split('T')[0])}</p>
+                            <p class="text-xs font-bold text-slate-800">Panitia PMBM MI Al-Irsyad</p>
+                        </div>
+                        <div class="border-b border-slate-800 w-36 mx-auto"></div>
+                        <p class="text-[10px] text-slate-500 font-medium">NIP / ID Panitia: -</p>
+                    </div>
+                </div>
+            `;
+
+            // Set document title for printing
+            currentPrintDocTitle = `Kartu_Observasi_${user.name.replace(/\s+/g, '_')}_${user.id}`;
+
+            const modal = document.getElementById('modalPrintCard');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function printKartuKelulusan() {
+            const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
+            if (!user) {
+                showToast("Data calon murid tidak ditemukan!", "error");
+                return;
+            }
+
+            const printContent = document.getElementById('printableCardContent');
+            if (!printContent) return;
+
+            printContent.innerHTML = `
+                <!-- Kop Surat Official -->
+                <div class="flex flex-col items-center justify-center text-center pb-4 border-b-2 border-emerald-600 space-y-3">
+                    <img src="https://imgh.in/host/7sfkdf" alt="Logo MI" class="w-16 h-16 object-contain drop-shadow-sm">
+                    <div>
+                        <h2 class="text-lg font-black tracking-tight text-slate-900 uppercase">MI AL-IRSYAD AL-ISLAMIYYAH BANJARMASIN</h2>
+                        <p class="text-[11px] text-slate-600 font-semibold mt-0.5">Panitia Penerimaan Murid Baru Madrasah (PMBM)</p>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Jl. Sulawesi No. 5,Ps.Lama, Banjarmasin Tengah | Akreditasi B+</p>
+                    </div>
+                </div>
+
+                <div class="text-center py-3">
+                    <h3 class="text-base font-black text-slate-900 uppercase tracking-wide border-b-2 border-slate-800 inline-block px-4 pb-1">SURAT KETERANGAN LULUS SELEKSI</h3>
+                    <p class="text-xs text-slate-500 mt-1">Nomor: 045/PAN-PMBM/MI-ALIRSYAD/2027</p>
+                </div>
+
+                <div class="text-xs leading-relaxed space-y-3 text-slate-800">
+                    <p>Yang bertanda tangan di bawah ini Kepala Madrasah Ibtidaiyah Al-Irsyad Al-Islamiyyah Kota Banjarmasin menerangkan bahwa:</p>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                        <div class="grid grid-cols-12"><span class="col-span-4 text-slate-500">Nomor Registrasi</span><span class="col-span-8 font-mono font-bold text-emerald-700">: ${user.id}</span></div>
+                        <div class="grid grid-cols-12"><span class="col-span-4 text-slate-500">Nama Calon Murid</span><span class="col-span-8 font-bold text-slate-900">: ${user.name}</span></div>
+                        <div class="grid grid-cols-12"><span class="col-span-4 text-slate-500">NIK Siswa</span><span class="col-span-8 font-mono">: ${user.nik || '-'}</span></div>
+                        <div class="grid grid-cols-12"><span class="col-span-4 text-slate-500">Sekolah Asal</span><span class="col-span-8">: ${user.sekolahAsal || '-'}</span></div>
+                        <div class="grid grid-cols-12"><span class="col-span-4 text-slate-500">Tempat, Tanggal Lahir</span><span class="col-span-8">: ${user.birthPlace || 'Banjarmasin'}, ${formatDateReadable(user.birthDate)}</span></div>
+                        <div class="grid grid-cols-12"><span class="col-span-4 text-slate-500">Nama Orang Tua / Wali</span><span class="col-span-8 font-semibold">: ${user.ayah || '-'}</span></div>
+                        <div class="grid grid-cols-12 border-t border-slate-200 pt-1.5 mt-1"><span class="col-span-4 text-emerald-800 font-bold">Rekomendasi Penempatan Jilid</span><span class="col-span-8 font-black text-emerald-900">: 📖 ${user.jilidResult || 'Tartili Jilid 3'}</span></div>
+                    </div>
+
+                    <div class="p-4 bg-emerald-50 border border-emerald-300 rounded-xl text-center space-y-1">
+                        <span class="text-xs font-bold text-emerald-900 uppercase">Dinyatakan</span>
+                        <h4 class="text-2xl font-black text-emerald-700">L U L U S</h4>
+                        <p class="text-[11px] text-emerald-800 font-medium">Sebagai Calon Murid Baru MI Al-Irsyad Al-Islamiyyah Banjarmasin Tahun Ajaran 2027/2028</p>
+                    </div>
+
+                    <p class="text-[11px] text-slate-600">Demikian Surat Keterangan Lulus ini diterbitkan untuk dipergunakan sebagaimana mestinya dan sebagai syarat melakukan registrasi daftar ulang.</p>
+                </div>
+
+                <div class="flex justify-between items-end pt-6 border-t border-slate-200 text-xs">
+                    <div class="text-center space-y-1">
+                        <div class="w-20 h-20 bg-slate-100 border border-slate-300 rounded-lg p-1 flex items-center justify-center mx-auto">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent('SKL_LULUS_' + user.id + '_' + user.name + '_' + (user.jilidResult || 'Jilid3'))}" alt="QR SKL" class="w-full h-full object-contain">
+                        </div>
+                        <span class="text-[9px] text-slate-400 font-mono block">Verifikasi SKL Digital</span>
+                    </div>
+
+                    <div class="text-center space-y-10">
+                        <div>
+                            <p class="text-[11px] text-slate-500">Banjarmasin, ${formatDateReadable(new Date().toISOString().split('T')[0])}</p>
+                            <p class="text-xs font-bold text-slate-800">Kepala MI Al-Irsyad Al-Islamiyyah</p>
+                        </div>
+                        <div class="border-b border-slate-800 w-44 mx-auto"></div>
+                        <p class="text-[10px] text-slate-600 font-bold">M. Rizky Nugraha. A.B.,S.H.</p>
+                    </div>
+                </div>
+            `;
+
+            // Set document title for printing
+            currentPrintDocTitle = `SKL_Lulus_${user.name.replace(/\s+/g, '_')}_${user.id}`;
+
+            const modal = document.getElementById('modalPrintCard');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function executeBrowserPrint() {
+            const cardHtml = document.getElementById('printableCardContent')?.innerHTML;
+            if (!cardHtml) {
+                showToast("Konten dokumen tidak ditemukan!", "error");
+                return;
+            }
+
+            const printWin = window.open('', '_blank', 'width=850,height=900');
+            
+            if (!printWin) {
+                try {
+                    window.print();
+                } catch (e) {
+                    showToast("Pop-up diblokir browser! Harap izinkan pop-up untuk mencetak PDF.", "error");
+                }
+                return;
+            }
+
+            printWin.document.write(`
+                <!DOCTYPE html>
+                <html lang="id">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>${currentPrintDocTitle}</title>
+                    <script src="https://cdn.tailwindcss.com"><\/script>
+                    <script src="https://unpkg.com/lucide@latest"><\/script>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+                        body { 
+                            font-family: 'Inter', sans-serif; 
+                            background: #ffffff; 
+                            color: #0f172a;
+                            padding: 24px; 
+                            margin: 0;
+                        }
+                        @media print { 
+                            body { padding: 0; margin: 0; } 
+                            .no-print { display: none !important; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="max-w-2xl mx-auto space-y-6">
+                        ${cardHtml}
+                    </div>
+                    <script>
+                        window.onload = function() {
+                            if (typeof lucide !== 'undefined') lucide.createIcons();
+                            setTimeout(function() {
+                                window.print();
+                            }, 400);
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+
+        function copyAccountNo() {
+            copyToClipboard(bankSettings.accountNo);
+            showToast(`Nomor Rekening ${bankSettings.bankName} (${bankSettings.accountNo}) Berhasil Disalin!`);
+        }
+
+        function formatDateReadable(dateStr) {
+            if (!dateStr) return '-';
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
+        function getInitials(name) {
+            if (!name) return 'MI';
+            const parts = name.trim().split(' ');
+            if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+            return name.substring(0, 2).toUpperCase();
+        }
+    </script>
+</body>
+</html>
