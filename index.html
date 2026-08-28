@@ -46,9 +46,8 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* PERBAIKAN CSS CETAK SUPAYA RAPI & TIDAK MEPET */
         @media print {
-            @page { size: A4; margin: 0; }
+            @page { size: A4; margin: 8mm; }
             body, html { background: white !important; color: black !important; margin: 0 !important; padding: 0 !important; }
             body > *:not(#modalPrintCard) { display: none !important; }
             #modalPrintCard {
@@ -58,9 +57,7 @@
             }
             #modalPrintCard > div { 
                 box-shadow: none !important; max-width: 100% !important; width: 100% !important; 
-                margin: 0 auto !important; 
-                padding: 15mm 20mm !important; /* INI KUNCINYA: Memberikan ruang napas di dalam kertas */
-                border: none !important; 
+                margin: 0 !important; padding: 0 !important; border: none !important; 
                 position: static !important; transform: none !important; max-height: none !important;
             }
             .print-hidden, .print\:hidden { display: none !important; }
@@ -79,8 +76,8 @@
   projectId: "pmbm-backup-ca78a",
   storageBucket: "pmbm-backup-ca78a.firebasestorage.app",
   messagingSenderId: "1010463482874",
-  appId: "1:1010463482874:web:b021646b2802a523823a43",
-  measurementId: "G-CTKC30BL46"
+  appId: "1:1010463482874:web:fad1fbab7155149f823a43",
+  measurementId: "G-BMQYEENR16"
         };
 
         window.is_preview = false; 
@@ -732,8 +729,8 @@
                     <button onclick="openGelombangModal()" class="px-3.5 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition flex items-center gap-1.5">
                         <i data-lucide="settings" class="w-4 h-4"></i> Kelola Gelombang
                     </button>
-                    <button onclick="exportToExcelSimulated()" class="px-3.5 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition flex items-center gap-1.5">
-                        <i data-lucide="download" class="w-4 h-4"></i> Export (Google Sheets)
+                    <button onclick="exportDataToCSV()" class="px-3.5 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition flex items-center gap-1.5">
+                        <i data-lucide="download" class="w-4 h-4"></i> Export (Excel / CSV)
                     </button>
                 </div>
             </div>
@@ -1290,6 +1287,8 @@
             accountNo: '7300-402-091'
         };
 
+        let globalCounter = 5; // Counter permanen untuk ID kontinu (mulai dari 5 karena data dummy ada 5)
+
         const dummyApplicantsSample = [
             {
                 id: 'PMBM-2027-001', waveId: 'wave-1', name: 'Muhammad Rayyan Al-Fatih', nickname: 'Rayyan', gender: 'Laki-laki', birthPlace: 'Banjarmasin', birthDate: '2019-05-14', sekolahAsal: 'RA Al-Irsyad', statusAbk: 'Non-ABK / Reguler', nik: '6371011405190001', ayah: 'Ahmad Fauzi, S.T.', pekerjaanAyah: 'Karyawan Swasta', wa: '08125551234', paymentStatus: 'VERIFIED', paymentFile: 'bukti_transfer.jpg', paymentFileUrl: 'https://placehold.co/400x600/059669/ffffff?text=Bukti+Transfer+200k', formCompleted: true, kkFileName: 'KK_Rayyan.pdf', kkFileBase64: 'data:text/plain;base64,S0sgDumteSBDb250ZW50', aktaFileName: 'Akta_Rayyan.pdf', aktaFileBase64: 'data:text/plain;base64,QWt0YSBEdW1teSBDb250ZW50', finalStatus: 'MENUNGGU', scoreCompleted: false
@@ -1342,6 +1341,7 @@
                     const data = docSnap.data();
                     if (data.waves) wavesList = data.waves;
                     if (data.bank) bankSettings = data.bank;
+                    if (data.globalCounter) globalCounter = data.globalCounter; // Sinkronisasi counter
                     updateWaveDisplay();
                     updateBankDisplay();
                 }
@@ -1384,7 +1384,8 @@
             try {
                 await window.setDoc(window.doc(window.db, "settings", "config"), {
                     waves: wavesList,
-                    bank: bankSettings
+                    bank: bankSettings,
+                    globalCounter: globalCounter // Simpan counter terakhir secara permanen
                 }, { merge: true });
             } catch (e) {
                 console.error("Error saving settings:", e);
@@ -1586,7 +1587,10 @@
             const ortu = document.getElementById('regNamaOrtu').value;
             const wa = document.getElementById('regWaOrtu').value;
 
-            const newId = `PMBM-2027-00${applicantsData.length + 1}`;
+            globalCounter++; // Tambah counter permanen tanpa mempedulikan data yang terhapus
+            const paddedCounter = String(globalCounter).padStart(3, '0');
+            const newId = `PMBM-2027-${paddedCounter}`;
+            
             const activeWave = getActiveWave();
             const newCandidate = {
                 id: newId,
@@ -1638,6 +1642,7 @@
             showToast(`Akun Baru Berhasil Dibuat! No. Reg: ${newId}`);
 
             saveApplicantToFirestore(newCandidate);
+            saveSettingsToFirestore(); // Simpan update counter ID ke database
         }
 
         function updateBankDisplay() {
@@ -2261,8 +2266,88 @@
             candidateToDelete = null;
         }
 
-        function exportToExcelSimulated() {
-            showToast("Mengunduh Rekapitulasi Data PMBM...");
+        function exportDataToCSV() {
+            if (applicantsData.length === 0) {
+                showToast("Tidak ada data pendaftar untuk diekspor!", "error");
+                return;
+            }
+
+            // Siapkan Header Kolom CSV
+            const headers = [
+                "No. Registrasi", "Gelombang", "Nama Lengkap", "Panggilan", "NIK", "Jenis Kelamin",
+                "Tempat Lahir", "Tanggal Lahir", "Sekolah Asal", "Status ABK", "Detail ABK",
+                "Nama Ayah", "Pekerjaan Ayah", "Penghasilan Ayah", "Nama Ibu", "Pekerjaan Ibu", "Penghasilan Ibu",
+                "No. WhatsApp", "Alamat", "Status Pembayaran",
+                "Jadwal Asesmen", "Skor Motorik", "Skor Bahasa", "Skor Hijaiyah", "Penempatan Jilid",
+                "Skor Komitmen", "Skor Kesepahaman", "Total Skor", "Rekomendasi", "Keputusan Akhir"
+            ];
+
+            // Fungsi escape string agar tidak rusak kalau ada tanda koma atau kutip
+            const escapeCSV = (str) => {
+                if (str === null || str === undefined) return '""';
+                const stringified = String(str);
+                if (stringified.includes(',') || stringified.includes('"') || stringified.includes('\n')) {
+                    return `"${stringified.replace(/"/g, '""')}"`;
+                }
+                return `"${stringified}"`;
+            };
+
+            let csvContent = headers.join(",") + "\n";
+
+            // Mapping Data Pendaftar
+            applicantsData.forEach(user => {
+                const waveName = wavesList.find(w => w.id === user.waveId)?.name || user.waveId;
+                
+                const row = [
+                    user.id, 
+                    waveName, 
+                    user.name, 
+                    user.nickname || "-", 
+                    `'${user.nik || "-"}`, // Tambah kutip 1 agar Excel tidak merusak format 16 digit NIK
+                    user.gender, 
+                    user.birthPlace || "-", 
+                    user.birthDate || "-", 
+                    user.sekolahAsal || "-", 
+                    user.statusAbk || "-", 
+                    user.detailAbk || "-",
+                    user.ayah || "-", 
+                    user.pekerjaanAyah || "-", 
+                    user.penghasilanAyah || "-", 
+                    user.ibu || "-", 
+                    user.pekerjaanIbu || "-", 
+                    user.penghasilanIbu || "-",
+                    `'${user.wa || "-"}`, // Tambah kutip 1 untuk No WA
+                    user.alamat || "-", 
+                    user.paymentStatus,
+                    user.scheduleDate ? `${user.scheduleDate} ${user.scheduleTime}` : "Belum Dijadwalkan",
+                    user.scoreMotorik || 0, 
+                    user.scoreBahasa || 0, 
+                    user.scoreHijaiyah || 0, 
+                    user.jilidResult || "-",
+                    user.scoreKomitmen || 0, 
+                    user.scoreKesepahaman || 0, 
+                    user.totalScore || 0, 
+                    user.recommendation || "-", 
+                    user.finalStatus
+                ].map(escapeCSV).join(",");
+                
+                csvContent += row + "\n";
+            });
+
+            // Buat Blob dengan UTF-8 BOM agar rapi di MS Excel
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            // Trigger Download
+            const link = document.createElement("a");
+            const dateStr = new Date().toISOString().split('T')[0];
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Rekap_PMBM_Banjarmasin_${dateStr}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast("Rekapitulasi Excel / CSV berhasil diunduh!");
         }
 
         function printKartuUjian() {
