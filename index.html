@@ -405,7 +405,7 @@
                             <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-emerald-500 transition-colors bg-slate-50 hover:bg-emerald-50/50 cursor-pointer" onclick="document.getElementById('filePaymentProof').click()">
                                 <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-emerald-600 mb-2"></i>
                                 <p class="text-xs font-medium text-slate-700">Klik untuk upload bukti pembayaran</p>
-                                <p class="text-[10px] text-slate-400 mt-1">Maksimal file 5MB</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Maksimal file 800KB</p>
                                 <input type="file" id="filePaymentProof" class="hidden" accept="image/*,.pdf" onchange="handlePaymentProofUpload(event)">
                             </div>
                         </div>
@@ -574,7 +574,7 @@
                                             <div class="border-2 border-dashed border-amber-400 rounded-xl p-5 text-center hover:border-amber-500 transition-colors bg-white cursor-pointer" onclick="document.getElementById('fileAbkSurat').click()">
                                                 <i data-lucide="upload-cloud" class="w-7 h-7 mx-auto text-amber-600 mb-1.5"></i>
                                                 <p class="text-xs font-semibold text-amber-900">Klik untuk upload surat medis</p>
-                                                <p class="text-[10px] text-amber-700/80 mt-0.5">Format: JPG, PNG, atau PDF (Maks. 5MB)</p>
+                                                <p class="text-[10px] text-amber-700/80 mt-0.5">Format: JPG, PNG, atau PDF (Maks. 800KB)</p>
                                                 <input type="file" id="fileAbkSurat" class="hidden" accept="image/*,.pdf" onchange="handleAbkSuratUpload(event)">
                                             </div>
                                         </div>
@@ -688,11 +688,13 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
                                         <label class="block text-xs font-bold text-slate-700">Kartu Keluarga (KK) *</label>
+                                        <p class="text-[10px] text-slate-500 -mt-1">Format: JPG/PDF (Maks. 800KB)</p>
                                         <input type="file" id="fileKk" accept="image/*,.pdf" onchange="handleKkChange(event)" class="text-xs w-full text-slate-500 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border file:border-emerald-500 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
                                         <p id="kkFileStatus" class="text-[11px] text-slate-500 font-medium">Belum ada file dipilih</p>
                                     </div>
                                     <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
                                         <label class="block text-xs font-bold text-slate-700">Akta Kelahiran *</label>
+                                        <p class="text-[10px] text-slate-500 -mt-1">Format: JPG/PDF (Maks. 800KB)</p>
                                         <input type="file" id="fileAkta" accept="image/*,.pdf" onchange="handleAktaChange(event)" class="text-xs w-full text-slate-500 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border file:border-emerald-500 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
                                         <p id="aktaFileStatus" class="text-[11px] text-slate-500 font-medium">Belum ada file dipilih</p>
                                     </div>
@@ -1213,12 +1215,28 @@
         function handleKkChange(e) {
             const file = e.target.files[0];
             if (!file) return;
+
+            if (file.size > 800 * 1024) {
+                showToast("Gagal: Ukuran file KK maksimal 800KB! Silakan kompres dulu.", "error");
+                e.target.value = ""; // Reset input
+                return;
+            }
+
             const statusEl = document.getElementById('kkFileStatus');
-            if (statusEl) statusEl.innerText = `✓ Terpilih: ${file.name}`;
+            if (statusEl) statusEl.innerText = `Sedang memproses...`;
             
             const reader = new FileReader();
             reader.onload = function(evt) {
                 tempKkFile = { name: file.name, base64: evt.target.result };
+                if (statusEl) statusEl.innerText = `✓ Tersimpan: ${file.name}`;
+                
+                const user = applicantsData.find(a => a.id === loggedInUserId);
+                if (user) {
+                    user.kkFileName = file.name;
+                    user.kkFileBase64 = evt.target.result;
+                    saveApplicantToFirestore(user);
+                    showToast("Berkas KK otomatis tersimpan & sinkron ke Admin!");
+                }
             };
             reader.readAsDataURL(file);
         }
@@ -1226,12 +1244,28 @@
         function handleAktaChange(e) {
             const file = e.target.files[0];
             if (!file) return;
+
+            if (file.size > 800 * 1024) {
+                showToast("Gagal: Ukuran file Akta maksimal 800KB! Silakan kompres dulu.", "error");
+                e.target.value = "";
+                return;
+            }
+
             const statusEl = document.getElementById('aktaFileStatus');
-            if (statusEl) statusEl.innerText = `✓ Terpilih: ${file.name}`;
+            if (statusEl) statusEl.innerText = `Sedang memproses...`;
             
             const reader = new FileReader();
             reader.onload = function(evt) {
                 tempAktaFile = { name: file.name, base64: evt.target.result };
+                if (statusEl) statusEl.innerText = `✓ Tersimpan: ${file.name}`;
+                
+                const user = applicantsData.find(a => a.id === loggedInUserId);
+                if (user) {
+                    user.aktaFileName = file.name;
+                    user.aktaFileBase64 = evt.target.result;
+                    saveApplicantToFirestore(user);
+                    showToast("Berkas Akta otomatis tersimpan & sinkron ke Admin!");
+                }
             };
             reader.readAsDataURL(file);
         }
@@ -1240,6 +1274,12 @@
             const file = e.target.files[0];
             if (!file) return;
 
+            if (file.size > 800 * 1024) {
+                showToast("Gagal: Ukuran file Medis maksimal 800KB! Silakan kompres dulu.", "error");
+                e.target.value = "";
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = function(evt) {
                 tempAbkSuratFile = { name: file.name, base64: evt.target.result, type: file.type };
@@ -1247,6 +1287,14 @@
                 document.getElementById('abkUploadedBox').classList.remove('hidden');
                 document.getElementById('abkFileName').innerText = file.name;
                 lucide.createIcons();
+
+                const user = applicantsData.find(a => a.id === loggedInUserId);
+                if (user) {
+                    user.abkSuratName = file.name;
+                    user.abkSuratBase64 = evt.target.result;
+                    saveApplicantToFirestore(user);
+                    showToast("Surat Medis otomatis tersimpan & sinkron!");
+                }
             };
             reader.readAsDataURL(file);
         }
@@ -1860,6 +1908,13 @@
         function handlePaymentProofUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
+
+            if (file.size > 800 * 1024) {
+                showToast("Gagal: Ukuran file Bukti Bayar maksimal 800KB! Silakan kompres dulu.", "error");
+                e.target.value = "";
+                return;
+            }
+
             const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
             if (!user) return;
 
@@ -1873,9 +1928,9 @@
                 updateUserViewState();
                 renderAdminTable();
                 saveApplicantToFirestore(user);
+                showToast('Bukti pembayaran berhasil diunggah & tersimpan!');
             };
             reader.readAsDataURL(file);
-            showToast('Bukti pembayaran berhasil diunggah!');
         }
 
         function demoUnlockForm() {
