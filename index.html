@@ -423,7 +423,7 @@
                                 <span class="text-xs text-slate-600 truncate max-w-[200px]" id="paymentFileName">bukti_transfer_Pendaftaran_200k.jpg</span>
                                 <button onclick="previewPaymentFile()" class="text-xs text-emerald-700 font-semibold underline">Lihat File</button>
                             </div>
-                            <p class="text-[11px] text-slate-500 italic">Silakan konfirmasi melalui WhatsApp Admin 08-5151-2121-56 setelah melakukan pembayaran untuk proses verifikasi. Setelah pembayaran diverifikasi, formulir pendaftaran lengkap di sebelah kanan akan terbuka secara otomatis.</p>
+                            <p class="text-[11px] text-slate-500 italic">Admin sedang memverifikasi pembayaran Anda. Setelah diverifikasi, formulir pendaftaran lengkap di sebelah kanan akan terbuka secara otomatis.</p>
                         </div>
                     </div>
 
@@ -2065,6 +2065,13 @@
                     </select>
                 `;
 
+                let printActions = '';
+                if (item.finalStatus === 'LULUS') {
+                    printActions = `<button onclick="printKartuKelulusan('${item.id}')" class="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-100 transition" title="Cetak SKL"><i data-lucide="award" class="w-4 h-4"></i></button>`;
+                } else if (item.scheduleDate) {
+                    printActions = `<button onclick="printKartuUjian('${item.id}')" class="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-100 transition" title="Cetak Kartu Observasi"><i data-lucide="printer" class="w-4 h-4"></i></button>`;
+                }
+
                 return `
                     <tr class="hover:bg-slate-50 border-b border-slate-100">
                         <td class="p-3.5 font-mono font-bold text-emerald-700">${item.id}</td>
@@ -2083,6 +2090,7 @@
                         <td class="p-3.5 text-center">${statusDropdown}</td>
                         <td class="p-3.5 text-right">
                             <div class="flex items-center justify-end gap-1">
+                                ${printActions}
                                 <button onclick="openPaymentProofModal('${item.id}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="Detail Bukti Transfer">
                                     <i data-lucide="eye" class="w-4 h-4"></i>
                                 </button>
@@ -2415,10 +2423,11 @@
             showToast("Rekapitulasi Excel / CSV berhasil diunduh!");
         }
 
-        function printKartuUjian() {
-            const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
+        function printKartuUjian(userIdOverride) {
+            const targetId = (typeof userIdOverride === 'string') ? userIdOverride : loggedInUserId;
+            const user = applicantsData.find(a => a.id === targetId) || applicantsData[0];
             if (!user) return;
-            const activeWave = getActiveWave();
+            const activeWave = wavesList.find(w => w.id === user.waveId) || getActiveWave();
             const printContent = document.getElementById('printableCardContent');
             
             printContent.innerHTML = `
@@ -2491,8 +2500,9 @@
             lucide.createIcons();
         }
 
-        function printKartuKelulusan() {
-            const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
+        function printKartuKelulusan(userIdOverride) {
+            const targetId = (typeof userIdOverride === 'string') ? userIdOverride : loggedInUserId;
+            const user = applicantsData.find(a => a.id === targetId) || applicantsData[0];
             if (!user) return;
             const printContent = document.getElementById('printableCardContent');
             
