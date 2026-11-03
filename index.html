@@ -71,7 +71,7 @@
         import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
-  apiKey: "AIzaSyA52DKF5OTo9jhzTV4JKO6WMdibbnK0D0s",
+             apiKey: "AIzaSyA52DKF5OTo9jhzTV4JKO6WMdibbnK0D0s",
   authDomain: "pmbm-backup-ca78a.firebaseapp.com",
   projectId: "pmbm-backup-ca78a",
   storageBucket: "pmbm-backup-ca78a.firebasestorage.app",
@@ -1512,10 +1512,31 @@
         function postDataSyncActions() {
             updateWaveDisplay();
             updateBankDisplay();
+            updateDemoVisibility();
             if (currentRole === 'ADMIN') renderAdminTable();
             if (currentRole === 'ASESMEN') renderAsesmenCandidates();
             if (currentRole === 'USER') updateUserViewState();
             checkAndShowWavePopup();
+        }
+
+        // FUNGSI KONTROL VISIBILITAS DEMO (Otomatis lenyap di Mode Produksi)
+        function updateDemoVisibility() {
+            const demoPanel = document.getElementById('demoAccessPanel');
+            if (demoPanel) {
+                if (window.is_preview) {
+                    demoPanel.classList.remove('hidden');
+                } else {
+                    demoPanel.classList.add('hidden');
+                }
+            }
+            const demoUnlockBtn = document.getElementById('demoUnlockBtn');
+            if (demoUnlockBtn) {
+                if (window.is_preview) {
+                    demoUnlockBtn.classList.remove('hidden');
+                } else {
+                    demoUnlockBtn.classList.add('hidden');
+                }
+            }
         }
 
         // FUNGSI POP-UP PROMOSI / STATUS GELOMBANG OTOMATIS
@@ -2382,6 +2403,9 @@
                         <td class="p-3.5 text-right">
                             <div class="flex items-center justify-end gap-1.5">
                                 ${printBtn}
+                                <button onclick="openPaymentModal('${app.id}')" class="p-1.5 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-lg border border-slate-200 transition" title="Lihat Bukti Transfer">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
                                 <button onclick="openFormDetailModal('${app.id}')" class="p-1.5 ${app.formCompleted ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200 border-slate-200'} rounded-lg border transition" title="Lihat Status & Rincian Formulir">
                                     <i data-lucide="${app.formCompleted ? 'file-text' : 'file-clock'}" class="w-4 h-4"></i>
                                 </button>
@@ -2957,6 +2981,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) lucide.createIcons();
+            updateDemoVisibility();
             initRealtimeSync();
 
             // Membaca sesi view terakhir agar tidak hilang saat refresh (Anti-Refresh Loss)
