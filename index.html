@@ -270,8 +270,8 @@
 
                         <!-- New Registration Link -->
                         <div class="pt-2 text-center border-t border-slate-100">
-                            <span class="text-xs text-slate-500">Belum punya akun calon murid?</span>
-                            <button onclick="openRegisterModal()" class="text-xs font-bold text-emerald-600 hover:underline block mx-auto mt-1">
+                            <span id="regStatusLabel" class="text-xs text-slate-500">Belum punya akun calon murid?</span>
+                            <button id="btnOpenRegister" onclick="openRegisterModal()" class="text-xs font-bold text-emerald-600 hover:underline block mx-auto mt-1">
                                 + Daftar Akun Calon Murid Baru
                             </button>
                         </div>
@@ -318,20 +318,20 @@
             <div class="bg-[#107353] rounded-2xl p-6 text-white shadow-xl">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <div class="flex flex-wrap items-center gap-2 mb-2">
-                            <span id="userWaveBadge" class="bg-white/20 text-emerald-100 border border-white/20 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
-                                Gelombang 1 T.A. 2027/2028 (01 Agu - 31 Agu 2027)
-                            </span>
-                            <span id="userQuotaBadge" class="bg-amber-500/20 text-amber-200 border border-amber-400/30 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                                <i data-lucide="users" class="w-3.5 h-3.5"></i> Sisa Kuota: <span id="userQuotaRemaining">116</span> / <span id="userQuotaTotal">120</span> Murid
-                            </span>
-                        </div>
-                        <h2 class="text-2xl font-black">Selamat Datang, Bapak/Ibu Wali Murid!</h2>
-                        <p class="text-emerald-50 text-sm mt-1 max-w-2xl">
-                            Pantau status pendaftaran, pelunasan biaya registrasi awal, dan jadwal tes observasi & wawancara di dashboard ini.
-                        </p>
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                        <span id="userWaveBadge" class="bg-white/20 text-emerald-100 border border-white/20 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                            Gelombang 1 T.A. 2027/2028 (01 Agu - 31 Agu 2027)
+                        </span>
+                        <span id="userQuotaBadge" class="bg-amber-500/20 text-amber-200 border border-amber-400/30 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                            <i data-lucide="users" class="w-3.5 h-3.5"></i> Sisa Kuota: <span id="userQuotaRemaining">116</span> / <span id="userQuotaTotal">120</span> Murid
+                        </span>
                     </div>
-                    <div class="bg-white/10 border border-white/20 rounded-xl p-4 text-center min-w-[200px]">
+                    <h2 id="userWelcomeGreeting" class="text-lg sm:text-2xl font-black leading-snug break-words">Selamat Datang, Bapak/Ibu Wali Murid!</h2>
+                    <p class="text-emerald-50 text-sm mt-1 max-w-2xl">
+                        Pantau status pendaftaran, pelunasan biaya registrasi awal, dan jadwal tes observasi & wawancara di dashboard ini.
+                    </p>
+                </div>
+                <div class="bg-white/10 border border-white/20 rounded-xl p-4 text-center min-w-[200px]">
                         <span class="text-xs text-emerald-100 uppercase font-bold tracking-wider block">Status Berkas</span>
                         <span id="userStatusBadge" class="inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-slate-900">
                             MENUNGGU PEMBAYARAN
@@ -1088,7 +1088,12 @@
                     <input type="number" id="inputGelombangFee" value="200000" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Status Gelombang:</label>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block font-semibold text-slate-700">Status Gelombang:</label>
+                        <button type="button" onclick="closeAllWavesPrompt()" class="text-[10px] text-rose-600 font-bold hover:underline flex items-center gap-0.5">
+                            <i data-lucide="lock" class="w-3 h-3"></i> Tutup Semua Gelombang
+                        </button>
+                    </div>
                     <select id="inputGelombangStatus" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                         <option value="OPEN">DIBUKA (Menerima Pendaftaran & Aktif di Landing Page)</option>
                         <option value="CLOSED">DITUTUP (Kuota Penuh / Lewat Tanggal)</option>
@@ -1238,6 +1243,43 @@
         </div>
     </div>
 
+    <!-- MODAL 8: POP-UP IKLAN / PENGUMUMAN STATUS GELOMBANG (OTOMATIS MUNCUL SAAT BUKA WEB) -->
+    <div id="modalWaveAnnouncement" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl relative transform transition-all">
+            <!-- Close Icon -->
+            <button onclick="closeModal('modalWaveAnnouncement')" class="absolute top-4 right-4 text-white/80 hover:text-white bg-black/25 hover:bg-black/50 rounded-full p-1.5 transition z-10" title="Tutup">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <!-- Header Flyer Dinamis -->
+            <div id="announcementBannerHeader" class="bg-gradient-to-br from-[#14523E] to-[#0c3c2d] text-white p-6 relative overflow-hidden">
+                <div class="relative z-10 space-y-1.5">
+                    <span id="announcementBadge" class="inline-block px-3 py-1 bg-amber-400 text-slate-900 font-black text-[10px] uppercase rounded-full tracking-wider shadow-sm">
+                        📢 PENGUMUMAN GELOMBANG
+                    </span>
+                    <h3 id="announcementTitle" class="text-xl font-black tracking-tight leading-snug pt-1">
+                        Memuat Informasi...
+                    </h3>
+                    <p id="announcementSubtitle" class="text-xs text-emerald-100 font-medium">
+                        MI Al-Irsyad Al-Islamiyyah Kota Banjarmasin
+                    </p>
+                </div>
+            </div>
+
+            <!-- Konten Isi Flyer -->
+            <div class="p-6 space-y-4 text-xs">
+                <div id="announcementContent" class="space-y-3">
+                    <!-- Diinjeksi otomatis via JavaScript -->
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div id="announcementActionBtnGroup" class="pt-2 flex flex-col sm:flex-row gap-2">
+                    <!-- Diinjeksi otomatis via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let isLoggedIn = false;
         let currentRole = 'LOGIN'; // LOGIN | USER | ADMIN | ASESMEN
@@ -1250,6 +1292,32 @@
         let tempAktaFile = null;
         let tempAbkSuratFile = null;
         let currentPrintDocTitle = 'Dokumen PMBM';
+
+        // PENGAWAL FORMULIR: Merekam seluruh isian yang sedang diketik sebelum berkas diunggah
+        function captureCurrentFormValues(targetUser) {
+            if (!targetUser) return;
+            const getVal = (id) => document.getElementById(id)?.value;
+            if (document.getElementById('inputNik')) targetUser.nik = getVal('inputNik') || targetUser.nik;
+            if (document.getElementById('inputNamaLengkap')) targetUser.name = getVal('inputNamaLengkap') || targetUser.name;
+            if (document.getElementById('inputNamaPanggilan')) targetUser.nickname = getVal('inputNamaPanggilan');
+            if (document.getElementById('inputJenisKelamin')) targetUser.gender = getVal('inputJenisKelamin');
+            if (document.getElementById('inputTempatLahir')) targetUser.birthPlace = getVal('inputTempatLahir');
+            if (document.getElementById('inputTglLahir')) targetUser.birthDate = getVal('inputTglLahir');
+            if (document.getElementById('inputSekolahAsal')) targetUser.sekolahAsal = getVal('inputSekolahAsal');
+            if (document.getElementById('inputStatusAbk')) targetUser.statusAbk = getVal('inputStatusAbk');
+            if (document.getElementById('inputDetailAbk')) targetUser.detailAbk = getVal('inputDetailAbk');
+            if (document.getElementById('inputNamaAyah')) targetUser.ayah = getVal('inputNamaAyah');
+            if (document.getElementById('inputPekerjaanAyah')) targetUser.pekerjaanAyah = getVal('inputPekerjaanAyah');
+            if (document.getElementById('inputPenghasilanAyah')) targetUser.penghasilanAyah = getVal('inputPenghasilanAyah');
+            if (document.getElementById('inputNamaIbu')) targetUser.ibu = getVal('inputNamaIbu');
+            if (document.getElementById('inputPekerjaanIbu')) targetUser.pekerjaanIbu = getVal('inputPekerjaanIbu');
+            if (document.getElementById('inputPenghasilanIbu')) targetUser.penghasilanIbu = getVal('inputPenghasilanIbu');
+            if (document.getElementById('inputNoWa')) targetUser.wa = getVal('inputNoWa');
+            if (document.getElementById('inputNamaWali')) targetUser.wali = getVal('inputNamaWali');
+            if (document.getElementById('inputPekerjaanWali')) targetUser.pekerjaanWali = getVal('inputPekerjaanWali');
+            if (document.getElementById('inputHubunganWali')) targetUser.hubunganWali = getVal('inputHubunganWali');
+            if (document.getElementById('inputAlamat')) targetUser.alamat = getVal('inputAlamat');
+        }
 
         function handleKkChange(e) {
             const file = e.target.files[0];
@@ -1271,6 +1339,7 @@
                 
                 const user = applicantsData.find(a => a.id === loggedInUserId);
                 if (user) {
+                    captureCurrentFormValues(user); // Amankan ketikan form agar tidak lenyap
                     user.kkFileName = file.name;
                     user.kkFileBase64 = evt.target.result;
                     saveApplicantToFirestore(user);
@@ -1300,6 +1369,7 @@
                 
                 const user = applicantsData.find(a => a.id === loggedInUserId);
                 if (user) {
+                    captureCurrentFormValues(user); // Amankan ketikan form agar tidak lenyap
                     user.aktaFileName = file.name;
                     user.aktaFileBase64 = evt.target.result;
                     saveApplicantToFirestore(user);
@@ -1329,6 +1399,7 @@
 
                 const user = applicantsData.find(a => a.id === loggedInUserId);
                 if (user) {
+                    captureCurrentFormValues(user); // Amankan ketikan form agar tidak lenyap
                     user.abkSuratName = file.name;
                     user.abkSuratBase64 = evt.target.result;
                     saveApplicantToFirestore(user);
@@ -1395,6 +1466,7 @@
         ];
 
         let applicantsData = [...dummyApplicantsSample];
+        let hasShownWaveAnnouncement = false;
 
         // REAL-TIME FIRESTORE SYNC ENGINE WITH ERROR HANDLING & PERMISSION FALLBACK
         function initRealtimeSync() {
@@ -1443,1315 +1515,154 @@
             if (currentRole === 'ADMIN') renderAdminTable();
             if (currentRole === 'ASESMEN') renderAsesmenCandidates();
             if (currentRole === 'USER') updateUserViewState();
+            checkAndShowWavePopup();
         }
 
-        async function saveApplicantToFirestore(applicant) {
-            if (window.is_preview || !window.db) return;
-            try {
-                await window.setDoc(window.doc(window.db, "applicants", applicant.id), applicant, { merge: true });
-            } catch (e) {
-                console.error("Error saving applicant:", e);
-            }
-        }
+        // FUNGSI POP-UP PROMOSI / STATUS GELOMBANG OTOMATIS
+        function checkAndShowWavePopup() {
+            if (hasShownWaveAnnouncement) return;
+            // Hanya aktif di halaman awal (Landing/Login)
+            if (currentRole !== 'LOGIN') return;
 
-        async function deleteApplicantFromFirestore(id) {
-            applicantsData = applicantsData.filter(a => a.id !== id);
-            postDataSyncActions();
+            const modal = document.getElementById('modalWaveAnnouncement');
+            if (!modal) return;
 
-            if (window.is_preview || !window.db) return;
-            try {
-                await window.deleteDoc(window.doc(window.db, "applicants", id));
-            } catch (e) {
-                console.error("Error deleting applicant:", e);
-            }
-        }
+            const hasOpenWave = wavesList.some(w => w.status === 'OPEN');
+            const activeWave = getActiveWave();
+            const header = document.getElementById('announcementBannerHeader');
+            const badge = document.getElementById('announcementBadge');
+            const title = document.getElementById('announcementTitle');
+            const sub = document.getElementById('announcementSubtitle');
+            const content = document.getElementById('announcementContent');
+            const btnGroup = document.getElementById('announcementActionBtnGroup');
 
-        async function saveSettingsToFirestore() {
-            if (window.is_preview || !window.db) return;
-            try {
-                await window.setDoc(window.doc(window.db, "settings", "config"), {
-                    waves: wavesList,
-                    bank: bankSettings,
-                    globalCounter: globalCounter // Simpan counter terakhir secara permanen
-                }, { merge: true });
-            } catch (e) {
-                console.error("Error saving settings:", e);
-            }
-        }
+            if (hasOpenWave && activeWave) {
+                const remaining = Math.max(0, activeWave.totalQuota - applicantsData.length);
+                header.className = "bg-gradient-to-br from-[#14523E] to-[#0c3c2d] text-white p-6 relative overflow-hidden";
+                badge.className = "inline-block px-3 py-1 bg-amber-400 text-slate-900 font-black text-[10px] uppercase rounded-full tracking-wider shadow-sm";
+                badge.innerText = "📢 PENDAFTARAN RESMI DIBUKA";
+                title.innerText = activeWave.name;
+                sub.innerText = "MI Al-Irsyad Al-Islamiyyah Kota Banjarmasin";
 
-        document.addEventListener("DOMContentLoaded", () => {
-            lucide.createIcons();
-            applyProductionMode();
+                content.innerHTML = `
+                    <p class="text-slate-600 leading-relaxed text-justify">
+                        Ahlan Wa Sahlan! Pendaftaran Calon Murid Baru Madrasah Tahun Ajaran 2027/2028 untuk <strong>${activeWave.name}</strong> saat ini sedang berlangsung.
+                    </p>
+                    <div class="grid grid-cols-2 gap-2 p-3 bg-emerald-50/80 border border-emerald-200 rounded-2xl">
+                        <div>
+                            <span class="text-[10px] text-slate-500 font-semibold block">Masa Pendaftaran:</span>
+                            <span class="font-bold text-slate-800 text-[11px]">${formatDateReadable(activeWave.startDate)} - ${formatDateReadable(activeWave.endDate)}</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-500 font-semibold block">Sisa Kuota:</span>
+                            <span class="font-black text-emerald-700 text-sm">${remaining} / ${activeWave.totalQuota} Siswa</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-500 font-semibold block">Biaya Registrasi:</span>
+                            <span class="font-bold text-slate-800 text-[11px]">Rp ${activeWave.fee.toLocaleString('id-ID')}</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-500 font-semibold block">Bank Tujuan:</span>
+                            <span class="font-bold text-slate-800 text-[11px]">${bankSettings.bankName}</span>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-amber-800 bg-amber-50 p-2.5 rounded-xl border border-amber-200 leading-tight">
+                        ⚡ <strong>Penting:</strong> Kuota terbatas! Pendaftaran akan otomatis tertutup apabila kuota telah terpenuhi.
+                    </p>
+                `;
 
-            const savedRole = localStorage.getItem('pmbm_current_role');
-            if (savedRole && savedRole !== 'LOGIN') {
-                switchRole(savedRole);
+                btnGroup.innerHTML = `
+                    <button onclick="closeModal('modalWaveAnnouncement'); switchLoginTab('USER'); const el = document.getElementById('loginUserReg'); if(el) el.focus();" class="w-full sm:w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                        <i data-lucide="log-in" class="w-4 h-4"></i> Sudah Mendaftar
+                    </button>
+                    <button onclick="closeModal('modalWaveAnnouncement'); openRegisterModal();" class="w-full sm:w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center justify-center gap-1.5">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i> Daftar Sekarang
+                    </button>
+                `;
             } else {
-                showLoginView();
+                header.className = "bg-gradient-to-br from-rose-800 to-rose-950 text-white p-6 relative overflow-hidden";
+                badge.className = "inline-block px-3 py-1 bg-white text-rose-800 font-black text-[10px] uppercase rounded-full tracking-wider shadow-sm";
+                badge.innerText = "⛔ PEMBERITAHUAN RESMI";
+                title.innerText = "Pendaftaran Ditutup";
+                sub.innerText = "MI Al-Irsyad Al-Islamiyyah Kota Banjarmasin";
+
+                content.innerHTML = `
+                    <p class="text-slate-600 leading-relaxed text-justify">
+                        Mohon maaf, saat ini <strong>seluruh gelombang penerimaan calon murid baru telah resmi ditutup</strong> dikarenakan kuota kelas telah terpenuhi atau batas tanggal pendaftaran telah berakhir.
+                    </p>
+                    <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-rose-900 space-y-1">
+                        <p class="font-bold text-[11px]">Informasi Lebih Lanjut:</p>
+                        <p class="text-[11px] text-rose-800 leading-relaxed">Bagi wali murid yang memerlukan informasi gelombang susulan atau verifikasi lainnya, silakan hubungi panitia melalui sekretariat madrasah.</p>
+                    </div>
+                `;
+
+                btnGroup.innerHTML = `
+                    <button onclick="closeModal('modalWaveAnnouncement'); switchLoginTab('USER'); const el = document.getElementById('loginUserReg'); if(el) el.focus();" class="w-full sm:w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                        <i data-lucide="log-in" class="w-4 h-4"></i> Sudah Mendaftar
+                    </button>
+                    <button onclick="closeModal('modalWaveAnnouncement')" class="w-full sm:w-1/2 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition">
+                        Tutup
+                    </button>
+                `;
             }
 
-            initRealtimeSync();
-        });
-
-        function applyProductionMode() {
-            const demoBox = document.getElementById('demoAccessPanel');
-            const demoUnlockBtn = document.getElementById('demoUnlockBtn');
-
-            if (!window.is_preview) {
-                if (demoBox) demoBox.classList.add('hidden');
-                if (demoUnlockBtn) demoUnlockBtn.classList.add('hidden');
-            } else {
-                if (demoBox) demoBox.classList.remove('hidden');
-                if (demoUnlockBtn) demoUnlockBtn.classList.remove('hidden');
-            }
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            hasShownWaveAnnouncement = true;
+            if (window.lucide) lucide.createIcons();
         }
 
+        // ==========================================================
+        // 1. SISTEM NOTIFIKASI TOAST & UTILITAS MODAL (ANTI-ALERT)
+        // ==========================================================
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
+            if (!container) return;
+
             const toast = document.createElement('div');
-            const bgClass = type === 'error' ? 'bg-rose-900 border-rose-700 text-rose-100' : 'bg-slate-900 border-slate-700 text-emerald-300';
-            
-            toast.className = `p-3.5 rounded-xl border text-xs font-semibold shadow-xl flex items-center gap-2 pointer-events-auto transform transition-all duration-300 translate-y-2 opacity-0 ${bgClass}`;
-            toast.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> ${message}`;
+            const bgClass = type === 'error' ? 'bg-rose-600 text-white' : (type === 'warning' ? 'bg-amber-500 text-slate-900' : 'bg-emerald-600 text-white');
+            const iconName = type === 'error' ? 'alert-circle' : (type === 'warning' ? 'alert-triangle' : 'check-circle-2');
+
+            toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs font-bold pointer-events-auto transition-all transform duration-300 translate-y-3 opacity-0`;
+            toast.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4 shrink-0"></i><span>${message}</span>`;
             
             container.appendChild(toast);
+            if (window.lucide) lucide.createIcons();
+
             setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 10);
-            
+                toast.classList.remove('translate-y-3', 'opacity-0');
+            }, 50);
+
             setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
+                toast.classList.add('opacity-0', 'translate-y-3');
                 setTimeout(() => toast.remove(), 300);
             }, 3500);
         }
 
-        function showLoginView() {
-            currentRole = 'LOGIN';
-            document.getElementById('viewLogin').classList.remove('hidden');
-            document.getElementById('viewUser').classList.add('hidden');
-            document.getElementById('viewAdmin').classList.add('hidden');
-            document.getElementById('viewAsesmen').classList.add('hidden');
-            document.getElementById('logoutBtn').classList.add('hidden');
-
-            document.getElementById('activeUserLabel').innerText = 'Belum Login';
-            document.getElementById('activeRoleLabel').innerText = 'Silakan masuk ke sistem';
-            document.getElementById('userAvatar').innerText = '?';
-            lucide.createIcons();
-        }
-
-        function switchRole(role) {
-            isLoggedIn = true;
-            currentRole = role;
-            localStorage.setItem('pmbm_current_role', role);
-
-            document.getElementById('viewLogin').classList.add('hidden');
-            document.getElementById('viewUser').classList.add('hidden');
-            document.getElementById('viewAdmin').classList.add('hidden');
-            document.getElementById('viewAsesmen').classList.add('hidden');
-            document.getElementById('logoutBtn').classList.remove('hidden');
-
-            if (role === 'USER') {
-                document.getElementById('viewUser').classList.remove('hidden');
-                const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0] || { name: 'Calon Murid', id: 'PMBM-2027-XXX', nickname: 'Murid' };
-                document.getElementById('activeUserLabel').innerText = `Calon Murid: ${user.nickname || user.name}`;
-                document.getElementById('activeRoleLabel').innerText = `No. Reg: ${user.id}`;
-                document.getElementById('userAvatar').innerText = getInitials(user.name);
-                updateUserViewState();
-            } else if (role === 'ADMIN') {
-                document.getElementById('viewAdmin').classList.remove('hidden');
-                document.getElementById('activeUserLabel').innerText = 'Administrator Utama';
-                document.getElementById('activeRoleLabel').innerText = 'Super Admin Control';
-                document.getElementById('userAvatar').innerText = 'ADM';
-                renderAdminTable();
-            } else if (role === 'ASESMEN') {
-                document.getElementById('viewAsesmen').classList.remove('hidden');
-                document.getElementById('activeUserLabel').innerText = 'Tim Asesmen & Evaluator';
-                document.getElementById('activeRoleLabel').innerText = 'Penguji Observasi';
-                document.getElementById('userAvatar').innerText = 'EV';
-                renderAsesmenCandidates();
-            }
-            lucide.createIcons();
-        }
-
-        function switchLoginTab(type) {
-            const tabUser = document.getElementById('tabUserLogin');
-            const tabStaff = document.getElementById('tabStaffLogin');
-            const formUser = document.getElementById('formUserLogin');
-            const formStaff = document.getElementById('formStaffLogin');
-
-            if (type === 'USER') {
-                tabUser.className = 'w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-emerald-600 text-emerald-700 transition';
-                tabStaff.className = 'w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition';
-                formUser.classList.remove('hidden');
-                formStaff.classList.add('hidden');
-            } else {
-                tabStaff.className = 'w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-emerald-600 text-emerald-700 transition';
-                tabUser.className = 'w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition';
-                formStaff.classList.remove('hidden');
-                formUser.classList.add('hidden');
-            }
-        }
-
-        function handleUserLoginSubmit(e) {
-            e.preventDefault();
-            const regInput = document.getElementById('loginUserReg').value.trim();
-            const foundUser = applicantsData.find(a => a.id.toLowerCase() === regInput.toLowerCase() || a.nik === regInput);
-            
-            if (foundUser) {
-                loggedInUserId = foundUser.id;
-                switchRole('USER');
-                showToast(`Selamat Datang, ${foundUser.name}!`);
-            } else {
-                showToast(`Nomor Registrasi / NIK (${regInput}) tidak ditemukan!`, 'error');
-            }
-        }
-
-        async function handleStaffLoginSubmit(e) {
-            e.preventDefault();
-            const username = document.getElementById('loginStaffUser').value.trim();
-            const pass = document.getElementById('loginStaffPass').value.trim();
-
-            if (window.is_preview || typeof window.auth === 'undefined') {
-                const u = username.toLowerCase();
-                if (u.includes('admin') || u.includes('asesmen') || u.includes('evaluator')) {
-                    const role = (u.includes('asesmen') || u.includes('evaluator')) ? 'ASESMEN' : 'ADMIN';
-                    switchRole(role);
-                    showToast(`Login ${role} Berhasil (Preview Mode)!`);
-                } else {
-                    showToast('Username atau kata sandi salah!', 'error');
-                }
-            } else {
-                try {
-                    let email = username.includes('@') ? username : `${username}@pmbm.com`;
-                    const userCredential = await window.signInWithEmailAndPassword(window.auth, email, pass);
-                    const userDocRef = window.doc(window.db, "users", userCredential.user.uid);
-                    const userDoc = await window.getDoc(userDocRef);
-                    
-                    if (userDoc.exists()) {
-                        const role = userDoc.data().role;
-                        if (role === 'ADMIN' || role === 'ASESMEN') {
-                            switchRole(role);
-                            showToast(`Login ${role} Berhasil!`);
-                        } else {
-                            window.signOut(window.auth);
-                            showToast('Akses ditolak: Role tidak valid!', 'error');
-                        }
-                    } else {
-                        window.signOut(window.auth);
-                        showToast('Akses ditolak: Data user tidak ditemukan!', 'error');
-                    }
-                } catch (error) {
-                    showToast('Login gagal: Periksa email dan kata sandi Anda.', 'error');
-                }
-            }
-        }
-
-        function quickDemoLogin(role) {
-            if (role === 'USER' && applicantsData.length > 0) loggedInUserId = applicantsData[0].id;
-            switchRole(role);
-            showToast(`Mode Demo Aktif: Role ${role}`);
-        }
-
-        function handleLogout() {
-            isLoggedIn = false;
-            localStorage.removeItem('pmbm_current_role');
-            if (!window.is_preview && window.signOut && window.auth) window.signOut(window.auth);
-            showLoginView();
-            showToast('Anda telah keluar dari sistem.');
-        }
-
-        function openRegisterModal() {
-            const modal = document.getElementById('modalRegisterAccount');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            lucide.createIcons();
-        }
-
-        function handleNewAccountRegister(e) {
-            e.preventDefault();
-            const name = document.getElementById('regNamaMurid').value;
-            const nik = document.getElementById('regNikMurid').value;
-            const ortu = document.getElementById('regNamaOrtu').value;
-            const wa = document.getElementById('regWaOrtu').value;
-
-            globalCounter++; // Tambah counter permanen tanpa mempedulikan data yang terhapus
-            const paddedCounter = String(globalCounter).padStart(3, '0');
-            const newId = `PMBM-2027-${paddedCounter}`;
-            
-            const activeWave = getActiveWave();
-            const newCandidate = {
-                id: newId,
-                waveId: activeWave ? activeWave.id : 'wave-1',
-                name: name,
-                nickname: name.split(' ')[0],
-                gender: 'Laki-laki',
-                birthPlace: '',
-                birthDate: '',
-                sekolahAsal: '',
-                statusAbk: 'Non-ABK / Reguler',
-                detailAbk: '',
-                nik: nik,
-                ayah: ortu,
-                pekerjaanAyah: '',
-                penghasilanAyah: 'Tidak Berpenghasilan',
-                ibu: '',
-                pekerjaanIbu: '',
-                penghasilanIbu: 'Tidak Berpenghasilan',
-                wa: wa,
-                wali: '',
-                pekerjaanWali: '',
-                hubunganWali: '',
-                alamat: '',
-                paymentStatus: 'UNPAID',
-                paymentFile: null,
-                paymentTime: null,
-                formCompleted: false,
-                scheduleDate: null,
-                scheduleTime: null,
-                scheduleLoc: null,
-                scoreMotorik: null,
-                scoreBahasa: null,
-                scoreHijaiyah: null,
-                scoreKomitmen: null,
-                scoreKesepahaman: null,
-                notes: null,
-                recommendation: null,
-                totalScore: null,
-                scoreCompleted: false,
-                finalStatus: 'MENUNGGU'
-            };
-
-            applicantsData.push(newCandidate);
-            loggedInUserId = newId;
-            closeModal('modalRegisterAccount');
-            updateWaveDisplay();
-            switchRole('USER');
-            showToast(`Akun Baru Berhasil Dibuat! No. Reg: ${newId}`);
-
-            saveApplicantToFirestore(newCandidate);
-            saveSettingsToFirestore(); // Simpan update counter ID ke database
-        }
-
-        function updateBankDisplay() {
-            const elName = document.getElementById('displayBankName');
-            const elHolder = document.getElementById('displayBankHolder');
-            const elNo = document.getElementById('displayBankNo');
-            if (elName) elName.innerText = bankSettings.bankName;
-            if (elHolder) elHolder.innerText = bankSettings.bankHolder;
-            if (elNo) elNo.innerText = bankSettings.accountNo;
-        }
-
-        function getActiveWave() {
-            return wavesList.find(w => w.status === 'OPEN') || wavesList[0];
-        }
-
-        function updateWaveDisplay() {
-            const activeWave = getActiveWave();
-            if (!activeWave) return;
-            const quotaRemaining = Math.max(0, activeWave.totalQuota - applicantsData.length);
-            const waveText = `${activeWave.name} (${formatDateReadable(activeWave.startDate)} - ${formatDateReadable(activeWave.endDate)})`;
-            
-            const loginBadge = document.getElementById('loginWaveBadge');
-            if (loginBadge) loginBadge.innerText = waveText;
-
-            const userWaveBadge = document.getElementById('userWaveBadge');
-            if (userWaveBadge) userWaveBadge.innerText = waveText;
-
-            const elLoginQuota = document.getElementById('loginQuotaCount');
-            if (elLoginQuota) elLoginQuota.innerText = quotaRemaining;
-
-            const elUserQuotaRem = document.getElementById('userQuotaRemaining');
-            if (elUserQuotaRem) elUserQuotaRem.innerText = quotaRemaining;
-
-            const elUserQuotaTot = document.getElementById('userQuotaTotal');
-            if (elUserQuotaTot) elUserQuotaTot.innerText = activeWave.totalQuota;
-
-            const waveFilterDropdown = document.getElementById('adminWaveFilter');
-            if (waveFilterDropdown) {
-                const currentVal = waveFilterDropdown.value;
-                let opts = '<option value="ALL">Semua Gelombang</option>';
-                wavesList.forEach(w => {
-                    opts += `<option value="${w.id}">${w.name}</option>`;
-                });
-                waveFilterDropdown.innerHTML = opts;
-                if (wavesList.some(w => w.id === currentVal) || currentVal === 'ALL') {
-                    waveFilterDropdown.value = currentVal;
-                }
-            }
-        }
-
-        function onWaveSelectChange() {
-            const select = document.getElementById('inputGelombangSelect');
-            if (select) {
-                selectedWaveId = select.value;
-                updateWaveModalControls();
-            }
-        }
-
-        function addNewWavePrompt() {
-            const newIndex = wavesList.length + 1;
-            const newWave = {
-                id: `wave-${newIndex}`,
-                name: `Gelombang ${newIndex} T.A. 2027/2028`,
-                startDate: '2027-09-01',
-                endDate: '2027-09-30',
-                totalQuota: 80,
-                fee: 250000,
-                status: 'OPEN'
-            };
-            wavesList.push(newWave);
-            selectedWaveId = newWave.id;
-            updateWaveModalControls();
-            updateWaveDisplay();
-            saveSettingsToFirestore();
-            showToast(`Gelombang ${newIndex} Ditambahkan!`);
-        }
-
-        function deleteCurrentWavePrompt() {
-            if (wavesList.length <= 1) {
-                showToast("Minimal harus ada 1 Gelombang!", "error");
-                return;
-            }
-            wavesList = wavesList.filter(w => w.id !== selectedWaveId);
-            selectedWaveId = wavesList[0].id;
-            updateWaveModalControls();
-            updateWaveDisplay();
-            saveSettingsToFirestore();
-            showToast("Gelombang dihapus.");
-        }
-
-        function toggleAbkDetailInput() {
-            const statusSelect = document.getElementById('inputStatusAbk');
-            const wrapper = document.getElementById('wrapperDetailAbk');
-            if (!statusSelect || !wrapper) return;
-            if (statusSelect.value !== 'Non-ABK / Reguler') {
-                wrapper.classList.remove('hidden');
-            } else {
-                wrapper.classList.add('hidden');
-            }
-        }
-
-        function updateUserViewState() {
-            const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
-            if (!user) return;
-
-            const userStatusBadge = document.getElementById('userStatusBadge');
-            const lockOverlay = document.getElementById('formLockOverlay');
-            const paymentUploadBox = document.getElementById('paymentUploadBox');
-            const paymentUploadedBox = document.getElementById('paymentUploadedBox');
-            const schedulePendingBox = document.getElementById('schedulePendingBox');
-            const scheduleActiveBox = document.getElementById('scheduleActiveBox');
-            const userResultCard = document.getElementById('userResultCard');
-            const userResultContent = document.getElementById('userResultContent');
-
-            document.getElementById('inputNik').value = user.nik || '';
-            document.getElementById('inputNamaLengkap').value = user.name || '';
-            document.getElementById('inputNamaPanggilan').value = user.nickname || '';
-            document.getElementById('inputJenisKelamin').value = user.gender || 'Laki-laki';
-            document.getElementById('inputTempatLahir').value = user.birthPlace || '';
-            document.getElementById('inputTglLahir').value = user.birthDate || '';
-            document.getElementById('inputSekolahAsal').value = user.sekolahAsal || '';
-            document.getElementById('inputStatusAbk').value = user.statusAbk || 'Non-ABK / Reguler';
-            document.getElementById('inputDetailAbk').value = user.detailAbk || '';
-            toggleAbkDetailInput();
-
-            document.getElementById('inputNamaAyah').value = user.ayah || '';
-            document.getElementById('inputPekerjaanAyah').value = user.pekerjaanAyah || '';
-            document.getElementById('inputPenghasilanAyah').value = user.penghasilanAyah || '2 - 5 Juta';
-            document.getElementById('inputNamaIbu').value = user.ibu || '';
-            document.getElementById('inputPekerjaanIbu').value = user.pekerjaanIbu || '';
-            document.getElementById('inputPenghasilanIbu').value = user.penghasilanIbu || '< 2 Juta';
-            document.getElementById('inputNoWa').value = user.wa || '';
-            document.getElementById('inputNamaWali').value = user.wali || '';
-            document.getElementById('inputPekerjaanWali').value = user.pekerjaanWali || '';
-            document.getElementById('inputHubunganWali').value = user.hubunganWali || '';
-            document.getElementById('inputAlamat').value = user.alamat || '';
-
-            const kkStatus = document.getElementById('kkFileStatus');
-            if (kkStatus) kkStatus.innerText = user.kkFileName ? `✓ Berkas KK: ${user.kkFileName}` : 'Belum ada file dipilih';
-            const aktaStatus = document.getElementById('aktaFileStatus');
-            if (aktaStatus) aktaStatus.innerText = user.aktaFileName ? `✓ Berkas Akta: ${user.aktaFileName}` : 'Belum ada file dipilih';
-
-            if (user.paymentStatus === 'UNPAID') {
-                userStatusBadge.className = 'inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-slate-900';
-                userStatusBadge.innerText = 'MENUNGGU PEMBAYARAN';
-                lockOverlay.classList.remove('hidden');
-                paymentUploadBox.classList.remove('hidden');
-                paymentUploadedBox.classList.add('hidden');
-            } else if (user.paymentStatus === 'PENDING') {
-                userStatusBadge.className = 'inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-slate-900 animate-pulse';
-                userStatusBadge.innerText = 'VERIFIKASI PEMBAYARAN';
-                lockOverlay.classList.remove('hidden');
-                paymentUploadBox.classList.add('hidden');
-                paymentUploadedBox.classList.remove('hidden');
-                document.getElementById('paymentFileName').innerText = user.paymentFile || 'bukti_transfer.jpg';
-                document.getElementById('paymentUploadedTime').innerText = `Diunggah: ${user.paymentTime || 'Baru saja'}`;
-            } else if (user.paymentStatus === 'VERIFIED') {
-                userStatusBadge.className = 'inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-[#a3b13f] text-white';
-                userStatusBadge.innerText = 'TERVERIFIKASI & FORM AKTIF';
-                lockOverlay.classList.add('hidden');
-                paymentUploadBox.classList.add('hidden');
-                paymentUploadedBox.classList.remove('hidden');
-            }
-
-            if (user.scheduleDate) {
-                schedulePendingBox.classList.add('hidden');
-                scheduleActiveBox.classList.remove('hidden');
-                document.getElementById('userScheduleDate').innerText = formatDateReadable(user.scheduleDate);
-                document.getElementById('userScheduleTime').innerText = `Pukul: ${user.scheduleTime}`;
-                document.getElementById('userScheduleLoc').innerText = `Lokasi: ${user.scheduleLoc}`;
-            }
-
-            if (user.finalStatus === 'LULUS') {
-                userResultCard.classList.remove('hidden');
-                userResultContent.className = 'text-center p-5 rounded-xl bg-emerald-50 border border-emerald-200 space-y-3';
-                userResultContent.innerHTML = `
-                    <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto border border-emerald-300">
-                        <i data-lucide="check-circle-2" class="w-7 h-7"></i>
-                    </div>
-                    <div>
-                        <span class="text-xs font-extrabold text-emerald-800 uppercase tracking-widest">SELAMAT! ANDA DINYATAKAN</span>
-                        <h4 class="text-2xl font-black text-emerald-700 mt-0.5">LULUS SELEKSI PMBM</h4>
-                        <p class="text-xs text-slate-600 mt-1">No. Reg: <strong>${user.id}</strong></p>
-                    </div>
-                    <div class="p-3 bg-white rounded-xl border border-emerald-200 max-w-sm mx-auto shadow-sm text-left flex items-center gap-3">
-                        <div class="p-2 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-lg">📖</div>
-                        <div>
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Penempatan Belajar:</span>
-                            <span class="text-xs font-black text-emerald-800">${user.jilidResult || 'Tartili Jilid 3'}</span>
-                        </div>
-                    </div>
-                    <div class="pt-2">
-                        <button onclick="printKartuKelulusan()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center justify-center gap-2 mx-auto">
-                            <i data-lucide="file-text" class="w-4 h-4"></i> Cetak Surat Keterangan Lulus (SKL)
-                        </button>
-                    </div>
-                `;
-            } else if (user.finalStatus === 'TIDAK_LULUS') {
-                userResultCard.classList.remove('hidden');
-                userResultContent.className = 'text-center p-5 rounded-xl bg-rose-50 border border-rose-200 space-y-3';
-                userResultContent.innerHTML = `
-                    <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center mx-auto border border-rose-300">
-                        <i data-lucide="x-circle" class="w-7 h-7"></i>
-                    </div>
-                    <div>
-                        <span class="text-xs font-extrabold text-rose-800 uppercase tracking-widest">MOHON MAAF, ANDA DINYATAKAN</span>
-                        <h4 class="text-2xl font-black text-rose-700 mt-0.5">TIDAK LULUS</h4>
-                        <p class="text-xs text-slate-600 mt-1">No. Reg: <strong>${user.id}</strong></p>
-                    </div>
-                `;
-            }
-            lucide.createIcons();
-        }
-
-        function handlePaymentProofUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            if (file.size > 800 * 1024) {
-                showToast("Gagal: Ukuran file Bukti Bayar maksimal 800KB! Silakan kompres dulu.", "error");
-                e.target.value = "";
-                return;
-            }
-
-            const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
-            if (!user) return;
-
-            user.paymentStatus = 'PENDING';
-            user.paymentFile = file.name;
-            user.paymentTime = new Date().toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' });
-
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                user.paymentFileUrl = evt.target.result;
-                updateUserViewState();
-                renderAdminTable();
-                saveApplicantToFirestore(user);
-                showToast('Bukti pembayaran berhasil diunggah & tersimpan!');
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function demoUnlockForm() {
-            const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
-            if (!user) return;
-            user.paymentStatus = 'VERIFIED';
-            user.paymentFile = 'bukti_transfer_demo.jpg';
-            user.paymentTime = 'Bypass Demo';
-            updateUserViewState();
-            renderAdminTable();
-            saveApplicantToFirestore(user);
-            showToast('Simulasi Berhasil: Pembayaran diverifikasi.');
-        }
-
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            const user = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
-            if (!user) return;
-
-            user.nik = document.getElementById('inputNik').value;
-            user.name = document.getElementById('inputNamaLengkap').value;
-            user.nickname = document.getElementById('inputNamaPanggilan').value;
-            user.gender = document.getElementById('inputJenisKelamin').value;
-            user.birthPlace = document.getElementById('inputTempatLahir').value;
-            user.birthDate = document.getElementById('inputTglLahir').value;
-            user.sekolahAsal = document.getElementById('inputSekolahAsal').value;
-            user.statusAbk = document.getElementById('inputStatusAbk').value;
-            user.detailAbk = document.getElementById('inputDetailAbk').value;
-            user.ayah = document.getElementById('inputNamaAyah').value;
-            user.pekerjaanAyah = document.getElementById('inputPekerjaanAyah').value;
-            user.penghasilanAyah = document.getElementById('inputPenghasilanAyah').value;
-            user.ibu = document.getElementById('inputNamaIbu').value;
-            user.pekerjaanIbu = document.getElementById('inputPekerjaanIbu').value;
-            user.penghasilanIbu = document.getElementById('inputPenghasilanIbu').value;
-            user.wa = document.getElementById('inputNoWa').value;
-            user.wali = document.getElementById('inputNamaWali').value;
-            user.pekerjaanWali = document.getElementById('inputPekerjaanWali').value;
-            user.hubunganWali = document.getElementById('inputHubunganWali').value;
-            user.alamat = document.getElementById('inputAlamat').value;
-            user.formCompleted = true;
-
-            if (tempKkFile) {
-                user.kkFileName = tempKkFile.name;
-                user.kkFileBase64 = tempKkFile.base64;
-            }
-            if (tempAktaFile) {
-                user.aktaFileName = tempAktaFile.name;
-                user.aktaFileBase64 = tempAktaFile.base64;
-            }
-            if (tempAbkSuratFile) {
-                user.abkSuratName = tempAbkSuratFile.name;
-                user.abkSuratBase64 = tempAbkSuratFile.base64;
-            }
-
-            showToast('Formulir berhasil disimpan!');
-            renderAdminTable();
-            saveApplicantToFirestore(user);
-        }
-
-        function filterAdminTable(filter) {
-            currentTableFilter = filter;
-            renderAdminTable();
-        }
-
-        function renderAdminTable() {
-            const tbody = document.getElementById('adminTableBody');
-            if (!tbody) return;
-
-            const searchKey = (document.getElementById('adminSearchInput')?.value || '').toLowerCase();
-            const waveFilter = document.getElementById('adminWaveFilter')?.value || 'ALL';
-            
-            let filtered = applicantsData.filter(item => {
-                const matchSearch = item.name.toLowerCase().includes(searchKey) || item.id.toLowerCase().includes(searchKey) || (item.ayah && item.ayah.toLowerCase().includes(searchKey));
-                const itemWaveId = item.waveId || 'wave-1';
-                const matchWave = waveFilter === 'ALL' || itemWaveId === waveFilter;
-                
-                if (!matchSearch || !matchWave) return false;
-                if (currentTableFilter === 'PENDING') return item.paymentStatus === 'PENDING';
-                if (currentTableFilter === 'VERIFIED') return item.paymentStatus === 'VERIFIED';
-                return true;
-            });
-
-            document.getElementById('statTotal').innerText = applicantsData.length;
-            document.getElementById('statPendingPay').innerText = applicantsData.filter(a => a.paymentStatus === 'PENDING').length;
-            document.getElementById('statReadyAssess').innerText = applicantsData.filter(a => a.paymentStatus === 'VERIFIED').length;
-            document.getElementById('statPassed').innerText = applicantsData.filter(a => a.finalStatus === 'LULUS').length;
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Belum ada data calon murid terdaftar.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = filtered.map(item => {
-                let payBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600">Belum Bayar</span>';
-                if (item.paymentStatus === 'PENDING') {
-                    payBadge = `<button onclick="openPaymentProofModal('${item.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-300 flex items-center gap-1">
-                        <i data-lucide="clock" class="w-3 h-3"></i> Perlu Verifikasi
-                    </button>`;
-                } else if (item.paymentStatus === 'VERIFIED') {
-                    payBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✓ Rp 200k Terverifikasi</span>`;
-                }
-
-                // PERBAIKAN: Tanggal yang sudah ada sekarang jadi tombol bisa diklik buat diedit lagi
-                let schedCell = item.scheduleDate ? `<button onclick="openScheduleModal('${item.id}')" class="text-[11px] font-bold text-blue-700 hover:text-blue-800 hover:underline flex items-center gap-1" title="Edit Jadwal"><i data-lucide="edit-3" class="w-3 h-3"></i> ${formatDateReadable(item.scheduleDate)}</button>` : `<button onclick="openScheduleModal('${item.id}')" class="text-[11px] text-blue-600 font-semibold hover:underline">+ Atur Jadwal</button>`;
-
-                let recColorClass = (item.recommendation && item.recommendation.toLowerCase() === 'tidak lulus') ? 'text-rose-600' : 'text-emerald-600';
-                let scoreCell = item.scoreCompleted ? `<div class="text-[11px]"><span class="font-bold text-slate-900">Skor: ${item.totalScore}</span> <span class="${recColorClass} block text-[10px]">${item.recommendation}</span></div>` : `<span class="text-[11px] text-slate-400 italic">Belum Diuji</span>`;
-
-                let berkasCell = '<div class="flex flex-col gap-1 min-w-[70px]">';
-                if (item.kkFileBase64 || item.kkFileName) {
-                    berkasCell += `<button type="button" onclick="window.previewBase64File('${item.kkFileBase64}')" class="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 border border-slate-300 flex items-center justify-center gap-1 w-full"><i data-lucide="file-text" class="w-3 h-3"></i> KK</button>`;
-                } else {
-                    berkasCell += `<span class="text-[10px] text-slate-400 text-center block bg-slate-50 border border-slate-100 rounded px-1 py-0.5">KK (-)</span>`;
-                }
-                
-                if (item.aktaFileBase64 || item.aktaFileName) {
-                    berkasCell += `<button type="button" onclick="window.previewBase64File('${item.aktaFileBase64}')" class="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 border border-slate-300 flex items-center justify-center gap-1 w-full mt-1"><i data-lucide="file-text" class="w-3 h-3"></i> Akta</button>`;
-                } else {
-                    berkasCell += `<span class="text-[10px] text-slate-400 text-center block bg-slate-50 border border-slate-100 rounded px-1 py-0.5 mt-1">Akta (-)</span>`;
-                }
-
-                if (item.abkSuratBase64 || item.abkSuratName) {
-                    berkasCell += `<button type="button" onclick="window.previewBase64File('${item.abkSuratBase64}')" class="text-[10px] px-2 py-0.5 bg-amber-50 text-amber-700 rounded hover:bg-amber-100 border border-amber-300 flex items-center justify-center gap-1 w-full mt-1"><i data-lucide="file-plus" class="w-3 h-3"></i> Medis</button>`;
-                }
-                berkasCell += '</div>';
-
-                let statusDropdown = `
-                    <select onchange="setFinalStatus('${item.id}', this.value)" class="text-xs font-bold border border-slate-300 rounded-lg px-2 py-1 ${item.finalStatus === 'LULUS' ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : (item.finalStatus === 'TIDAK_LULUS' ? 'bg-rose-50 text-rose-700 border-rose-300' : 'bg-white text-slate-700')}">
-                        <option value="MENUNGGU" ${item.finalStatus === 'MENUNGGU' ? 'selected' : ''}>⏳ Menunggu</option>
-                        <option value="LULUS" ${item.finalStatus === 'LULUS' ? 'selected' : ''}>✅ LULUS</option>
-                        <option value="TIDAK_LULUS" ${item.finalStatus === 'TIDAK_LULUS' ? 'selected' : ''}>❌ Tidak Lulus</option>
-                    </select>
-                `;
-
-                let printActions = '';
-                if (item.finalStatus === 'LULUS') {
-                    printActions = `<button onclick="printKartuKelulusan('${item.id}')" class="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-100 transition" title="Cetak SKL"><i data-lucide="award" class="w-4 h-4"></i></button>`;
-                } else if (item.scheduleDate) {
-                    printActions = `<button onclick="printKartuUjian('${item.id}')" class="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-100 transition" title="Cetak Kartu Observasi"><i data-lucide="printer" class="w-4 h-4"></i></button>`;
-                }
-
-                return `
-                    <tr class="hover:bg-slate-50 border-b border-slate-100">
-                        <td class="p-3.5 font-mono font-bold text-emerald-700">${item.id}</td>
-                        <td class="p-3.5">
-                            <p class="font-bold text-slate-900">${item.name}</p>
-                            <p class="text-[10px] text-slate-400">${item.gender} | NIK: ${item.nik}</p>
-                        </td>
-                        <td class="p-3.5">
-                            <p class="text-xs text-slate-800 font-semibold">${item.ayah || '-'}</p>
-                            <p class="text-[10px] text-slate-500">Pekerjaan: ${item.pekerjaanAyah || '-'} | WA: ${item.wa}</p>
-                        </td>
-                        <td class="p-3.5">${payBadge}</td>
-                        <td class="p-3.5">${schedCell}</td>
-                        <td class="p-3.5">${scoreCell}</td>
-                        <td class="p-3.5">${berkasCell}</td>
-                        <td class="p-3.5 text-center">${statusDropdown}</td>
-                        <td class="p-3.5 text-right">
-                            <div class="flex items-center justify-end gap-1">
-                                ${printActions}
-                                <button onclick="openFormDetailModal('${item.id}')" class="p-1.5 rounded-lg ${item.formCompleted ? 'bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200' : 'bg-slate-100 hover:bg-slate-200 text-slate-400 border border-slate-200'} transition" title="${item.formCompleted ? 'Lihat Formulir Pendaftaran (Sudah Terisi)' : 'Formulir Belum Diisi / Dikirim'}">
-                                    <i data-lucide="${item.formCompleted ? 'file-text' : 'file-clock'}" class="w-4 h-4"></i>
-                                </button>
-                                <button onclick="openPaymentProofModal('${item.id}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="Detail Bukti Transfer">
-                                    <i data-lucide="eye" class="w-4 h-4"></i>
-                                </button>
-                                <button onclick="promptDeleteApplicant('${item.id}')" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-100 transition" title="Hapus Data">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-            lucide.createIcons();
-        }
-
-        function openPaymentProofModal(id) {
-            activeModalApplicantId = id;
-            const item = applicantsData.find(a => a.id === id);
-            if (!item) return;
-
-            const modal = document.getElementById('modalPaymentProof');
-            const imgEl = document.getElementById('modalPaymentImage');
-            const extLink = document.getElementById('modalPaymentExternalLink');
-
-            const fileTarget = item.paymentFileUrl || item.paymentFile || '';
-            imgEl.src = fileTarget.startsWith('data:image') || fileTarget.startsWith('http') ? fileTarget : `https://placehold.co/400x600/059669/ffffff?text=Bukti+Transfer`;
-            extLink.href = fileTarget;
-            extLink.classList.remove('hidden');
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            lucide.createIcons();
-        }
-
-        function adminVerifyPayment(id, isApproved) {
-            const item = applicantsData.find(a => a.id === id);
-            if (!item) return;
-
-            item.paymentStatus = isApproved ? 'VERIFIED' : 'UNPAID';
-            closeModal('modalPaymentProof');
-            renderAdminTable();
-            if (currentRole === 'USER') updateUserViewState();
-            saveApplicantToFirestore(item);
-            showToast(isApproved ? `Pembayaran diverifikasi!` : `Pembayaran ditolak.`, isApproved ? 'success' : 'error');
-        }
-
-        // PERBAIKAN: Modal langsung menarik data jadwal lama kalau sudah pernah di-set
-        function openScheduleModal(id) {
-            activeModalApplicantId = id;
-            const item = applicantsData.find(a => a.id === id);
-            
-            if (item) {
-                document.getElementById('inputScheduleDate').value = item.scheduleDate || '';
-                document.getElementById('inputScheduleTime').value = item.scheduleTime || '08:30 - 10:00 WITA';
-                document.getElementById('inputScheduleLoc').value = item.scheduleLoc || 'Gedung Utama MI Al-Irsyad Banjarmasin';
-            }
-
-            const modal = document.getElementById('modalSchedule');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            lucide.createIcons();
-        }
-
-        function saveScheduleFromModal() {
-            const date = document.getElementById('inputScheduleDate').value;
-            const time = document.getElementById('inputScheduleTime').value;
-            const loc = document.getElementById('inputScheduleLoc').value;
-
-            const item = applicantsData.find(a => a.id === activeModalApplicantId);
-            if (item) {
-                item.scheduleDate = date;
-                item.scheduleTime = time;
-                item.scheduleLoc = loc;
-                renderAdminTable();
-                if (currentRole === 'USER') updateUserViewState();
-                saveApplicantToFirestore(item);
-                showToast(`Jadwal Asesmen disimpan!`);
-            }
-            closeModal('modalSchedule');
-        }
-
-        function openGelombangModal() {
-            const modal = document.getElementById('modalGelombang');
-            updateWaveModalControls();
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            lucide.createIcons();
-        }
-
-        function updateWaveModalControls() {
-            const select = document.getElementById('inputGelombangSelect');
-            if (!select) return;
-
-            select.innerHTML = wavesList.map(w => `<option value="${w.id}" ${w.id === selectedWaveId ? 'selected' : ''}>${w.name}</option>`).join('');
-            
-            const currWave = wavesList.find(w => w.id === selectedWaveId) || wavesList[0];
-            if (currWave) {
-                document.getElementById('inputGelombangName').value = currWave.name;
-                document.getElementById('inputGelombangStartDate').value = currWave.startDate;
-                document.getElementById('inputGelombangEndDate').value = currWave.endDate;
-                document.getElementById('inputGelombangQuota').value = currWave.totalQuota;
-                document.getElementById('inputGelombangFee').value = currWave.fee;
-                document.getElementById('inputGelombangStatus').value = currWave.status;
-
-                document.getElementById('modalQuotaSummary').innerText = `Terisi: ${applicantsData.length} dari ${currWave.totalQuota}`;
-            }
-
-            if (document.getElementById('inputBankName')) {
-                document.getElementById('inputBankName').value = bankSettings.bankName;
-                document.getElementById('inputBankHolder').value = bankSettings.bankHolder;
-                document.getElementById('inputAccountNo').value = bankSettings.accountNo;
-            }
-        }
-
-        function saveGelombangSetting() {
-            const currWave = wavesList.find(w => w.id === selectedWaveId);
-            if (currWave) {
-                currWave.name = document.getElementById('inputGelombangName').value;
-                currWave.startDate = document.getElementById('inputGelombangStartDate').value;
-                currWave.endDate = document.getElementById('inputGelombangEndDate').value;
-                currWave.totalQuota = parseInt(document.getElementById('inputGelombangQuota').value);
-                currWave.fee = parseInt(document.getElementById('inputGelombangFee').value);
-                currWave.status = document.getElementById('inputGelombangStatus').value;
-
-                if (document.getElementById('inputBankName')) {
-                    bankSettings.bankName = document.getElementById('inputBankName').value || bankSettings.bankName;
-                    bankSettings.bankHolder = document.getElementById('inputBankHolder').value || bankSettings.bankHolder;
-                    bankSettings.accountNo = document.getElementById('inputAccountNo').value || bankSettings.accountNo;
-                }
-
-                updateBankDisplay();
-                updateWaveDisplay();
-                saveSettingsToFirestore();
-                showToast("Pengaturan Gelombang Disimpan!");
-            }
-            closeModal('modalGelombang');
-        }
-
-        function renderAsesmenCandidates() {
-            const container = document.getElementById('asesmenCandidateList');
-            if (!container) return;
-
-            const readyCandidates = applicantsData.filter(a => a.paymentStatus === 'VERIFIED');
-            if (readyCandidates.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 italic p-4 text-center">Belum ada calon murid siap diuji.</p>`;
-                return;
-            }
-
-            if (!selectedAsesmenCandidateId && readyCandidates.length > 0) {
-                selectedAsesmenCandidateId = readyCandidates[0].id;
-            }
-
-            container.innerHTML = readyCandidates.map(c => `
-                <div data-id="${c.id}" onclick="selectAsesmenCandidate('${c.id}')" class="p-3.5 rounded-xl border transition-all cursor-pointer ${c.id === selectedAsesmenCandidateId ? 'bg-emerald-50 border-emerald-500 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'}">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-bold text-xs text-slate-900">${c.name}</p>
-                            <p class="text-[10px] text-slate-500 font-mono">${c.id} | Wali: ${c.ayah || '-'}</p>
-                        </div>
-                        <span class="text-[9px] px-2 py-0.5 rounded font-bold ${c.scoreCompleted ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                            ${c.scoreCompleted ? 'Selesai' : 'Siap'}
-                        </span>
-                    </div>
-                </div>
-            `).join('');
-
-            if (selectedAsesmenCandidateId) selectAsesmenCandidate(selectedAsesmenCandidateId);
-        }
-
-        function selectAsesmenCandidate(id) {
-            selectedAsesmenCandidateId = id;
-            const item = applicantsData.find(a => a.id === id);
-            if (!item) return;
-
-            // Sinkronisasi highlight warna hijau di panel daftar kartu kiri
-            const cards = document.querySelectorAll('#asesmenCandidateList > div');
-            cards.forEach(card => {
-                if (card.getAttribute('data-id') === id) {
-                    card.className = "p-3.5 rounded-xl border transition-all cursor-pointer bg-emerald-50 border-emerald-500 shadow-sm";
-                } else {
-                    card.className = "p-3.5 rounded-xl border transition-all cursor-pointer bg-white border-slate-200 hover:border-slate-300";
-                }
-            });
-
-            document.getElementById('asesmenTargetName').innerText = item.name;
-            document.getElementById('asesmenTargetDetail').innerText = `No. Reg: ${item.id} | Wali: ${item.ayah || '-'}`;
-            document.getElementById('asesmenStatusBadge').innerText = item.scoreCompleted ? `Nilai: ${item.totalScore}` : 'Siap Diuji';
-
-            document.getElementById('scoreMotorik').value = item.scoreMotorik || 85;
-            document.getElementById('scoreBahasa').value = item.scoreBahasa || 90;
-            document.getElementById('scoreHijaiyah').value = item.scoreHijaiyah || 88;
-            document.getElementById('scoreJilid').value = item.jilidResult || 'Tartili Jilid 3';
-            document.getElementById('scoreKomitmen').value = item.scoreKomitmen || 95;
-            document.getElementById('scoreKesepahaman').value = item.scoreKesepahaman || 92;
-            document.getElementById('asesmenNotes').value = item.notes || 'Anak aktif dan siap mengikuti program madrasah.';
-            document.getElementById('asesmenRecommendation').value = item.recommendation || 'Lulus';
-        }
-
-        function handleAsesmenSubmit(e) {
-            e.preventDefault();
-            const item = applicantsData.find(a => a.id === selectedAsesmenCandidateId);
-            if (!item) return;
-
-            const m = parseFloat(document.getElementById('scoreMotorik').value || '0');
-            const b = parseFloat(document.getElementById('scoreBahasa').value || '0');
-            const h = parseFloat(document.getElementById('scoreHijaiyah').value || '0');
-            const jilid = document.getElementById('scoreJilid').value;
-            const k = parseFloat(document.getElementById('scoreKomitmen').value || '0');
-            const p = parseFloat(document.getElementById('scoreKesepahaman').value || '0');
-
-            item.scoreMotorik = m;
-            item.scoreBahasa = b;
-            item.scoreHijaiyah = h;
-            item.jilidResult = jilid;
-            item.scoreKomitmen = k;
-            item.scoreKesepahaman = p;
-            item.totalScore = parseFloat(((m + b + h + k + p) / 5).toFixed(1));
-            item.notes = document.getElementById('asesmenNotes').value;
-            item.recommendation = document.getElementById('asesmenRecommendation').value;
-            item.scoreCompleted = true;
-
-            showToast(`Asesmen ${item.name} Disimpan!`);
-            renderAsesmenCandidates();
-            renderAdminTable();
-            saveApplicantToFirestore(item);
-        }
-
-        function setFinalStatus(id, status) {
-            const item = applicantsData.find(a => a.id === id);
-            if (item) {
-                item.finalStatus = status;
-                renderAdminTable();
-                saveApplicantToFirestore(item);
-                showToast(`Status ${item.name} diubah ke: ${status}`);
-            }
-        }
-
-        let candidateToDelete = null;
-
-        function promptDeleteApplicant(id) {
-            const item = applicantsData.find(a => a.id === id);
-            if (!item) return;
-            candidateToDelete = id;
-            document.getElementById('deleteConfirmText').innerHTML = `Hapus data <strong>${item.name}</strong> (${item.id}) permanen dari database?`;
-            const modal = document.getElementById('modalConfirmDelete');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            lucide.createIcons();
-        }
-
-        function executeDeleteApplicant() {
-            if (!candidateToDelete) return;
-            const idToRemove = candidateToDelete;
-            deleteApplicantFromFirestore(idToRemove);
-            closeModal('modalConfirmDelete');
-            showToast('Data berhasil dihapus dari Cloud Database!');
-            candidateToDelete = null;
-        }
-
-        function exportDataToCSV() {
-            if (applicantsData.length === 0) {
-                showToast("Tidak ada data pendaftar untuk diekspor!", "error");
-                return;
-            }
-
-            // Siapkan Header Kolom CSV
-            const headers = [
-                "No. Registrasi", "Gelombang", "Nama Lengkap", "Panggilan", "NIK", "Jenis Kelamin",
-                "Tempat Lahir", "Tanggal Lahir", "Sekolah Asal", "Status ABK", "Detail ABK",
-                "Nama Ayah", "Pekerjaan Ayah", "Penghasilan Ayah", "Nama Ibu", "Pekerjaan Ibu", "Penghasilan Ibu",
-                "No. WhatsApp", "Alamat", "Status Pembayaran",
-                "Jadwal Asesmen", "Skor Motorik", "Skor Bahasa", "Skor Hijaiyah", "Penempatan Jilid",
-                "Skor Komitmen", "Skor Kesepahaman", "Total Skor", "Rekomendasi", "Keputusan Akhir"
-            ];
-
-            // Fungsi escape string agar tidak rusak kalau ada tanda koma atau kutip
-            const escapeCSV = (str) => {
-                if (str === null || str === undefined) return '""';
-                const stringified = String(str);
-                if (stringified.includes(',') || stringified.includes('"') || stringified.includes('\n')) {
-                    return `"${stringified.replace(/"/g, '""')}"`;
-                }
-                return `"${stringified}"`;
-            };
-
-            let csvContent = headers.join(",") + "\n";
-
-            // Mapping Data Pendaftar
-            applicantsData.forEach(user => {
-                const waveName = wavesList.find(w => w.id === user.waveId)?.name || user.waveId;
-                
-                const row = [
-                    user.id, 
-                    waveName, 
-                    user.name, 
-                    user.nickname || "-", 
-                    `'${user.nik || "-"}`, // Tambah kutip 1 agar Excel tidak merusak format 16 digit NIK
-                    user.gender, 
-                    user.birthPlace || "-", 
-                    user.birthDate || "-", 
-                    user.sekolahAsal || "-", 
-                    user.statusAbk || "-", 
-                    user.detailAbk || "-",
-                    user.ayah || "-", 
-                    user.pekerjaanAyah || "-", 
-                    user.penghasilanAyah || "-", 
-                    user.ibu || "-", 
-                    user.pekerjaanIbu || "-", 
-                    user.penghasilanIbu || "-",
-                    `'${user.wa || "-"}`, // Tambah kutip 1 untuk No WA
-                    user.alamat || "-", 
-                    user.paymentStatus,
-                    user.scheduleDate ? `${user.scheduleDate} ${user.scheduleTime}` : "Belum Dijadwalkan",
-                    user.scoreMotorik || 0, 
-                    user.scoreBahasa || 0, 
-                    user.scoreHijaiyah || 0, 
-                    user.jilidResult || "-",
-                    user.scoreKomitmen || 0, 
-                    user.scoreKesepahaman || 0, 
-                    user.totalScore || 0, 
-                    user.recommendation || "-", 
-                    user.finalStatus
-                ].map(escapeCSV).join(",");
-                
-                csvContent += row + "\n";
-            });
-
-            // Buat Blob dengan UTF-8 BOM agar rapi di MS Excel
-            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            
-            // Trigger Download
-            const link = document.createElement("a");
-            const dateStr = new Date().toISOString().split('T')[0];
-            link.setAttribute("href", url);
-            link.setAttribute("download", `Rekap_PMBM_Banjarmasin_${dateStr}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showToast("Rekapitulasi Excel / CSV berhasil diunduh!");
-        }
-
-        function printKartuUjian(userIdOverride) {
-            const targetId = (typeof userIdOverride === 'string') ? userIdOverride : loggedInUserId;
-            const user = applicantsData.find(a => a.id === targetId) || applicantsData[0];
-            if (!user) return;
-            const activeWave = wavesList.find(w => w.id === user.waveId) || getActiveWave();
-            const printContent = document.getElementById('printableCardContent');
-            
-            printContent.innerHTML = `
-                <!-- Kop Surat Official -->
-                <div class="flex flex-col items-center justify-center text-center pb-3 border-b-2 border-emerald-600 space-y-2">
-                    <img src="https://imgh.in/host/7sfkdf" alt="Logo MI" class="w-14 h-14 object-contain">
-                    <div>
-                        <h2 class="text-base font-black tracking-tight text-slate-900 uppercase">MI AL-IRSYAD AL-ISLAMIYYAH BANJARMASIN</h2>
-                        <p class="text-[10px] text-slate-600 font-semibold">Panitia Penerimaan Murid Baru Madrasah (PMBM)</p>
-                        <p class="text-[9px] text-slate-500">Jl. Sulawesi No. 5, Ps.Lama, Banjarmasin Tengah | WA: 08-5151-2121-56</p>
-                    </div>
-                </div>
-
-                <!-- Title -->
-                <div class="text-center py-2 bg-slate-50 border border-slate-200 rounded-lg">
-                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">KARTU PESERTA OBSERVASI & WAWANCARA PMBM</h3>
-                    <p class="text-[10px] text-emerald-700 font-bold">${activeWave.name}</p>
-                </div>
-
-                <!-- Grid Data Calon Murid & Jadwal -->
-                <div class="grid grid-cols-2 gap-3 text-[11px]">
-                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
-                        <h4 class="font-bold text-emerald-700 uppercase text-[10px] border-b pb-1">Data Calon Murid</h4>
-                        <p><strong>No. Reg:</strong> <span class="font-mono text-emerald-700">${user.id}</span></p>
-                        <p><strong>Nama:</strong> ${user.name}</p>
-                        <p><strong>NIK:</strong> ${user.nik || '-'}</p>
-                        <p><strong>TTL:</strong> ${user.birthPlace || 'Banjarmasin'}, ${formatDateReadable(user.birthDate)}</p>
-                        <p><strong>Wali:</strong> ${user.ayah || '-'}</p>
-                    </div>
-                    <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 space-y-1.5 flex flex-col justify-between">
-                        <div>
-                            <h4 class="font-bold text-blue-900 uppercase text-[10px] border-b border-blue-200 pb-1">Jadwal Asesmen</h4>
-                            <p class="mt-1"><strong>Tanggal:</strong> ${formatDateReadable(user.scheduleDate || '2027-08-22')}</p>
-                            <p><strong>Waktu:</strong> ${user.scheduleTime || '08:30 - 10:00 WITA'}</p>
-                            <p><strong>Lokasi:</strong> ${user.scheduleLoc || 'Aula Utama MI Al-Irsyad'}</p>
-                        </div>
-                        <span class="text-center bg-blue-600 text-white font-bold text-[9px] py-1 rounded">Wajib Hadir Tatap Muka</span>
-                    </div>
-                </div>
-
-                <!-- Tata Tertib -->
-                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-[10px] space-y-1">
-                    <h4 class="font-bold text-slate-800 uppercase">Petunjuk & Tata Tertib:</h4>
-                    <ol class="list-decimal list-inside text-slate-600 space-y-0.5">
-                        <li>Hadir 15 menit sebelum waktu observasi dimulai.</li>
-                        <li>Didampingi oleh orang tua / wali kandung.</li>
-                    </ol>
-                </div>
-
-                <!-- Footer Tanda Tangan & QR -->
-                <div class="flex justify-between items-end pt-3 border-t text-[11px]">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-slate-100 border rounded p-0.5 flex items-center justify-center mx-auto">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(user.id + '_' + user.name)}" alt="QR" class="w-full h-full object-contain">
-                        </div>
-                        <span class="text-[8px] font-mono text-slate-400 block mt-0.5">Autentikasi PMBM</span>
-                    </div>
-                    <div class="text-center space-y-6">
-                        <div>
-                            <p class="text-[10px] text-slate-500">Banjarmasin, ${formatDateReadable(new Date().toISOString().split('T')[0])}</p>
-                            <p class="text-[11px] font-bold text-slate-800">Panitia PMBM MI Al-Irsyad</p>
-                        </div>
-                        <div class="border-b border-slate-800 w-32 mx-auto"></div>
-                    </div>
-                </div>
-            `;
-            currentPrintDocTitle = `Kartu_Observasi_${user.id}`;
-            document.getElementById('modalPrintCard').classList.remove('hidden');
-            document.getElementById('modalPrintCard').classList.add('flex');
-            lucide.createIcons();
-        }
-
-        function printKartuKelulusan(userIdOverride) {
-            const targetId = (typeof userIdOverride === 'string') ? userIdOverride : loggedInUserId;
-            const user = applicantsData.find(a => a.id === targetId) || applicantsData[0];
-            if (!user) return;
-            const printContent = document.getElementById('printableCardContent');
-            
-            printContent.innerHTML = `
-                <!-- Kop Surat Official -->
-                <div class="flex flex-col items-center justify-center text-center pb-3 border-b-2 border-emerald-600 space-y-2">
-                    <img src="https://imgh.in/host/7sfkdf" alt="Logo MI" class="w-14 h-14 object-contain">
-                    <div>
-                        <h2 class="text-base font-black tracking-tight text-slate-900 uppercase">MI AL-IRSYAD AL-ISLAMIYYAH BANJARMASIN</h2>
-                        <p class="text-[10px] text-slate-600 font-semibold">Panitia Penerimaan Murid Baru Madrasah (PMBM)</p>
-                        <p class="text-[9px] text-slate-500">Jl. Sulawesi No. 5, Ps.Lama, Banjarmasin Tengah | Akreditasi B+</p>
-                    </div>
-                </div>
-
-                <div class="text-center py-2">
-                    <h3 class="text-sm font-black text-slate-900 uppercase border-b-2 border-slate-800 inline-block px-3 pb-0.5">SURAT KETERANGAN LULUS SELEKSI</h3>
-                    <p class="text-[10px] text-slate-500 mt-0.5">Nomor: 045/PAN-PMBM/MI-ALIRSYAD/2027</p>
-                </div>
-
-                <div class="text-[11px] leading-relaxed space-y-2.5 text-slate-800">
-                    <p>Kepala Madrasah Ibtidaiyah Al-Irsyad Al-Islamiyyah Kota Banjarmasin menerangkan bahwa:</p>
-
-                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
-                        <p><strong>Nomor Registrasi:</strong> <span class="font-mono text-emerald-700">${user.id}</span></p>
-                        <p><strong>Nama Calon Murid:</strong> ${user.name}</p>
-                        <p><strong>NIK Siswa:</strong> ${user.nik || '-'}</p>
-                        <p><strong>TTL:</strong> ${user.birthPlace || 'Banjarmasin'}, ${formatDateReadable(user.birthDate)}</p>
-                        <p><strong>Nama Orang Tua / Wali:</strong> ${user.ayah || '-'}</p>
-                        <p class="border-t pt-1 mt-1 text-emerald-800 font-bold"><strong>Rekomendasi Penempatan Jilid:</strong> ${user.jilidResult || 'Tartili Jilid 3'}</p>
-                    </div>
-
-                    <div class="p-3 bg-emerald-50 border border-emerald-300 rounded-lg text-center space-y-0.5">
-                        <span class="text-[10px] font-bold text-emerald-900 uppercase">Dinyatakan</span>
-                        <h4 class="text-xl font-black text-emerald-700">L U L U S</h4>
-                        <p class="text-[10px] text-emerald-800">Sebagai Calon Murid Baru MI Al-Irsyad Al-Islamiyyah T.A. 2027/2028</p>
-                    </div>
-                </div>
-
-                <div class="flex justify-between items-end pt-4 border-t text-[11px]">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-slate-100 border rounded p-0.5 flex items-center justify-center mx-auto">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent('SKL_LULUS_' + user.id)}" alt="QR" class="w-full h-full object-contain">
-                        </div>
-                        <span class="text-[8px] font-mono text-slate-400 block mt-0.5">Verifikasi SKL</span>
-                    </div>
-                    <div class="text-center space-y-6">
-                        <div>
-                            <p class="text-[10px] text-slate-500">Banjarmasin, ${formatDateReadable(new Date().toISOString().split('T')[0])}</p>
-                            <p class="text-[11px] font-bold text-slate-800">Kepala Madrasah</p>
-                        </div>
-                        <div class="border-b border-slate-800 w-36 mx-auto"></div>
-                        <p class="text-[10px] text-slate-600 font-bold">M. Rizky Nugraha. A.B.,S.H.</p>
-                    </div>
-                </div>
-            `;
-            currentPrintDocTitle = `SKL_Lulus_${user.id}`;
-            document.getElementById('modalPrintCard').classList.remove('hidden');
-            document.getElementById('modalPrintCard').classList.add('flex');
-            lucide.createIcons();
-        }
-
-        function executeBrowserPrint() {
-            window.print();
-        }
-
-        function openFormDetailModal(id) {
-            const item = applicantsData.find(a => a.id === id);
-            if (!item) return;
-
-            const modal = document.getElementById('modalFormDetail');
-            const badge = document.getElementById('formDetailStatusBadge');
-            const title = document.getElementById('formDetailSubTitle');
-            const content = document.getElementById('formDetailContent');
-
-            title.innerText = `${item.id} - ${item.name}`;
-
-            if (item.formCompleted) {
-                badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1';
-                badge.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Formulir Sudah Lengkap`;
-            } else {
-                badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1';
-                badge.innerHTML = `<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Formulir Belum Diisi / Dikirim`;
-            }
-
-            content.innerHTML = `
-                ${!item.formCompleted ? `
-                    <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center gap-2">
-                        <i data-lucide="info" class="w-5 h-5 text-amber-600 shrink-0"></i>
-                        <span>Calon murid / wali <strong>belum menekan Simpan & Kirim</strong> formulir pendaftaran. Rincian di bawah hanya data awal registrasi.</span>
-                    </div>
-                ` : `
-                    <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs flex items-center gap-2">
-                        <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600 shrink-0"></i>
-                        <span>Calon murid telah melengkapi dan mengirimkan seluruh berkas formulir pendaftaran secara valid.</span>
-                    </div>
-                `}
-
-                <!-- A. Data Calon Murid -->
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                    <h4 class="font-bold text-emerald-800 uppercase text-[11px] flex items-center gap-1 pb-1 border-b border-slate-200">
-                        <i data-lucide="user" class="w-3.5 h-3.5"></i> A. Data Calon Murid
-                    </h4>
-                    <div class="grid grid-cols-2 gap-2 text-slate-800">
-                        <p><strong>Nama Lengkap:</strong> ${item.name || '-'}</p>
-                        <p><strong>Nama Panggilan:</strong> ${item.nickname || '-'}</p>
-                        <p><strong>NIK Siswa:</strong> <span class="font-mono">${item.nik || '-'}</span></p>
-                        <p><strong>Jenis Kelamin:</strong> ${item.gender || '-'}</p>
-                        <p><strong>Tempat, Tgl Lahir:</strong> ${item.birthPlace || '-'}, ${item.birthDate ? formatDateReadable(item.birthDate) : '-'}</p>
-                        <p><strong>Sekolah Asal:</strong> ${item.sekolahAsal || '-'}</p>
-                        <p class="col-span-2"><strong>Status Kebutuhan Khusus:</strong> <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.statusAbk && item.statusAbk !== 'Non-ABK / Reguler' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-700'}">${item.statusAbk || 'Non-ABK / Reguler'}</span> ${item.detailAbk ? `(${item.detailAbk})` : ''}</p>
-                    </div>
-                </div>
-
-                <!-- B. Data Orang Tua / Wali -->
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                    <h4 class="font-bold text-emerald-800 uppercase text-[11px] flex items-center gap-1 pb-1 border-b border-slate-200">
-                        <i data-lucide="users" class="w-3.5 h-3.5"></i> B. Data Orang Tua / Wali
-                    </h4>
-                    <div class="grid grid-cols-2 gap-2 text-slate-800">
-                        <p><strong>Ayah Kandung:</strong> ${item.ayah || '-'}</p>
-                        <p><strong>Pekerjaan Ayah:</strong> ${item.pekerjaanAyah || '-'}</p>
-                        <p><strong>Penghasilan Ayah:</strong> ${item.penghasilanAyah || '-'}</p>
-                        <p><strong>No. WhatsApp:</strong> <span class="font-mono text-emerald-700 font-bold">${item.wa || '-'}</span></p>
-                        <p><strong>Ibu Kandung:</strong> ${item.ibu || '-'}</p>
-                        <p><strong>Pekerjaan Ibu:</strong> ${item.pekerjaanIbu || '-'}</p>
-                        <p><strong>Penghasilan Ibu:</strong> ${item.penghasilanIbu || '-'}</p>
-                        <p><strong>Wali (Jika Ada):</strong> ${item.wali ? `${item.wali} (${item.hubunganWali || 'Wali'})` : '-'}</p>
-                        <p class="col-span-2"><strong>Alamat Lengkap:</strong> ${item.alamat || '-'}</p>
-                    </div>
-                </div>
-
-                <!-- C. Berkas Persyaratan Terlampir -->
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                    <h4 class="font-bold text-emerald-800 uppercase text-[11px] flex items-center gap-1 pb-1 border-b border-slate-200">
-                        <i data-lucide="file-check" class="w-3.5 h-3.5"></i> C. Berkas Persyaratan Terlampir
-                    </h4>
-                    <div class="grid grid-cols-3 gap-2 pt-1">
-                        <div class="p-2 bg-white rounded-lg border border-slate-200 text-center">
-                            <p class="font-bold text-[10px] text-slate-500 mb-1">Kartu Keluarga (KK)</p>
-                            ${item.kkFileBase64 || item.kkFileName ? `
-                                <button type="button" onclick="window.previewBase64File('${item.kkFileBase64}')" class="px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[10px] font-bold hover:bg-emerald-100 flex items-center justify-center gap-1 w-full">
-                                    <i data-lucide="file-text" class="w-3 h-3"></i> Buka KK
-                                </button>
-                            ` : `<span class="text-[10px] text-slate-400 italic">Belum Ada</span>`}
-                        </div>
-                        <div class="p-2 bg-white rounded-lg border border-slate-200 text-center">
-                            <p class="font-bold text-[10px] text-slate-500 mb-1">Akta Kelahiran</p>
-                            ${item.aktaFileBase64 || item.aktaFileName ? `
-                                <button type="button" onclick="window.previewBase64File('${item.aktaFileBase64}')" class="px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[10px] font-bold hover:bg-emerald-100 flex items-center justify-center gap-1 w-full">
-                                    <i data-lucide="file-text" class="w-3 h-3"></i> Buka Akta
-                                </button>
-                            ` : `<span class="text-[10px] text-slate-400 italic">Belum Ada</span>`}
-                        </div>
-                        <div class="p-2 bg-white rounded-lg border border-slate-200 text-center">
-                            <p class="font-bold text-[10px] text-slate-500 mb-1">Surat Medis ABK</p>
-                            ${item.abkSuratBase64 || item.abkSuratName ? `
-                                <button type="button" onclick="window.previewBase64File('${item.abkSuratBase64}')" class="px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[10px] font-bold hover:bg-amber-100 flex items-center justify-center gap-1 w-full">
-                                    <i data-lucide="file-plus" class="w-3 h-3"></i> Buka Medis
-                                </button>
-                            ` : `<span class="text-[10px] text-slate-400 italic">-</span>`}
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            lucide.createIcons();
-        }
-
         function closeModal(modalId) {
-            const m = document.getElementById(modalId);
-            if (m) {
-                m.classList.add('hidden');
-                m.classList.remove('flex');
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
             }
-        }
-
-        function copyAccountNo() {
-            navigator.clipboard.writeText(bankSettings.accountNo);
-            showToast(`No. Rekening ${bankSettings.accountNo} disalin!`);
         }
 
         function formatDateReadable(dateStr) {
             if (!dateStr) return '-';
             try {
-                return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                    return `${parseInt(parts[2])} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
+                }
+                return dateStr;
             } catch (e) {
                 return dateStr;
             }
         }
 
-        function getInitials(name) {
-            if (!name) return 'MI';
-            const parts = name.trim().split(' ');
-            if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-            return name.substring(0, 2).toUpperCase();
+        function getActiveWave() {
+            return wavesList.find(w => w.status === 'OPEN') || wavesList[0] || null;
         }
 
         function togglePasswordVisibility(inputId, btn) {
@@ -2759,11 +1670,1306 @@
             if (!input) return;
             const isPassword = input.type === 'password';
             input.type = isPassword ? 'text' : 'password';
-            btn.innerHTML = isPassword 
-                ? '<i data-lucide="eye-off" class="w-4 h-4"></i>' 
-                : '<i data-lucide="eye" class="w-4 h-4"></i>';
+            btn.innerHTML = `<i data-lucide="${isPassword ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>`;
             if (window.lucide) lucide.createIcons();
         }
+
+        function copyAccountNo() {
+            const no = bankSettings.accountNo || "7300-402-091";
+            const tempInput = document.createElement("input");
+            tempInput.value = no;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            showToast("Nomor rekening berhasil disalin!");
+        }
+
+        function updateBankDisplay() {
+            const nameEl = document.getElementById('displayBankName');
+            const holderEl = document.getElementById('displayBankHolder');
+            const noEl = document.getElementById('displayBankNo');
+            if (nameEl) nameEl.innerText = bankSettings.bankName;
+            if (holderEl) holderEl.innerText = bankSettings.bankHolder;
+            if (noEl) noEl.innerText = bankSettings.accountNo;
+        }
+
+        function updateWaveDisplay() {
+            const hasOpen = wavesList.some(w => w.status === 'OPEN');
+            const activeWave = getActiveWave();
+            const quota = activeWave ? activeWave.totalQuota : 120;
+            const remaining = Math.max(0, quota - applicantsData.length);
+
+            const badge = document.getElementById('loginWaveBadge');
+            const quotaEl = document.getElementById('loginQuotaCount');
+            const regBtn = document.getElementById('btnOpenRegister');
+            const regStatus = document.getElementById('regStatusLabel');
+
+            if (hasOpen && activeWave) {
+                if (badge) {
+                    badge.className = "bg-[#2D7B64] text-white border-none text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider";
+                    badge.innerText = `${activeWave.name} (${formatDateReadable(activeWave.startDate)} - ${formatDateReadable(activeWave.endDate)})`;
+                }
+                if (quotaEl) quotaEl.innerText = remaining;
+                if (regBtn) {
+                    regBtn.disabled = false;
+                    regBtn.className = "text-xs font-bold text-emerald-600 hover:underline block mx-auto mt-1 cursor-pointer";
+                    regBtn.innerText = "+ Daftar Akun Calon Murid Baru";
+                }
+                if (regStatus) regStatus.innerText = "Belum punya akun calon murid?";
+            } else {
+                if (badge) {
+                    badge.className = "bg-rose-600 text-white border border-rose-300 text-xs font-black px-4 py-2 rounded-full uppercase tracking-wider animate-pulse";
+                    badge.innerText = "⛔ PENDAFTARAN DITUTUP (Semua Gelombang Berakhir)";
+                }
+                if (quotaEl) quotaEl.innerText = 0;
+                if (regBtn) {
+                    regBtn.disabled = true;
+                    regBtn.className = "text-xs font-bold text-rose-500 block mx-auto mt-1 cursor-not-allowed opacity-80";
+                    regBtn.innerText = "⛔ Pendaftaran Calon Murid Baru Ditutup";
+                }
+                if (regStatus) regStatus.innerText = "Penerimaan murid baru saat ini belum dibuka.";
+            }
+
+            const userWaveBadge = document.getElementById('userWaveBadge');
+            const userQuotaRemaining = document.getElementById('userQuotaRemaining');
+            const userQuotaTotal = document.getElementById('userQuotaTotal');
+            if (userWaveBadge && activeWave) userWaveBadge.innerText = activeWave.name;
+            if (userQuotaRemaining) userQuotaRemaining.innerText = remaining;
+            if (userQuotaTotal && activeWave) userQuotaTotal.innerText = quota;
+        }
+
+        // ==========================================================
+        // 2. SISTEM NAVIGASI VIEW & MANAJEMEN ROLE PENGGUNA
+        // ==========================================================
+        function switchView(role) {
+            currentRole = role;
+            localStorage.setItem('pmbm_currentRole', role);
+            if (role === 'USER') {
+                localStorage.setItem('pmbm_userId', loggedInUserId);
+            }
+
+            const views = {
+                'LOGIN': document.getElementById('viewLogin'),
+                'USER': document.getElementById('viewUser'),
+                'ADMIN': document.getElementById('viewAdmin'),
+                'ASESMEN': document.getElementById('viewAsesmen')
+            };
+
+            Object.keys(views).forEach(k => {
+                if (views[k]) {
+                    if (k === role) {
+                        views[k].classList.remove('hidden');
+                    } else {
+                        views[k].classList.add('hidden');
+                    }
+                }
+            });
+
+            const headerDetails = document.getElementById('headerUserDetails');
+            const activeUser = document.getElementById('activeUserLabel');
+            const activeRole = document.getElementById('activeRoleLabel');
+            const avatar = document.getElementById('userAvatar');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            if (role === 'LOGIN') {
+                isLoggedIn = false;
+                if (headerDetails) headerDetails.classList.add('hidden');
+                if (avatar) avatar.innerText = '?';
+                if (logoutBtn) logoutBtn.classList.add('hidden');
+            } else {
+                isLoggedIn = true;
+                if (headerDetails) headerDetails.classList.remove('hidden');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+
+                if (role === 'USER') {
+                    const student = applicantsData.find(a => a.id === loggedInUserId) || applicantsData[0];
+                    if (activeUser) activeUser.innerText = student ? student.name : 'Calon Murid';
+                    if (activeRole) activeRole.innerText = `Calon Siswa (${loggedInUserId})`;
+                    if (avatar) avatar.innerText = '🎓';
+                    updateUserViewState();
+                } else if (role === 'ADMIN') {
+                    if (activeUser) activeUser.innerText = 'Super Admin PMBM';
+                    if (activeRole) activeRole.innerText = 'Administrator Utama';
+                    if (avatar) avatar.innerText = '⚙️';
+                    renderAdminTable();
+                } else if (role === 'ASESMEN') {
+                    if (activeUser) activeUser.innerText = 'Tim Evaluator & Penguji';
+                    if (activeRole) activeRole.innerText = 'Admin Asesmen Terpadu';
+                    if (avatar) avatar.innerText = '📋';
+                    renderAsesmenCandidates();
+                }
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function showLoginView() {
+            switchView('LOGIN');
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('pmbm_currentRole');
+            localStorage.removeItem('pmbm_userId');
+            if (!window.is_preview && window.auth && window.signOut) {
+                window.signOut(window.auth).catch(() => {});
+            }
+            switchView('LOGIN');
+            showToast("Anda telah keluar dari sistem.");
+        }
+
+        function switchLoginTab(tab) {
+            const tabUser = document.getElementById('tabUserLogin');
+            const tabStaff = document.getElementById('tabStaffLogin');
+            const formUser = document.getElementById('formUserLogin');
+            const formStaff = document.getElementById('formStaffLogin');
+
+            if (tab === 'USER') {
+                tabUser.className = "w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-emerald-600 text-emerald-700 transition";
+                tabStaff.className = "w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition";
+                formUser.classList.remove('hidden');
+                formStaff.classList.add('hidden');
+            } else {
+                tabStaff.className = "w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-slate-900 text-slate-900 transition";
+                tabUser.className = "w-1/2 py-2.5 text-xs font-bold text-center border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition";
+                formStaff.classList.remove('hidden');
+                formUser.classList.add('hidden');
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function quickDemoLogin(targetRole) {
+            if (targetRole === 'USER') {
+                const rayyan = applicantsData.find(a => a.id === 'PMBM-2027-001') || applicantsData[0];
+                loggedInUserId = rayyan ? rayyan.id : 'PMBM-2027-001';
+                switchView('USER');
+                showToast(`Login demo berhasil sebagai: ${rayyan ? rayyan.name : 'Calon Murid'}`);
+            } else if (targetRole === 'ADMIN') {
+                switchView('ADMIN');
+                showToast("Login demo berhasil sebagai Admin Utama");
+            } else if (targetRole === 'ASESMEN') {
+                switchView('ASESMEN');
+                showToast("Login demo berhasil sebagai Tim Evaluator Asesmen");
+            }
+        }
+
+        function handleUserLoginSubmit(e) {
+            e.preventDefault();
+            const regOrNik = document.getElementById('loginUserReg').value.trim();
+            const waPass = document.getElementById('loginUserPass').value.trim();
+
+            const matched = applicantsData.find(a => 
+                (a.id.toLowerCase() === regOrNik.toLowerCase() || (a.nik && a.nik === regOrNik)) &&
+                (!a.wa || a.wa.includes(waPass) || waPass.includes(a.wa) || window.is_preview)
+            );
+
+            if (matched) {
+                loggedInUserId = matched.id;
+                switchView('USER');
+                showToast(`Selamat datang, Wali dari ${matched.name}!`);
+            } else {
+                showToast("No. Registrasi / NIK atau No. WA tidak ditemukan!", "error");
+            }
+        }
+
+        async function handleStaffLoginSubmit(e) {
+            e.preventDefault();
+            const userOrEmail = document.getElementById('loginStaffUser').value.trim();
+            const pass = document.getElementById('loginStaffPass').value.trim();
+
+            if (window.is_preview) {
+                if (userOrEmail.toLowerCase().includes('asesmen') || userOrEmail.toLowerCase().includes('evaluator')) {
+                    switchView('ASESMEN');
+                    showToast("Login Staff Asesmen Berhasil!");
+                } else {
+                    switchView('ADMIN');
+                    showToast("Login Admin Utama Berhasil!");
+                }
+                return;
+            }
+
+            try {
+                const fullEmail = userOrEmail.includes('@') ? userOrEmail : `${userOrEmail}@pmbm.com`;
+                const userCred = await window.signInWithEmailAndPassword(window.auth, fullEmail, pass);
+                const uid = userCred.user.uid;
+
+                const userDocRef = window.doc(window.db, "users", uid);
+                const userDocSnap = await window.getDoc(userDocRef);
+
+                if (userDocSnap.exists() && userDocSnap.data().role === 'ASESMEN') {
+                    switchView('ASESMEN');
+                    showToast("Login Evaluator Asesmen Berhasil!");
+                } else {
+                    switchView('ADMIN');
+                    showToast("Login Admin Utama Berhasil!");
+                }
+            } catch (err) {
+                console.error("Staff Login Error:", err);
+                showToast("Email atau Kata Sandi Staff salah!", "error");
+            }
+        }
+
+        // ==========================================================
+        // 3. REGISTRASI CALON MURID BARU (VALIDASI DUPLIKAT & KONTINU)
+        // ==========================================================
+        function openRegisterModal() {
+            const hasOpen = wavesList.some(w => w.status === 'OPEN');
+            if (!hasOpen) {
+                showToast("Pendaftaran ditutup karena seluruh gelombang telah berakhir!", "error");
+                return;
+            }
+            const modal = document.getElementById('modalRegisterAccount');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
+        function handleNewAccountRegister(e) {
+            e.preventDefault();
+            const activeWave = getActiveWave();
+            if (!activeWave || activeWave.status !== 'OPEN') {
+                showToast("Maaf, pendaftaran sedang ditutup!", "error");
+                closeModal('modalRegisterAccount');
+                return;
+            }
+
+            const nama = document.getElementById('regNamaMurid').value.trim();
+            const nik = document.getElementById('regNikMurid').value.trim();
+            const ortu = document.getElementById('regNamaOrtu').value.trim();
+            const wa = document.getElementById('regWaOrtu').value.trim();
+
+            // Pengecekan NIK & No WA duplikat
+            const duplicate = applicantsData.find(a => a.nik === nik || (a.wa && a.wa === wa));
+            if (duplicate) {
+                showToast(`Peringatan: NIK atau No. WA sudah terdaftar dengan No. Reg ${duplicate.id}! Silakan langsung login.`, "warning");
+                return;
+            }
+
+            globalCounter++;
+            const newRegId = `PMBM-2027-${String(globalCounter).padStart(3, '0')}`;
+
+            const newApplicant = {
+                id: newRegId,
+                waveId: activeWave.id,
+                name: nama,
+                nickname: nama.split(' ')[0] || nama,
+                gender: 'Laki-laki',
+                birthPlace: 'Banjarmasin',
+                birthDate: '2019-01-01',
+                sekolahAsal: '-',
+                statusAbk: 'Non-ABK / Reguler',
+                detailAbk: '',
+                nik: nik,
+                ayah: ortu,
+                pekerjaanAyah: '-',
+                penghasilanAyah: '2 - 5 Juta',
+                ibu: '-',
+                pekerjaanIbu: '-',
+                penghasilanIbu: '< 2 Juta',
+                wa: wa,
+                alamat: 'Banjarmasin',
+                paymentStatus: 'UNPAID',
+                paymentFile: null,
+                paymentFileUrl: null,
+                formCompleted: false,
+                kkFileName: null,
+                kkFileBase64: null,
+                aktaFileName: null,
+                aktaFileBase64: null,
+                abkSuratName: null,
+                abkSuratBase64: null,
+                scheduleDate: null,
+                scheduleTime: null,
+                scheduleLoc: null,
+                finalStatus: 'MENUNGGU',
+                scoreCompleted: false
+            };
+
+            applicantsData.unshift(newApplicant);
+            saveApplicantToFirestore(newApplicant);
+            saveSettingsToFirestore();
+
+            closeModal('modalRegisterAccount');
+            e.target.reset();
+
+            loggedInUserId = newRegId;
+            switchView('USER');
+            showToast(`Akun berhasil dibuat! No. Reg: ${newRegId}`);
+        }
+
+        // ==========================================================
+        // 4. KENDALI DASHBOARD CALON MURID (USER VIEW)
+        // ==========================================================
+        function toggleAbkDetailInput() {
+            const sel = document.getElementById('inputStatusAbk');
+            const wrap = document.getElementById('wrapperDetailAbk');
+            if (sel && wrap) {
+                if (sel.value.startsWith('ABK')) {
+                    wrap.classList.remove('hidden');
+                } else {
+                    wrap.classList.add('hidden');
+                }
+            }
+        }
+
+        function demoUnlockForm() {
+            const user = applicantsData.find(a => a.id === loggedInUserId);
+            if (user) {
+                user.paymentStatus = 'VERIFIED';
+                saveApplicantToFirestore(user);
+                updateUserViewState();
+                showToast("Simulasi bypass: Pembayaran Rp 200k berhasil diverifikasi!");
+            }
+        }
+
+        function handlePaymentProofUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 800 * 1024) {
+                showToast("Gagal: Ukuran file bukti transfer maksimal 800KB!", "error");
+                e.target.value = "";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const user = applicantsData.find(a => a.id === loggedInUserId);
+                if (user) {
+                    user.paymentStatus = 'PENDING';
+                    user.paymentFile = file.name;
+                    user.paymentFileUrl = evt.target.result;
+                    user.paymentTime = new Date().toLocaleString('id-ID');
+                    saveApplicantToFirestore(user);
+                    updateUserViewState();
+                    showToast("Bukti pembayaran berhasil diunggah! Menunggu verifikasi admin.");
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function previewPaymentFile() {
+            const user = applicantsData.find(a => a.id === loggedInUserId);
+            if (user && user.paymentFileUrl) {
+                const modal = document.getElementById('modalPaymentProof');
+                const img = document.getElementById('modalPaymentImage');
+                const ext = document.getElementById('modalPaymentExternalLink');
+                const actions = document.getElementById('modalPaymentActions');
+                if (img) img.src = user.paymentFileUrl;
+                if (ext) { ext.href = user.paymentFileUrl; ext.classList.remove('hidden'); }
+                if (actions) actions.classList.add('hidden');
+                if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+                if (window.lucide) lucide.createIcons();
+            } else {
+                showToast("Belum ada bukti pembayaran diunggah.", "warning");
+            }
+        }
+
+        function updateUserViewState() {
+            const user = applicantsData.find(a => a.id === loggedInUserId);
+            if (!user) return;
+
+            // Sambutan dinamis
+            const greeting = document.getElementById('userWelcomeGreeting');
+            if (greeting) {
+                greeting.innerText = `Selamat Datang, Bapak/Ibu Wali dari ${user.name}!`;
+            }
+
+            // Status Badge
+            const statusBadge = document.getElementById('userStatusBadge');
+            if (statusBadge) {
+                if (user.paymentStatus === 'UNPAID') {
+                    statusBadge.className = "inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-slate-900";
+                    statusBadge.innerText = "MENUNGGU PEMBAYARAN";
+                } else if (user.paymentStatus === 'PENDING') {
+                    statusBadge.className = "inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-blue-500 text-white";
+                    statusBadge.innerText = "VERIFIKASI PEMBAYARAN";
+                } else if (user.paymentStatus === 'VERIFIED') {
+                    statusBadge.className = "inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500 text-white";
+                    statusBadge.innerText = user.formCompleted ? "BERKAS LENGKAP & TERVERIFIKASI" : "TERVERIFIKASI & FORM AKTIF";
+                }
+            }
+
+            // Pipeline 5-Step
+            const step2Badge = document.getElementById('step2Badge');
+            const step2Sub = document.getElementById('step2Subtext');
+            const step3Badge = document.getElementById('step3Badge');
+            const step3Sub = document.getElementById('step3Subtext');
+            const step4Badge = document.getElementById('step4Badge');
+            const step4Sub = document.getElementById('step4Subtext');
+            const step5Badge = document.getElementById('step5Badge');
+            const step5Sub = document.getElementById('step5Subtext');
+
+            if (user.paymentStatus === 'VERIFIED') {
+                if (step2Badge) { step2Badge.className = "w-7 h-7 rounded-full bg-emerald-400 text-slate-900 font-bold flex items-center justify-center text-xs mb-1.5"; step2Badge.innerText = "✓"; }
+                if (step2Sub) step2Sub.innerText = "Lunas";
+            } else if (user.paymentStatus === 'PENDING') {
+                if (step2Badge) { step2Badge.className = "w-7 h-7 rounded-full bg-amber-400 text-slate-900 font-bold flex items-center justify-center text-xs mb-1.5"; step2Badge.innerText = "⏳"; }
+                if (step2Sub) step2Sub.innerText = "Diverifikasi";
+            }
+
+            if (user.formCompleted) {
+                if (step3Badge) { step3Badge.className = "w-7 h-7 rounded-full bg-emerald-400 text-slate-900 font-bold flex items-center justify-center text-xs mb-1.5"; step3Badge.innerText = "✓"; }
+                if (step3Sub) step3Sub.innerText = "Terkirim";
+            } else if (user.paymentStatus === 'VERIFIED') {
+                if (step3Badge) { step3Badge.className = "w-7 h-7 rounded-full bg-blue-400 text-slate-900 font-bold flex items-center justify-center text-xs mb-1.5"; step3Badge.innerText = "3"; }
+                if (step3Sub) step3Sub.innerText = "Silakan Isi";
+            }
+
+            if (user.scheduleDate) {
+                if (step4Badge) { step4Badge.className = "w-7 h-7 rounded-full bg-emerald-400 text-slate-900 font-bold flex items-center justify-center text-xs mb-1.5"; step4Badge.innerText = "✓"; }
+                if (step4Sub) step4Sub.innerText = formatDateReadable(user.scheduleDate);
+            }
+
+            if (user.finalStatus && user.finalStatus !== 'MENUNGGU') {
+                if (step5Badge) { step5Badge.className = "w-7 h-7 rounded-full bg-emerald-400 text-slate-900 font-bold flex items-center justify-center text-xs mb-1.5"; step5Badge.innerText = "★"; }
+                if (step5Sub) step5Sub.innerText = user.finalStatus;
+            }
+
+            // Gembok Formulir
+            const overlay = document.getElementById('formLockOverlay');
+            if (overlay) {
+                if (user.paymentStatus === 'VERIFIED') {
+                    overlay.classList.add('opacity-0', 'pointer-events-none');
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
+                } else {
+                    overlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+                }
+            }
+
+            // Status Upload Bukti Bayar
+            const uploadBox = document.getElementById('paymentUploadBox');
+            const uploadedBox = document.getElementById('paymentUploadedBox');
+            const fileName = document.getElementById('paymentFileName');
+            const uploadTime = document.getElementById('paymentUploadedTime');
+
+            if (user.paymentFileUrl || user.paymentFile) {
+                if (uploadBox) uploadBox.classList.add('hidden');
+                if (uploadedBox) uploadedBox.classList.remove('hidden');
+                if (fileName) fileName.innerText = user.paymentFile || "bukti_transfer.jpg";
+                if (uploadTime) uploadTime.innerText = `Diunggah: ${user.paymentTime || 'Baru saja'}`;
+            } else {
+                if (uploadBox) uploadBox.classList.remove('hidden');
+                if (uploadedBox) uploadedBox.classList.add('hidden');
+            }
+
+            // Jadwal Asesmen
+            const schedPending = document.getElementById('schedulePendingBox');
+            const schedActive = document.getElementById('scheduleActiveBox');
+            if (user.scheduleDate) {
+                if (schedPending) schedPending.classList.add('hidden');
+                if (schedActive) schedActive.classList.remove('hidden');
+                const dEl = document.getElementById('userScheduleDate');
+                const tEl = document.getElementById('userScheduleTime');
+                const lEl = document.getElementById('userScheduleLoc');
+                if (dEl) dEl.innerText = formatDateReadable(user.scheduleDate);
+                if (tEl) tEl.innerText = `Pukul: ${user.scheduleTime || '08:30 WITA'}`;
+                if (lEl) lEl.innerText = `Lokasi: ${user.scheduleLoc || 'Aula Utama MI Al-Irsyad'}`;
+            } else {
+                if (schedPending) schedPending.classList.remove('hidden');
+                if (schedActive) schedActive.classList.add('hidden');
+            }
+
+            // Kartu Hasil Kelulusan
+            const resCard = document.getElementById('userResultCard');
+            const resContent = document.getElementById('userResultContent');
+            if (user.finalStatus && user.finalStatus !== 'MENUNGGU') {
+                if (resCard) resCard.classList.remove('hidden');
+                if (resContent) {
+                    if (user.finalStatus === 'LULUS') {
+                        resContent.className = "text-center p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-2";
+                        resContent.innerHTML = `
+                            <i data-lucide="award" class="w-8 h-8 text-emerald-600 mx-auto"></i>
+                            <h4 class="font-black text-sm text-emerald-800">SELAMAT! ANDA DINYATAKAN LULUS</h4>
+                            <p class="text-[11px] text-emerald-700">Silakan unduh Surat Keterangan Lulus (SKL) resmi untuk registrasi ulang.</p>
+                            <button onclick="printSkl('${user.id}')" class="mt-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 mx-auto">
+                                <i data-lucide="printer" class="w-4 h-4"></i> Cetak Surat Kelulusan (SKL)
+                            </button>
+                        `;
+                    } else {
+                        resContent.className = "text-center p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 space-y-2";
+                        resContent.innerHTML = `
+                            <i data-lucide="x-circle" class="w-8 h-8 text-rose-600 mx-auto"></i>
+                            <h4 class="font-black text-sm text-rose-800">MOHON MAAF, BELUM DAPAT DITERIMA</h4>
+                            <p class="text-[11px] text-rose-700">Terima kasih atas partisipasi Anda dalam PMBM Tahun Ajaran 2027/2028.</p>
+                        `;
+                    }
+                }
+            } else {
+                if (resCard) resCard.classList.add('hidden');
+            }
+
+            // Sinkronisasi data form agar tidak menimpa jika sedang fokus
+            const setIfPresent = (id, val) => {
+                const el = document.getElementById(id);
+                if (el && document.activeElement !== el && val !== undefined && val !== null) {
+                    el.value = val;
+                }
+            };
+
+            setIfPresent('inputNik', user.nik);
+            setIfPresent('inputNamaLengkap', user.name);
+            setIfPresent('inputNamaPanggilan', user.nickname);
+            setIfPresent('inputJenisKelamin', user.gender);
+            setIfPresent('inputTempatLahir', user.birthPlace);
+            setIfPresent('inputTglLahir', user.birthDate);
+            setIfPresent('inputSekolahAsal', user.sekolahAsal);
+            setIfPresent('inputStatusAbk', user.statusAbk);
+            setIfPresent('inputDetailAbk', user.detailAbk);
+            setIfPresent('inputNamaAyah', user.ayah);
+            setIfPresent('inputPekerjaanAyah', user.pekerjaanAyah);
+            setIfPresent('inputPenghasilanAyah', user.penghasilanAyah);
+            setIfPresent('inputNamaIbu', user.ibu);
+            setIfPresent('inputPekerjaanIbu', user.pekerjaanIbu);
+            setIfPresent('inputPenghasilanIbu', user.penghasilanIbu);
+            setIfPresent('inputNoWa', user.wa);
+            setIfPresent('inputNamaWali', user.wali);
+            setIfPresent('inputPekerjaanWali', user.pekerjaanWali);
+            setIfPresent('inputHubunganWali', user.hubunganWali);
+            setIfPresent('inputAlamat', user.alamat);
+
+            toggleAbkDetailInput();
+
+            const kkStat = document.getElementById('kkFileStatus');
+            if (kkStat) kkStat.innerText = user.kkFileName ? `✓ Tersimpan: ${user.kkFileName}` : 'Belum ada file dipilih';
+
+            const aktaStat = document.getElementById('aktaFileStatus');
+            if (aktaStat) aktaStat.innerText = user.aktaFileName ? `✓ Tersimpan: ${user.aktaFileName}` : 'Belum ada file dipilih';
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const user = applicantsData.find(a => a.id === loggedInUserId);
+            if (!user) return;
+
+            captureCurrentFormValues(user);
+            user.formCompleted = true;
+            saveApplicantToFirestore(user);
+            updateUserViewState();
+            showToast("Formulir pendaftaran berhasil disimpan dan dikirim!");
+        }
+
+        // ==========================================================
+        // 5. KENDALI ADMIN UTAMA (TABEL, VERIFIKASI, JADWAL, GELOMBANG)
+        // ==========================================================
+        function filterAdminTable(filter) {
+            currentTableFilter = filter;
+            document.querySelectorAll('#filterAll, #filterPending, #filterVerified').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-emerald-500', 'font-black');
+            });
+            const activeBtn = document.getElementById(filter === 'ALL' ? 'filterAll' : (filter === 'PENDING' ? 'filterPending' : 'filterVerified'));
+            if (activeBtn) activeBtn.classList.add('ring-2', 'ring-emerald-500', 'font-black');
+            renderAdminTable();
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('adminTableBody');
+            if (!tbody) return;
+
+            const search = (document.getElementById('adminSearchInput')?.value || '').toLowerCase();
+            const waveFilter = document.getElementById('adminWaveFilter')?.value || 'ALL';
+
+            // Update statistik
+            const statTotal = document.getElementById('statTotal');
+            const statPending = document.getElementById('statPendingPay');
+            const statReady = document.getElementById('statReadyAssess');
+            const statPassed = document.getElementById('statPassed');
+
+            if (statTotal) statTotal.innerText = applicantsData.length;
+            if (statPending) statPending.innerText = applicantsData.filter(a => a.paymentStatus === 'PENDING').length;
+            if (statReady) statReady.innerText = applicantsData.filter(a => a.paymentStatus === 'VERIFIED' && a.formCompleted).length;
+            if (statPassed) statPassed.innerText = applicantsData.filter(a => a.finalStatus === 'LULUS').length;
+
+            // Filter data
+            const filtered = applicantsData.filter(app => {
+                const matchSearch = (app.name && app.name.toLowerCase().includes(search)) ||
+                                    (app.id && app.id.toLowerCase().includes(search)) ||
+                                    (app.ayah && app.ayah.toLowerCase().includes(search)) ||
+                                    (app.wa && app.wa.includes(search));
+                const matchWave = waveFilter === 'ALL' || app.waveId === waveFilter;
+                let matchStatus = true;
+                if (currentTableFilter === 'PENDING') matchStatus = app.paymentStatus === 'PENDING';
+                if (currentTableFilter === 'VERIFIED') matchStatus = app.paymentStatus === 'VERIFIED';
+                return matchSearch && matchWave && matchStatus;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400">Tidak ada data pendaftar yang cocok.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(app => {
+                // Status Bayar Tag
+                let payTag = `<span class="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-lg text-[11px] font-bold">Belum Bayar</span>`;
+                if (app.paymentStatus === 'PENDING') {
+                    payTag = `<button onclick="openPaymentModal('${app.id}')" class="px-2.5 py-1 bg-amber-100 text-amber-800 hover:bg-amber-200 rounded-lg text-[11px] font-bold flex items-center gap-1">
+                                <i data-lucide="clock" class="w-3.5 h-3.5"></i> Perlu Verifikasi
+                              </button>`;
+                } else if (app.paymentStatus === 'VERIFIED') {
+                    payTag = `<button onclick="openPaymentModal('${app.id}')" class="px-2 py-1 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 rounded-lg text-[11px] font-bold flex items-center gap-1">
+                                <i data-lucide="check" class="w-3 h-3"></i> Rp 200k Terverifikasi
+                              </button>`;
+                }
+
+                // Berkas Tag
+                const kkBtn = app.kkFileBase64 ? 
+                    `<button onclick="previewBase64File('${app.kkFileBase64}')" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 text-[10px] font-semibold flex items-center gap-0.5"><i data-lucide="file-text" class="w-3 h-3"></i> KK</button>` : 
+                    `<span class="text-slate-300 text-[10px]">-</span>`;
+                const aktaBtn = app.aktaFileBase64 ? 
+                    `<button onclick="previewBase64File('${app.aktaFileBase64}')" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300 text-[10px] font-semibold flex items-center gap-0.5"><i data-lucide="file-text" class="w-3 h-3"></i> Akta</button>` : 
+                    `<span class="text-slate-300 text-[10px]">-</span>`;
+                const abkBtn = app.abkSuratBase64 ? 
+                    `<button onclick="previewBase64File('${app.abkSuratBase64}')" class="px-2 py-0.5 bg-amber-50 hover:bg-amber-100 rounded border border-amber-300 text-amber-800 text-[10px] font-semibold flex items-center gap-0.5"><i data-lucide="file-plus" class="w-3 h-3"></i> Medis</button>` : '';
+
+                // Jadwal tag
+                const schedTag = app.scheduleDate ? 
+                    `<button onclick="openScheduleModal('${app.id}')" class="text-blue-600 hover:underline font-bold text-[11px] flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${formatDateReadable(app.scheduleDate)}</button>` : 
+                    `<button onclick="openScheduleModal('${app.id}')" class="text-slate-400 hover:text-blue-600 text-[11px] flex items-center gap-1"><i data-lucide="calendar-plus" class="w-3 h-3"></i> Atur Jadwal</button>`;
+
+                // Nilai Asesmen
+                const scoreTag = app.scoreCompleted ? 
+                    `<div><span class="font-black text-emerald-700">${app.totalScore || 90}</span> <span class="text-[10px] text-slate-500">(${app.recommendation || 'Lulus'})</span></div>` : 
+                    `<span class="text-slate-400 italic text-[11px]">Belum Diuji</span>`;
+
+                // Keputusan Akhir
+                const statusOptions = ['MENUNGGU', 'LULUS', 'TIDAK LULUS'].map(st => 
+                    `<option value="${st}" ${app.finalStatus === st ? 'selected' : ''}>${st === 'MENUNGGU' ? '⏳ Menunggu' : (st === 'LULUS' ? '✓ Lulus' : '✗ Tidak Lulus')}</option>`
+                ).join('');
+
+                // Tombol Cetak Dokumen Cerdas
+                let printBtn = '';
+                if (app.finalStatus === 'LULUS') {
+                    printBtn = `<button onclick="printSkl('${app.id}')" class="p-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg border border-emerald-200 transition" title="Cetak Surat Kelulusan (SKL)">
+                                    <i data-lucide="award" class="w-4 h-4"></i>
+                                </button>`;
+                } else if (app.scheduleDate) {
+                    printBtn = `<button onclick="printKartuUjian('${app.id}')" class="p-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg border border-blue-200 transition" title="Cetak Kartu Observasi">
+                                    <i data-lucide="printer" class="w-4 h-4"></i>
+                                </button>`;
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-3.5 font-mono font-bold text-slate-700">${app.id}</td>
+                        <td class="p-3.5">
+                            <p class="font-bold text-slate-900">${app.name}</p>
+                            <p class="text-[10px] text-slate-400">NIK: ${app.nik || '-'} | ${app.statusAbk || 'Non-ABK'}</p>
+                        </td>
+                        <td class="p-3.5">
+                            <p class="font-semibold text-slate-800">${app.ayah || '-'}</p>
+                            <p class="text-[10px] text-emerald-600 font-mono">${app.wa || '-'}</p>
+                        </td>
+                        <td class="p-3.5">${payTag}</td>
+                        <td class="p-3.5">${schedTag}</td>
+                        <td class="p-3.5">${scoreTag}</td>
+                        <td class="p-3.5 text-center">
+                            <div class="flex flex-col gap-1 items-center">
+                                ${kkBtn}
+                                ${aktaBtn}
+                                ${abkBtn}
+                            </div>
+                        </td>
+                        <td class="p-3.5 text-center">
+                            <select onchange="updateApplicantFinalStatus('${app.id}', this.value)" class="text-[11px] font-bold border border-slate-300 rounded-lg px-2 py-1 bg-white focus:ring-2 focus:ring-emerald-500">
+                                ${statusOptions}
+                            </select>
+                        </td>
+                        <td class="p-3.5 text-right">
+                            <div class="flex items-center justify-end gap-1.5">
+                                ${printBtn}
+                                <button onclick="openFormDetailModal('${app.id}')" class="p-1.5 ${app.formCompleted ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200 border-slate-200'} rounded-lg border transition" title="Lihat Status & Rincian Formulir">
+                                    <i data-lucide="${app.formCompleted ? 'file-text' : 'file-clock'}" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="confirmDeleteApplicant('${app.id}')" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg border border-rose-200 transition" title="Hapus Data">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        window.updateApplicantFinalStatus = function(applicantId, newStatus) {
+            const user = applicantsData.find(a => a.id === applicantId);
+            if (user) {
+                user.finalStatus = newStatus;
+                saveApplicantToFirestore(user);
+                renderAdminTable();
+                showToast(`Status kelulusan ${user.name} diperbarui menjadi: ${newStatus}`);
+            }
+        };
+
+        function openPaymentModal(applicantId) {
+            activeModalApplicantId = applicantId;
+            const user = applicantsData.find(a => a.id === applicantId);
+            if (!user) return;
+
+            const modal = document.getElementById('modalPaymentProof');
+            const img = document.getElementById('modalPaymentImage');
+            const ext = document.getElementById('modalPaymentExternalLink');
+            const actions = document.getElementById('modalPaymentActions');
+
+            const url = user.paymentFileUrl || 'https://placehold.co/400x600/059669/ffffff?text=Bukti+Transfer+BSI+200k';
+            if (img) img.src = url;
+            if (ext) { ext.href = url; ext.classList.remove('hidden'); }
+            if (actions) actions.classList.remove('hidden');
+
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function adminVerifyPayment(applicantId, isApproved) {
+            const user = applicantsData.find(a => a.id === applicantId);
+            if (!user) return;
+
+            user.paymentStatus = isApproved ? 'VERIFIED' : 'UNPAID';
+            saveApplicantToFirestore(user);
+            closeModal('modalPaymentProof');
+            renderAdminTable();
+            showToast(isApproved ? `Pembayaran ${user.name} BERHASIL diverifikasi! Form terbuka.` : `Pembayaran ${user.name} ditolak.`);
+        }
+
+        function openScheduleModal(applicantId) {
+            activeModalApplicantId = applicantId;
+            const user = applicantsData.find(a => a.id === applicantId);
+            if (!user) return;
+
+            const dEl = document.getElementById('inputScheduleDate');
+            const tEl = document.getElementById('inputScheduleTime');
+            const lEl = document.getElementById('inputScheduleLoc');
+            if (dEl) dEl.value = user.scheduleDate || '2027-08-22';
+            if (tEl) tEl.value = user.scheduleTime || '08:30 - 10:00 WITA';
+            if (lEl) lEl.value = user.scheduleLoc || 'Aula Utama MI Al-Irsyad Banjarmasin';
+
+            const modal = document.getElementById('modalSchedule');
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function saveScheduleFromModal() {
+            const user = applicantsData.find(a => a.id === activeModalApplicantId);
+            if (!user) return;
+
+            user.scheduleDate = document.getElementById('inputScheduleDate').value;
+            user.scheduleTime = document.getElementById('inputScheduleTime').value;
+            user.scheduleLoc = document.getElementById('inputScheduleLoc').value;
+
+            saveApplicantToFirestore(user);
+            closeModal('modalSchedule');
+            renderAdminTable();
+            showToast(`Jadwal asesmen untuk ${user.name} berhasil disimpan!`);
+        }
+
+        function confirmDeleteApplicant(applicantId) {
+            activeModalApplicantId = applicantId;
+            const user = applicantsData.find(a => a.id === applicantId);
+            const textEl = document.getElementById('deleteConfirmText');
+            if (textEl && user) {
+                textEl.innerText = `Yakin ingin menghapus permanen data "${user.name}" (${user.id})?`;
+            }
+            const modal = document.getElementById('modalConfirmDelete');
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function executeDeleteApplicant() {
+            if (!activeModalApplicantId) return;
+            applicantsData = applicantsData.filter(a => a.id !== activeModalApplicantId);
+
+            if (!window.is_preview && window.db && window.deleteDoc && window.doc) {
+                window.deleteDoc(window.doc(window.db, "applicants", activeModalApplicantId)).catch(console.error);
+            }
+
+            closeModal('modalConfirmDelete');
+            renderAdminTable();
+            showToast("Data pendaftar berhasil dihapus permanen.");
+        }
+
+        function openFormDetailModal(applicantId) {
+            const user = applicantsData.find(a => a.id === applicantId);
+            if (!user) return;
+
+            const modal = document.getElementById('modalFormDetail');
+            const subTitle = document.getElementById('formDetailSubTitle');
+            const badge = document.getElementById('formDetailStatusBadge');
+            const content = document.getElementById('formDetailContent');
+
+            if (subTitle) subTitle.innerText = `${user.name} (${user.id})`;
+            if (badge) {
+                if (user.formCompleted) {
+                    badge.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800";
+                    badge.innerText = "✓ Formulir Lengkap";
+                } else {
+                    badge.className = "text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800";
+                    badge.innerText = "⏳ Belum Mengisi Form";
+                }
+            }
+
+            if (content) {
+                content.innerHTML = `
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                        <span class="font-bold text-slate-800 uppercase text-[10px] tracking-wider block">A. Data Calon Murid</span>
+                        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                            <div><span class="text-slate-400">NIK:</span> <strong>${user.nik || '-'}</strong></div>
+                            <div><span class="text-slate-400">Panggilan:</span> <strong>${user.nickname || '-'}</strong></div>
+                            <div><span class="text-slate-400">Jenis Kelamin:</span> <strong>${user.gender || '-'}</strong></div>
+                            <div><span class="text-slate-400">Tempat, Tgl Lahir:</span> <strong>${user.birthPlace || '-'}, ${user.birthDate || '-'}</strong></div>
+                            <div><span class="text-slate-400">Sekolah Asal:</span> <strong>${user.sekolahAsal || '-'}</strong></div>
+                            <div><span class="text-slate-400">Status ABK:</span> <strong>${user.statusAbk || 'Non-ABK'}</strong></div>
+                        </div>
+                        ${user.detailAbk ? `<p class="text-[11px] text-amber-900 bg-amber-50 p-2 rounded border border-amber-200 mt-1"><strong>Catatan ABK:</strong> ${user.detailAbk}</p>` : ''}
+                    </div>
+
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                        <span class="font-bold text-slate-800 uppercase text-[10px] tracking-wider block">B. Data Orang Tua / Wali</span>
+                        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                            <div><span class="text-slate-400">Nama Ayah:</span> <strong>${user.ayah || '-'}</strong></div>
+                            <div><span class="text-slate-400">Pekerjaan Ayah:</span> <strong>${user.pekerjaanAyah || '-'}</strong></div>
+                            <div><span class="text-slate-400">Nama Ibu:</span> <strong>${user.ibu || '-'}</strong></div>
+                            <div><span class="text-slate-400">Pekerjaan Ibu:</span> <strong>${user.pekerjaanIbu || '-'}</strong></div>
+                            <div><span class="text-slate-400">No. WhatsApp:</span> <strong>${user.wa || '-'}</strong></div>
+                            <div><span class="text-slate-400">Alamat:</span> <strong>${user.alamat || '-'}</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                        <span class="font-bold text-slate-800 uppercase text-[10px] tracking-wider block">C. Dokumen Lampiran</span>
+                        <div class="flex gap-2 flex-wrap">
+                            ${user.kkFileBase64 ? `<button onclick="previewBase64File('${user.kkFileBase64}')" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-emerald-700 font-bold hover:bg-slate-100 flex items-center gap-1"><i data-lucide="file" class="w-3.5 h-3.5"></i> Lihat KK</button>` : '<span class="text-slate-400 text-[11px]">KK belum ada</span>'}
+                            ${user.aktaFileBase64 ? `<button onclick="previewBase64File('${user.aktaFileBase64}')" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-emerald-700 font-bold hover:bg-slate-100 flex items-center gap-1"><i data-lucide="file" class="w-3.5 h-3.5"></i> Lihat Akta</button>` : '<span class="text-slate-400 text-[11px]">Akta belum ada</span>'}
+                            ${user.abkSuratBase64 ? `<button onclick="previewBase64File('${user.abkSuratBase64}')" class="px-3 py-1.5 bg-white border border-amber-300 rounded-lg text-amber-800 font-bold hover:bg-amber-50 flex items-center gap-1"><i data-lucide="file" class="w-3.5 h-3.5"></i> Lihat Medis</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function exportDataToCSV() {
+            let csv = "No_Registrasi,Nama_Murid,NIK,Jenis_Kelamin,Sekolah_Asal,Status_ABK,Nama_Ayah,No_WA,Status_Bayar,Jadwal_Asesmen,Skor_Total,Rekomendasi,Status_Akhir\n";
+            applicantsData.forEach(a => {
+                csv += `"${a.id}","${a.name || ''}","${a.nik || ''}","${a.gender || ''}","${a.sekolahAsal || ''}","${a.statusAbk || ''}","${a.ayah || ''}","${a.wa || ''}","${a.paymentStatus || ''}","${a.scheduleDate || ''}","${a.totalScore || ''}","${a.recommendation || ''}","${a.finalStatus || ''}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `PMBM_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Data pendaftar berhasil diunduh (CSV/Excel).");
+        }
+
+        // ==========================================================
+        // 6. KELOLA GELOMBANG & REKENING (ADMIN MODAL)
+        // ==========================================================
+        function openGelombangModal() {
+            const modal = document.getElementById('modalGelombang');
+            const sel = document.getElementById('inputGelombangSelect');
+            if (sel) {
+                sel.innerHTML = wavesList.map(w => `<option value="${w.id}">${w.name} (${w.status})</option>`).join('');
+                sel.value = selectedWaveId;
+            }
+            onWaveSelectChange();
+
+            const bName = document.getElementById('inputBankName');
+            const bHolder = document.getElementById('inputBankHolder');
+            const bNo = document.getElementById('inputAccountNo');
+            if (bName) bName.value = bankSettings.bankName;
+            if (bHolder) bHolder.value = bankSettings.bankHolder;
+            if (bNo) bNo.value = bankSettings.accountNo;
+
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function onWaveSelectChange() {
+            const sel = document.getElementById('inputGelombangSelect');
+            if (!sel) return;
+            selectedWaveId = sel.value;
+            const wave = wavesList.find(w => w.id === selectedWaveId) || wavesList[0];
+            if (!wave) return;
+
+            const nameEl = document.getElementById('inputGelombangName');
+            const startEl = document.getElementById('inputGelombangStartDate');
+            const endEl = document.getElementById('inputGelombangEndDate');
+            const quotaEl = document.getElementById('inputGelombangQuota');
+            const feeEl = document.getElementById('inputGelombangFee');
+            const statusEl = document.getElementById('inputGelombangStatus');
+            const summary = document.getElementById('modalQuotaSummary');
+
+            if (nameEl) nameEl.value = wave.name;
+            if (startEl) startEl.value = wave.startDate;
+            if (endEl) endEl.value = wave.endDate;
+            if (quotaEl) quotaEl.value = wave.totalQuota;
+            if (feeEl) feeEl.value = wave.fee;
+            if (statusEl) statusEl.value = wave.status;
+
+            const registeredInWave = applicantsData.filter(a => a.waveId === wave.id).length;
+            if (summary) summary.innerText = `Terisi: ${registeredInWave} dari ${wave.totalQuota}`;
+        }
+
+        function addNewWavePrompt() {
+            const nextIdx = wavesList.length + 1;
+            const newWave = {
+                id: `wave-${Date.now()}`,
+                name: `Gelombang ${nextIdx} T.A. 2027/2028`,
+                startDate: new Date().toISOString().slice(0, 10),
+                endDate: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+                totalQuota: 60,
+                fee: 200000,
+                status: 'OPEN'
+            };
+            wavesList.push(newWave);
+            selectedWaveId = newWave.id;
+            openGelombangModal();
+            showToast("Gelombang baru ditambahkan! Silakan sesuaikan lalu klik simpan.");
+        }
+
+        function deleteCurrentWavePrompt() {
+            if (wavesList.length <= 1) {
+                showToast("Tidak bisa menghapus! Minimal harus ada 1 gelombang pendaftaran.", "warning");
+                return;
+            }
+            wavesList = wavesList.filter(w => w.id !== selectedWaveId);
+            selectedWaveId = wavesList[0].id;
+            openGelombangModal();
+            showToast("Gelombang terpilih berhasil dihapus.");
+        }
+
+        function closeAllWavesPrompt() {
+            wavesList.forEach(w => w.status = 'CLOSED');
+            const selStatus = document.getElementById('inputGelombangStatus');
+            if (selStatus) selStatus.value = 'CLOSED';
+            saveGelombangSetting();
+            showToast("Seluruh gelombang telah resmi DITUTUP!");
+        }
+
+        function saveGelombangSetting() {
+            const wave = wavesList.find(w => w.id === selectedWaveId);
+            if (wave) {
+                wave.name = document.getElementById('inputGelombangName').value;
+                wave.startDate = document.getElementById('inputGelombangStartDate').value;
+                wave.endDate = document.getElementById('inputGelombangEndDate').value;
+                wave.totalQuota = parseInt(document.getElementById('inputGelombangQuota').value) || 100;
+                wave.fee = parseInt(document.getElementById('inputGelombangFee').value) || 200000;
+                wave.status = document.getElementById('inputGelombangStatus').value;
+            }
+
+            bankSettings.bankName = document.getElementById('inputBankName').value;
+            bankSettings.bankHolder = document.getElementById('inputBankHolder').value;
+            bankSettings.accountNo = document.getElementById('inputAccountNo').value;
+
+            saveSettingsToFirestore();
+            updateWaveDisplay();
+            updateBankDisplay();
+            closeModal('modalGelombang');
+            showToast("Pengaturan gelombang dan rekening bank berhasil disimpan!");
+        }
+
+        // ==========================================================
+        // 7. MODUL ASESMEN TERPADU (EVALUATOR)
+        // ==========================================================
+        function renderAsesmenCandidates() {
+            const listContainer = document.getElementById('asesmenCandidateList');
+            if (!listContainer) return;
+
+            const candidates = applicantsData.filter(a => a.paymentStatus === 'VERIFIED');
+            if (candidates.length === 0) {
+                listContainer.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">Belum ada calon murid yang terverifikasi bayar untuk diuji.</div>`;
+                return;
+            }
+
+            if (!selectedAsesmenCandidateId && candidates.length > 0) {
+                selectedAsesmenCandidateId = candidates[0].id;
+            }
+
+            listContainer.innerHTML = candidates.map(c => {
+                const isSelected = c.id === selectedAsesmenCandidateId;
+                const statusColor = c.scoreCompleted ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
+                const statusTxt = c.scoreCompleted ? 'Selesai Diuji' : 'Siap Diuji';
+
+                return `
+                    <div onclick="selectAsesmenCandidate('${c.id}')" class="p-3 rounded-xl border transition cursor-pointer ${isSelected ? 'bg-emerald-50/80 border-emerald-500 shadow-sm' : 'bg-slate-50 hover:bg-slate-100 border-slate-200'}">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-xs text-slate-900">${c.name}</h4>
+                                <p class="text-[10px] text-slate-500">${c.id} | Wali: ${c.ayah || '-'}</p>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColor}">${statusTxt}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const selectedCandidate = applicantsData.find(a => a.id === selectedAsesmenCandidateId);
+            if (selectedCandidate) {
+                populateAsesmenForm(selectedCandidate);
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function selectAsesmenCandidate(applicantId) {
+            selectedAsesmenCandidateId = applicantId;
+            renderAsesmenCandidates();
+        }
+
+        function populateAsesmenForm(candidate) {
+            const tName = document.getElementById('asesmenTargetName');
+            const tDetail = document.getElementById('asesmenTargetDetail');
+            const sBadge = document.getElementById('asesmenStatusBadge');
+
+            if (tName) tName.innerText = candidate.name;
+            if (tDetail) tDetail.innerText = `No. Reg: ${candidate.id} | Wali: ${candidate.ayah || '-'} | Asal: ${candidate.sekolahAsal || '-'}`;
+            if (sBadge) {
+                sBadge.className = candidate.scoreCompleted ? "px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full" : "px-3 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full";
+                sBadge.innerText = candidate.scoreCompleted ? `Selesai Diuji (${candidate.totalScore})` : "Siap Diuji";
+            }
+
+            const setVal = (id, val, def) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val !== undefined && val !== null ? val : def;
+            };
+
+            setVal('scoreMotorik', candidate.scoreMotorik, 85);
+            setVal('scoreBahasa', candidate.scoreBahasa, 90);
+            setVal('scoreHijaiyah', candidate.scoreHijaiyah, 88);
+            setVal('scoreJilid', candidate.scoreJilid, 'Tartili Jilid 3');
+            setVal('scoreKomitmen', candidate.scoreKomitmen, 95);
+            setVal('scoreKesepahaman', candidate.scoreKesepahaman, 92);
+            setVal('asesmenNotes', candidate.asesmenNotes, '');
+            setVal('asesmenRecommendation', candidate.recommendation, 'Lulus');
+        }
+
+        function handleAsesmenSubmit(e) {
+            e.preventDefault();
+            const candidate = applicantsData.find(a => a.id === selectedAsesmenCandidateId);
+            if (!candidate) return;
+
+            const m = parseInt(document.getElementById('scoreMotorik').value) || 0;
+            const b = parseInt(document.getElementById('scoreBahasa').value) || 0;
+            const h = parseInt(document.getElementById('scoreHijaiyah').value) || 0;
+            const k = parseInt(document.getElementById('scoreKomitmen').value) || 0;
+            const s = parseInt(document.getElementById('scoreKesepahaman').value) || 0;
+
+            const avg = Math.round((m + b + h + k + s) / 5);
+
+            candidate.scoreMotorik = m;
+            candidate.scoreBahasa = b;
+            candidate.scoreHijaiyah = h;
+            candidate.scoreJilid = document.getElementById('scoreJilid').value;
+            candidate.scoreKomitmen = k;
+            candidate.scoreKesepahaman = s;
+            candidate.totalScore = avg;
+            candidate.asesmenNotes = document.getElementById('asesmenNotes').value;
+            candidate.recommendation = document.getElementById('asesmenRecommendation').value;
+            candidate.scoreCompleted = true;
+
+            saveApplicantToFirestore(candidate);
+            renderAsesmenCandidates();
+            showToast(`Hasil asesmen untuk ${candidate.name} berhasil disimpan! Skor: ${avg}`);
+        }
+
+        // ==========================================================
+        // 8. GENERATOR CETAK RESMI (KARTU OBSERVASI & SKL RESMI PDF)
+        // ==========================================================
+        function printKartuUjian(applicantId) {
+            const targetId = applicantId || loggedInUserId;
+            const app = applicantsData.find(a => a.id === targetId);
+            if (!app) {
+                showToast("Data pendaftar tidak ditemukan.", "error");
+                return;
+            }
+
+            const activeWave = wavesList.find(w => w.id === app.waveId) || wavesList[0];
+            const content = document.getElementById('printableCardContent');
+            if (!content) return;
+
+            content.innerHTML = `
+                <div class="border-2 border-slate-900 p-6 rounded-2xl bg-white space-y-5">
+                    <div class="border-b-2 border-slate-900 pb-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <img src="https://imgh.in/host/7sfkdf" alt="Logo" class="w-14 h-14 object-contain">
+                            <div>
+                                <h3 class="font-black text-base uppercase tracking-tight text-slate-900">YAYASAN AL-IRSYAD AL-ISLAMIYYAH KALIMANTAN SELATAN</h3>
+                                <h4 class="font-bold text-sm text-emerald-800">MADRASAH IBTIDAIYAH (MI) AL-IRSYAD KOTA BANJARMASIN</h4>
+                                <p class="text-[10px] text-slate-600">Jl. Sulawesi No. 5 RT. 6 RW. 02, Pasar Lama, Banjarmasin Tengah | Telp/WA: 0812-555-1234</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center space-y-1">
+                        <h2 class="text-base font-black uppercase tracking-wider text-slate-900 underline">KARTU TANDA PESERTA OBSERVASI & WAWANCARA</h2>
+                        <p class="text-xs font-semibold text-slate-600">PMBM TAHUN AJARAN 2027/2028 - ${activeWave ? activeWave.name : 'Gelombang 1'}</p>
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-4 text-xs pt-2">
+                        <div class="col-span-8 space-y-2">
+                            <table class="w-full text-left font-medium">
+                                <tr><td class="w-36 py-1 text-slate-500 font-semibold">NO. REGISTRASI</td><td class="font-mono font-black text-emerald-800">: ${app.id}</td></tr>
+                                <tr><td class="py-1 text-slate-500 font-semibold">NAMA CALON MURID</td><td class="font-bold text-slate-900">: ${app.name}</td></tr>
+                                <tr><td class="py-1 text-slate-500 font-semibold">NIK SISWA</td><td class="font-mono font-semibold text-slate-800">: ${app.nik || '-'}</td></tr>
+                                <tr><td class="py-1 text-slate-500 font-semibold">JENIS KELAMIN</td><td class="text-slate-800">: ${app.gender || 'Laki-laki'}</td></tr>
+                                <tr><td class="py-1 text-slate-500 font-semibold">ASAL SEKOLAH</td><td class="text-slate-800">: ${app.sekolahAsal || '-'}</td></tr>
+                                <tr><td class="py-1 text-slate-500 font-semibold">NAMA ORANG TUA / WALI</td><td class="text-slate-800">: ${app.ayah || '-'}</td></tr>
+                                <tr><td class="py-1 text-slate-500 font-semibold">NO. WHATSAPP WALI</td><td class="text-slate-800">: ${app.wa || '-'}</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-span-4 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-3 bg-slate-50 text-center">
+                            <span class="text-[10px] font-bold text-slate-400 mb-1">PAS FOTO 3X4</span>
+                            <div class="w-20 h-24 border border-slate-300 rounded bg-white flex items-center justify-center text-slate-300 text-xs">Foto</div>
+                            <span class="text-[9px] text-slate-400 mt-2 font-mono">${app.id}</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 bg-emerald-50/70 border border-emerald-300 rounded-xl text-xs space-y-1">
+                        <span class="font-bold text-emerald-900 uppercase text-[10px] tracking-wider block">JADWAL & TEMPAT PELAKSANAAN:</span>
+                        <div class="grid grid-cols-3 gap-2 text-slate-800 font-semibold pt-1">
+                            <div><span class="text-slate-500 block text-[10px]">Hari, Tanggal:</span> ${app.scheduleDate ? formatDateReadable(app.scheduleDate) : 'Menunggu Jadwal'}</div>
+                            <div><span class="text-slate-500 block text-[10px]">Waktu / Sesi:</span> ${app.scheduleTime || '08:30 WITA'}</div>
+                            <div><span class="text-slate-500 block text-[10px]">Ruangan:</span> ${app.scheduleLoc || 'Aula Utama MI Al-Irsyad'}</div>
+                        </div>
+                    </div>
+
+                    <div class="text-[10px] text-slate-500 space-y-0.5 border-t border-slate-200 pt-3">
+                        <p class="font-bold text-slate-700">TATA TERTIB PESERTA:</p>
+                        <p>1. Membawa kartu tanda peserta ini saat hadir ke madrasah.</p>
+                        <p>2. Hadir bersama orang tua/wali minimal 15 menit sebelum sesi dimulai dan berpakaian muslim rapi serta sopan.</p>
+                    </div>
+                </div>
+            `;
+
+            const modal = document.getElementById('modalPrintCard');
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function printSkl(applicantId) {
+            const targetId = applicantId || loggedInUserId;
+            const app = applicantsData.find(a => a.id === targetId);
+            if (!app) return;
+
+            const content = document.getElementById('printableCardContent');
+            if (!content) return;
+
+            content.innerHTML = `
+                <div class="border-2 border-slate-900 p-8 rounded-2xl bg-white space-y-6">
+                    <div class="border-b-2 border-slate-900 pb-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <img src="https://imgh.in/host/7sfkdf" alt="Logo" class="w-16 h-16 object-contain">
+                            <div>
+                                <h3 class="font-black text-sm uppercase text-slate-900">YAYASAN AL-IRSYAD AL-ISLAMIYYAH KALIMANTAN SELATAN</h3>
+                                <h2 class="font-black text-base text-emerald-800">MADRASAH IBTIDAIYAH (MI) AL-IRSYAD BANJARMASIN</h2>
+                                <p class="text-[10px] text-slate-600">Jl. Sulawesi No. 5 RT. 6 RW. 02, Banjarmasin | Email: mi.alirsyad.bjm@gmail.com</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center space-y-1">
+                        <h2 class="text-lg font-black uppercase tracking-wider text-slate-900 underline">SURAT KETERANGAN LULUS (SKL)</h2>
+                        <p class="text-xs font-mono text-slate-600">Nomor: PMBM/MI-ALIRSYAD/2027/${app.id.replace('PMBM-2027-', '')}</p>
+                    </div>
+
+                    <p class="text-xs leading-relaxed text-justify text-slate-800">
+                        Panitia Penerimaan Murid Baru Madrasah (PMBM) MI Al-Irsyad Al-Islamiyyah Banjarmasin berdasarkan hasil seluruh rangkaian Observasi Calon Murid dan Wawancara Orang Tua/Wali Murid, dengan ini menetapkan bahwa:
+                    </p>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5 text-xs">
+                        <div class="grid grid-cols-3"><span class="text-slate-500 font-semibold">Nama Calon Murid</span><span class="col-span-2 font-black text-slate-900">: ${app.name}</span></div>
+                        <div class="grid grid-cols-3"><span class="text-slate-500 font-semibold">Nomor Registrasi</span><span class="col-span-2 font-mono font-bold text-emerald-800">: ${app.id}</span></div>
+                        <div class="grid grid-cols-3"><span class="text-slate-500 font-semibold">NIK Siswa</span><span class="col-span-2 font-mono text-slate-800">: ${app.nik || '-'}</span></div>
+                        <div class="grid grid-cols-3"><span class="text-slate-500 font-semibold">Nama Orang Tua / Wali</span><span class="col-span-2 font-semibold text-slate-800">: ${app.ayah || '-'}</span></div>
+                        <div class="grid grid-cols-3"><span class="text-slate-500 font-semibold">Penempatan Jilid Tartili</span><span class="col-span-2 font-bold text-emerald-700">: ${app.scoreJilid || 'Tartili Jilid 3'}</span></div>
+                    </div>
+
+                    <div class="p-3 bg-emerald-50 border border-emerald-300 rounded-xl text-center space-y-1">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-widest block">DENGAN INI DINYATAKAN:</span>
+                        <h3 class="text-xl font-black text-emerald-700 tracking-wider">LULUS SELEKSI PMBM 2027/2028</h3>
+                        <p class="text-[11px] text-emerald-800 font-medium">Nilai Total: ${app.totalScore || 92} / 100 (${app.recommendation || 'Sangat Direkomendasikan'})</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-4 text-xs">
+                        <div class="text-[10px] text-slate-500 space-y-1">
+                            <p class="font-bold text-slate-700">CATATAN REGISTRASI ULANG:</p>
+                            <p>1. Silakan melakukan konfirmasi pendaftaran ulang ke panitia paling lambat 7 hari setelah pengumuman.</p>
+                            <p>2. Membawa fotokopi KK dan Akta Kelahiran asli saat daftar ulang.</p>
+                        </div>
+                        <div class="text-right space-y-12">
+                            <div>
+                                <p class="text-[11px] text-slate-600">Banjarmasin, 31 Agustus 2027</p>
+                                <p class="text-xs font-bold text-slate-900">Kepala Madrasah Ibtidaiyah,</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-black text-slate-900 underline">Ustadz H. Ahmad Ridwan, M.Pd.</p>
+                                <p class="text-[10px] text-slate-500">NIP. 19820415 200801 1 012</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modal = document.getElementById('modalPrintCard');
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function executeBrowserPrint() {
+            window.print();
+        }
+
+        // ==========================================================
+        // 9. PERSISTENSI FIRESTORE & INISIALISASI HALAMAN
+        // ==========================================================
+        function saveApplicantToFirestore(applicant) {
+            if (window.is_preview || !window.db || !window.setDoc || !window.doc) return;
+            try {
+                window.setDoc(window.doc(window.db, "applicants", applicant.id), applicant, { merge: true })
+                    .catch(e => console.warn("Firestore save error:", e));
+            } catch (err) {
+                console.warn("Firestore error:", err);
+            }
+        }
+
+        function saveSettingsToFirestore() {
+            if (window.is_preview || !window.db || !window.setDoc || !window.doc) return;
+            try {
+                window.setDoc(window.doc(window.db, "settings", "config"), {
+                    waves: wavesList,
+                    bank: bankSettings,
+                    globalCounter: globalCounter
+                }, { merge: true }).catch(console.warn);
+            } catch (err) {
+                console.warn(err);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+            initRealtimeSync();
+
+            // Membaca sesi view terakhir agar tidak hilang saat refresh (Anti-Refresh Loss)
+            const savedRole = localStorage.getItem('pmbm_currentRole');
+            const savedUserId = localStorage.getItem('pmbm_userId');
+
+            if (savedRole && savedRole !== 'LOGIN') {
+                if (savedUserId) loggedInUserId = savedUserId;
+                switchView(savedRole);
+            } else {
+                switchView('LOGIN');
+            }
+        });
     </script>
 </body>
 </html>
