@@ -71,7 +71,7 @@
         import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
-             apiKey: "AIzaSyA52DKF5OTo9jhzTV4JKO6WMdibbnK0D0s",
+  apiKey: "AIzaSyA52DKF5OTo9jhzTV4JKO6WMdibbnK0D0s",
   authDomain: "pmbm-backup-ca78a.firebaseapp.com",
   projectId: "pmbm-backup-ca78a",
   storageBucket: "pmbm-backup-ca78a.firebasestorage.app",
@@ -1449,7 +1449,7 @@
 
         const dummyApplicantsSample = [
             {
-                id: 'PMBM-2027-001', waveId: 'wave-1', name: 'Muhammad Rayyan Al-Fatih', nickname: 'Rayyan', gender: 'Laki-laki', birthPlace: 'Banjarmasin', birthDate: '2019-05-14', sekolahAsal: 'RA Al-Irsyad', statusAbk: 'Non-ABK / Reguler', nik: '6371011405190001', ayah: 'Ahmad Fauzi, S.T.', pekerjaanAyah: 'Karyawan Swasta', wa: '08125551234', paymentStatus: 'VERIFIED', paymentFile: 'bukti_transfer.jpg', paymentFileUrl: 'https://placehold.co/400x600/059669/ffffff?text=Bukti+Transfer+200k', formCompleted: true, kkFileName: 'KK_Rayyan.pdf', kkFileBase64: 'data:text/plain;base64,S0sgDumteSBDb250ZW50', aktaFileName: 'Akta_Rayyan.pdf', aktaFileBase64: 'data:text/plain;base64,QWt0YSBEdW1teSBDb250ZW50', finalStatus: 'MENUNGGU', scoreCompleted: false
+                id: 'PMBM-2027-001', waveId: 'wave-1', name: 'Muhammad Rayyan Al-Fatih', nickname: 'Rayyan', gender: 'Laki-laki', birthPlace: 'Banjarmasin', birthDate: '2019-05-14', sekolahAsal: 'RA Al-Irsyad', statusAbk: 'Non-ABK / Reguler', nik: '6371011405190001', ayah: 'Ahmad Fauzi, S.T.', pekerjaanAyah: 'Karyawan Swasta', penghasilanAyah: 'Rp 2.000.000 - Rp 5.000.000', ibu: 'Siti Nurhaliza, S.Pd.', pekerjaanIbu: 'Ibu Rumah Tangga / Guru', penghasilanIbu: '< Rp 2.000.000', wa: '08125551234', alamat: 'Jl. Sultan Adam No. 45 RT 12, Banjarmasin Utara', paymentStatus: 'VERIFIED', paymentFile: 'bukti_transfer.jpg', paymentFileUrl: 'https://placehold.co/400x600/059669/ffffff?text=Bukti+Transfer+200k', formCompleted: true, kkFileName: 'KK_Rayyan.pdf', kkFileBase64: 'data:text/plain;base64,S0sgDumteSBDb250ZW50', aktaFileName: 'Akta_Rayyan.pdf', aktaFileBase64: 'data:text/plain;base64,QWt0YSBEdW1teSBDb250ZW50', finalStatus: 'MENUNGGU', scoreCompleted: false
             },
             {
                 id: 'PMBM-2027-002', waveId: 'wave-1', name: 'Aisyah Putri Azzahra', nickname: 'Aisyah', gender: 'Perempuan', birthPlace: 'Banjarbaru', birthDate: '2019-08-20', sekolahAsal: 'TK Pembina', statusAbk: 'Non-ABK / Reguler', nik: '6371011408190002', ayah: 'Budi Santoso', pekerjaanAyah: 'PNS', wa: '08534449999', paymentStatus: 'PENDING', paymentFile: 'transfer_bsi_aisyah.png', paymentFileUrl: 'https://placehold.co/400x600/f59e0b/ffffff?text=Bukti+Transfer+Aisyah', paymentTime: '26 Agu 2026 21:00', formCompleted: false, kkFileName: null, aktaFileName: null, finalStatus: 'MENUNGGU', scoreCompleted: false
@@ -2557,11 +2557,22 @@
                         <div class="grid grid-cols-2 gap-2 text-[11px]">
                             <div><span class="text-slate-400">Nama Ayah:</span> <strong>${user.ayah || '-'}</strong></div>
                             <div><span class="text-slate-400">Pekerjaan Ayah:</span> <strong>${user.pekerjaanAyah || '-'}</strong></div>
+                            <div><span class="text-slate-400">Gaji/Penghasilan Ayah:</span> <strong class="text-emerald-700">${user.penghasilanAyah || '-'}</strong></div>
                             <div><span class="text-slate-400">Nama Ibu:</span> <strong>${user.ibu || '-'}</strong></div>
                             <div><span class="text-slate-400">Pekerjaan Ibu:</span> <strong>${user.pekerjaanIbu || '-'}</strong></div>
+                            <div><span class="text-slate-400">Gaji/Penghasilan Ibu:</span> <strong class="text-emerald-700">${user.penghasilanIbu || '-'}</strong></div>
                             <div><span class="text-slate-400">No. WhatsApp:</span> <strong>${user.wa || '-'}</strong></div>
                             <div><span class="text-slate-400">Alamat:</span> <strong>${user.alamat || '-'}</strong></div>
                         </div>
+                        ${(user.wali || user.pekerjaanWali || user.hubunganWali) ? `
+                        <div class="pt-2 mt-2 border-t border-slate-200">
+                            <span class="text-[10px] font-bold text-slate-600 block mb-1">Data Wali:</span>
+                            <div class="grid grid-cols-3 gap-2 text-[11px]">
+                                <div><span class="text-slate-400">Nama Wali:</span> <strong>${user.wali || '-'}</strong></div>
+                                <div><span class="text-slate-400">Pekerjaan Wali:</span> <strong>${user.pekerjaanWali || '-'}</strong></div>
+                                <div><span class="text-slate-400">Hubungan:</span> <strong>${user.hubunganWali || '-'}</strong></div>
+                            </div>
+                        </div>` : ''}
                     </div>
 
                     <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
