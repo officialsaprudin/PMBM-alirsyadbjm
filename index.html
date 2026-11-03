@@ -1470,6 +1470,20 @@
         // REAL-TIME FIRESTORE SYNC ENGINE WITH ERROR HANDLING & PERMISSION FALLBACK
         function initRealtimeSync() {
             if (window.is_preview || !window.db) {
+                // Di mode preview, baca pengaturan tersimpan dari memori jika ada
+                try {
+                    const localWaves = localStorage.getItem('pmbm_wavesList');
+                    if (localWaves) {
+                        const parsed = JSON.parse(localWaves);
+                        if (Array.isArray(parsed) && parsed.length > 0) wavesList = parsed;
+                    }
+                    const localBank = localStorage.getItem('pmbm_bankSettings');
+                    if (localBank) {
+                        const parsedBank = JSON.parse(localBank);
+                        if (parsedBank && parsedBank.bankName) bankSettings = parsedBank;
+                    }
+                } catch (e) {}
+
                 applicantsData = [...dummyApplicantsSample];
                 postDataSyncActions();
                 return;
@@ -1497,11 +1511,12 @@
             window.onSnapshot(window.doc(window.db, "settings", "config"), (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    if (data.waves) wavesList = data.waves;
+                    if (data.waves && Array.isArray(data.waves) && data.waves.length > 0) wavesList = data.waves;
                     if (data.bank) bankSettings = data.bank;
                     if (data.globalCounter) globalCounter = data.globalCounter; // Sinkronisasi counter
                     updateWaveDisplay();
                     updateBankDisplay();
+                    renderWaveAnnouncement(); // Real-time perbarui pop-up flyer saat data Firestore masuk
                 }
             }, (error) => {
                 console.warn("Settings sync warning:", error);
@@ -1515,6 +1530,7 @@
             if (currentRole === 'ADMIN') renderAdminTable();
             if (currentRole === 'ASESMEN') renderAsesmenCandidates();
             if (currentRole === 'USER') updateUserViewState();
+            renderWaveAnnouncement();
             checkAndShowWavePopup();
         }
 
@@ -1538,15 +1554,12 @@
             }
         }
 
-        // FUNGSI POP-UP PROMOSI / STATUS GELOMBANG OTOMATIS
-        function checkAndShowWavePopup() {
-            if (hasShownWaveAnnouncement) return;
-            // Hanya aktif di halaman awal (Landing/Login)
-            if (currentRole !== 'LOGIN') return;
-
+        // FUNGSI POP-UP PROMOSI / STATUS GELOMBANG OTOMATIS & REAKTIF
+        function renderWaveAnnouncement() {
             const modal = document.getElementById('modalWaveAnnouncement');
             if (!modal) return;
 
+            // HANYA ambil gelombang yang berstatus 'OPEN'
             const openWaves = wavesList.filter(w => w.status === 'OPEN');
             const hasOpenWave = openWaves.length > 0;
             const header = document.getElementById('announcementBannerHeader');
@@ -1556,6 +1569,8 @@
             const content = document.getElementById('announcementContent');
             const btnGroup = document.getElementById('announcementActionBtnGroup');
 
+            if (!header || !badge || !title || !sub || !content || !btnGroup) return;
+
             if (hasOpenWave) {
                 header.className = "bg-gradient-to-br from-[#14523E] to-[#0c3c2d] text-white p-6 relative overflow-hidden shrink-0";
                 badge.className = "inline-block px-3 py-1 bg-amber-400 text-slate-900 font-black text-[10px] uppercase rounded-full tracking-wider shadow-sm";
@@ -1563,10 +1578,12 @@
                 title.innerText = openWaves.length > 1 ? `Pendaftaran PMBM (${openWaves.length} Gelombang Aktif)` : openWaves[0].name;
                 sub.innerText = "MI Al-Irsyad Al-Islamiyyah Kota Banjarmasin";
 
-                // Generate kartu dinamis untuk setiap gelombang yang OPEN
+                // Generate kartu dinamis HANYA untuk setiap gelombang yang OPEN
                 const waveCardsHtml = openWaves.map((wave, idx) => {
                     const waveApplicantsCount = applicantsData.filter(a => a.waveId === wave.id).length;
-                    const remaining = Math.max(0, wave.totalQuota - waveApplicantsCount);
+                    const totalQ = (wave.totalQuota !== undefined && wave.totalQuota !== null && !isNaN(wave.totalQuota) && wave.totalQuota !== '') ? Number(wave.totalQuota) : 100;
+                    const remaining = Math.max(0, totalQ - waveApplicantsCount);
+                    const feeVal = Number(wave.fee) || 200000;
                     return `
                     <div class="p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl space-y-2.5">
                         <div class="flex justify-between items-center pb-1.5 border-b border-emerald-200/60">
@@ -1583,11 +1600,11 @@
                             </div>
                             <div>
                                 <span class="text-[10px] text-slate-500 font-semibold block">Sisa Kuota:</span>
-                                <span class="font-black text-emerald-700 text-xs">${remaining} / ${wave.totalQuota} Siswa</span>
+                                <span class="font-black text-emerald-700 text-xs">${remaining} / ${totalQ} Siswa</span>
                             </div>
                             <div>
                                 <span class="text-[10px] text-slate-500 font-semibold block">Biaya Registrasi:</span>
-                                <span class="font-bold text-slate-800">Rp ${wave.fee.toLocaleString('id-ID')}</span>
+                                <span class="font-bold text-slate-800">Rp ${feeVal.toLocaleString('id-ID')}</span>
                             </div>
                             <div>
                                 <span class="text-[10px] text-slate-500 font-semibold block">Bank Tujuan:</span>
@@ -1644,6 +1661,18 @@
                     </button>
                 `;
             }
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function checkAndShowWavePopup() {
+            renderWaveAnnouncement();
+            if (hasShownWaveAnnouncement) return;
+            // Hanya aktif di halaman awal (Landing/Login)
+            if (currentRole !== 'LOGIN') return;
+
+            const modal = document.getElementById('modalWaveAnnouncement');
+            if (!modal) return;
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -1736,7 +1765,7 @@
         function updateWaveDisplay() {
             const hasOpen = wavesList.some(w => w.status === 'OPEN');
             const activeWave = getActiveWave();
-            const quota = activeWave ? activeWave.totalQuota : 120;
+            const quota = (activeWave && activeWave.totalQuota !== undefined && !isNaN(activeWave.totalQuota) && activeWave.totalQuota !== '') ? Number(activeWave.totalQuota) : 120;
             const remaining = Math.max(0, quota - applicantsData.length);
 
             const badge = document.getElementById('loginWaveBadge');
@@ -1776,6 +1805,13 @@
             if (userWaveBadge && activeWave) userWaveBadge.innerText = activeWave.name;
             if (userQuotaRemaining) userQuotaRemaining.innerText = remaining;
             if (userQuotaTotal && activeWave) userQuotaTotal.innerText = quota;
+
+            const adminWaveSelect = document.getElementById('adminWaveFilter');
+            if (adminWaveSelect) {
+                const curVal = adminWaveSelect.value;
+                adminWaveSelect.innerHTML = `<option value="ALL">Semua Gelombang</option>` + 
+                    wavesList.map(w => `<option value="${w.id}" ${curVal === w.id ? 'selected' : ''}>${w.name} (${w.status})</option>`).join('');
+            }
         }
 
         // ==========================================================
@@ -2656,7 +2692,12 @@
             const sel = document.getElementById('inputGelombangSelect');
             if (sel) {
                 sel.innerHTML = wavesList.map(w => `<option value="${w.id}">${w.name} (${w.status})</option>`).join('');
-                sel.value = selectedWaveId;
+                if (wavesList.some(w => w.id === selectedWaveId)) {
+                    sel.value = selectedWaveId;
+                } else if (wavesList.length > 0) {
+                    selectedWaveId = wavesList[0].id;
+                    sel.value = selectedWaveId;
+                }
             }
             onWaveSelectChange();
 
@@ -2686,15 +2727,24 @@
             const statusEl = document.getElementById('inputGelombangStatus');
             const summary = document.getElementById('modalQuotaSummary');
 
-            if (nameEl) nameEl.value = wave.name;
-            if (startEl) startEl.value = wave.startDate;
-            if (endEl) endEl.value = wave.endDate;
-            if (quotaEl) quotaEl.value = wave.totalQuota;
-            if (feeEl) feeEl.value = wave.fee;
-            if (statusEl) statusEl.value = wave.status;
+            if (nameEl) nameEl.value = wave.name || '';
+            if (startEl) startEl.value = wave.startDate || '';
+            if (endEl) endEl.value = wave.endDate || '';
+            
+            const totalQ = (wave.totalQuota !== undefined && wave.totalQuota !== null && !isNaN(wave.totalQuota) && wave.totalQuota !== '') ? Number(wave.totalQuota) : '';
+            if (quotaEl) {
+                quotaEl.value = totalQ !== '' ? totalQ : '';
+                quotaEl.oninput = function() {
+                    const currentVal = parseInt(this.value);
+                    const count = applicantsData.filter(a => a.waveId === wave.id).length;
+                    if (summary) summary.innerText = `Terisi: ${count} dari ${!isNaN(currentVal) ? currentVal : '-'}`;
+                };
+            }
+            if (feeEl) feeEl.value = wave.fee !== undefined ? wave.fee : 200000;
+            if (statusEl) statusEl.value = wave.status || 'OPEN';
 
             const registeredInWave = applicantsData.filter(a => a.waveId === wave.id).length;
-            if (summary) summary.innerText = `Terisi: ${registeredInWave} dari ${wave.totalQuota}`;
+            if (summary) summary.innerText = `Terisi: ${registeredInWave} dari ${totalQ !== '' ? totalQ : '-'}`;
         }
 
         function addNewWavePrompt() {
@@ -2736,21 +2786,31 @@
         function saveGelombangSetting() {
             const wave = wavesList.find(w => w.id === selectedWaveId);
             if (wave) {
-                wave.name = document.getElementById('inputGelombangName').value;
+                wave.name = document.getElementById('inputGelombangName').value.trim();
                 wave.startDate = document.getElementById('inputGelombangStartDate').value;
                 wave.endDate = document.getElementById('inputGelombangEndDate').value;
-                wave.totalQuota = parseInt(document.getElementById('inputGelombangQuota').value) || 100;
+                const parsedQuota = parseInt(document.getElementById('inputGelombangQuota').value);
+                wave.totalQuota = !isNaN(parsedQuota) && parsedQuota > 0 ? parsedQuota : 60;
                 wave.fee = parseInt(document.getElementById('inputGelombangFee').value) || 200000;
                 wave.status = document.getElementById('inputGelombangStatus').value;
             }
 
-            bankSettings.bankName = document.getElementById('inputBankName').value;
-            bankSettings.bankHolder = document.getElementById('inputBankHolder').value;
-            bankSettings.accountNo = document.getElementById('inputAccountNo').value;
+            bankSettings.bankName = document.getElementById('inputBankName').value.trim();
+            bankSettings.bankHolder = document.getElementById('inputBankHolder').value.trim();
+            bankSettings.accountNo = document.getElementById('inputAccountNo').value.trim();
 
-            saveSettingsToFirestore();
+            if (window.is_preview) {
+                try {
+                    localStorage.setItem('pmbm_wavesList', JSON.stringify(wavesList));
+                    localStorage.setItem('pmbm_bankSettings', JSON.stringify(bankSettings));
+                } catch (e) {}
+            } else {
+                saveSettingsToFirestore();
+            }
+
             updateWaveDisplay();
             updateBankDisplay();
+            renderWaveAnnouncement();
             closeModal('modalGelombang');
             showToast("Pengaturan gelombang dan rekening bank berhasil disimpan!");
         }
