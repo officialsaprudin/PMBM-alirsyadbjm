@@ -150,10 +150,10 @@
                     <div class="relative z-10 space-y-6">
                         <div class="flex items-center gap-3">
                             <span id="loginWaveBadge" class="bg-[#2D7B64] text-white border-none text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider">
-                                Gelombang 1 T.A. 2027/2028 (01 Agu - 31 Agu 2027)
+                                Gelombang 1 T.A. 2027/2028 (1 Agu 2026 - 2 Nov 2026)
                             </span>
                             <span class="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-bold px-4 py-2 rounded-full">
-                                Sisa Kuota: <span id="loginQuotaCount">116</span> Siswa
+                                Sisa Kuota: <span id="loginQuotaCount">102</span> Siswa
                             </span>
                         </div>
 
@@ -320,10 +320,10 @@
                     <div>
                     <div class="flex flex-wrap items-center gap-2 mb-2">
                         <span id="userWaveBadge" class="bg-white/20 text-emerald-100 border border-white/20 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
-                            Gelombang 1 T.A. 2027/2028 (01 Agu - 31 Agu 2027)
+                            Gelombang 1 T.A. 2027/2028 (1 Agu 2026 - 2 Nov 2026)
                         </span>
                         <span id="userQuotaBadge" class="bg-amber-500/20 text-amber-200 border border-amber-400/30 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                            <i data-lucide="users" class="w-3.5 h-3.5"></i> Sisa Kuota: <span id="userQuotaRemaining">116</span> / <span id="userQuotaTotal">120</span> Murid
+                            <i data-lucide="users" class="w-3.5 h-3.5"></i> Sisa Kuota: <span id="userQuotaRemaining">102</span> / <span id="userQuotaTotal">120</span> Murid
                         </span>
                     </div>
                     <h2 id="userWelcomeGreeting" class="text-lg sm:text-2xl font-black leading-snug break-words">Selamat Datang, Bapak/Ibu Wali Murid!</h2>
@@ -1433,8 +1433,8 @@
         };
 
         let wavesList = [
-            { id: 'wave-1', name: 'Gelombang 1 T.A. 2027/2028', startDate: '2027-08-01', endDate: '2027-08-31', totalQuota: 120, fee: 200000, status: 'OPEN' },
-            { id: 'wave-2', name: 'Gelombang 2 T.A. 2027/2028', startDate: '2027-09-01', endDate: '2027-09-30', totalQuota: 80, fee: 250000, status: 'OPEN' }
+            { id: 'wave-1', name: 'Gelombang 1 T.A. 2027/2028', startDate: '2026-08-01', endDate: '2026-11-02', totalQuota: 120, fee: 200000, status: 'OPEN' },
+            { id: 'wave-2', name: 'Gelombang 2 T.A. 2027/2028', startDate: '2026-11-23', endDate: '2027-04-12', totalQuota: 54, fee: 200000, status: 'CLOSED' }
         ];
         let selectedWaveId = 'wave-1';
 
@@ -1475,7 +1475,13 @@
                     const localWaves = localStorage.getItem('pmbm_wavesList');
                     if (localWaves) {
                         const parsed = JSON.parse(localWaves);
-                        if (Array.isArray(parsed) && parsed.length > 0) wavesList = parsed;
+                        // Bersihkan cache lama jika masih menahan data default 2027 usang
+                        const hasObsolete2027 = Array.isArray(parsed) && parsed.some(w => w.startDate && w.startDate.startsWith('2027-08'));
+                        if (!hasObsolete2027 && Array.isArray(parsed) && parsed.length > 0) {
+                            wavesList = parsed;
+                        } else {
+                            localStorage.setItem('pmbm_wavesList', JSON.stringify(wavesList));
+                        }
                     }
                     const localBank = localStorage.getItem('pmbm_bankSettings');
                     if (localBank) {
@@ -1559,9 +1565,6 @@
             const modal = document.getElementById('modalWaveAnnouncement');
             if (!modal) return;
 
-            // HANYA ambil gelombang yang berstatus 'OPEN'
-            const openWaves = wavesList.filter(w => w.status === 'OPEN');
-            const hasOpenWave = openWaves.length > 0;
             const header = document.getElementById('announcementBannerHeader');
             const badge = document.getElementById('announcementBadge');
             const title = document.getElementById('announcementTitle');
@@ -1571,27 +1574,33 @@
 
             if (!header || !badge || !title || !sub || !content || !btnGroup) return;
 
-            if (hasOpenWave) {
+            const hasAnyOpen = wavesList.some(w => w.status === 'OPEN');
+
+            if (wavesList.length > 0 && hasAnyOpen) {
                 header.className = "bg-gradient-to-br from-[#14523E] to-[#0c3c2d] text-white p-6 relative overflow-hidden shrink-0";
                 badge.className = "inline-block px-3 py-1 bg-amber-400 text-slate-900 font-black text-[10px] uppercase rounded-full tracking-wider shadow-sm";
                 badge.innerText = "📢 PENDAFTARAN RESMI DIBUKA";
-                title.innerText = openWaves.length > 1 ? `Pendaftaran PMBM (${openWaves.length} Gelombang Aktif)` : openWaves[0].name;
+                title.innerText = wavesList.length > 1 ? `Pendaftaran PMBM (${wavesList.length} Gelombang)` : wavesList[0].name;
                 sub.innerText = "MI Al-Irsyad Al-Islamiyyah Kota Banjarmasin";
 
-                // Generate kartu dinamis HANYA untuk setiap gelombang yang OPEN
-                const waveCardsHtml = openWaves.map((wave, idx) => {
+                // Generate kartu presisi untuk setiap gelombang yang ada di pengaturan admin (2 gelombang = 2 kartu)
+                const waveCardsHtml = wavesList.map((wave, idx) => {
                     const waveApplicantsCount = applicantsData.filter(a => a.waveId === wave.id).length;
-                    const totalQ = (wave.totalQuota !== undefined && wave.totalQuota !== null && !isNaN(wave.totalQuota) && wave.totalQuota !== '') ? Number(wave.totalQuota) : 100;
+                    const totalQ = (wave.totalQuota !== undefined && wave.totalQuota !== null && !isNaN(wave.totalQuota) && wave.totalQuota !== '') ? Number(wave.totalQuota) : 60;
                     const remaining = Math.max(0, totalQ - waveApplicantsCount);
                     const feeVal = Number(wave.fee) || 200000;
+                    const isOpen = wave.status === 'OPEN';
+
                     return `
-                    <div class="p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl space-y-2.5">
-                        <div class="flex justify-between items-center pb-1.5 border-b border-emerald-200/60">
-                            <span class="font-black text-emerald-950 text-xs uppercase tracking-wide flex items-center gap-1.5">
-                                <span class="w-5 h-5 rounded-full bg-emerald-700 text-white flex items-center justify-center text-[10px] font-bold">${idx + 1}</span>
+                    <div class="p-4 ${isOpen ? 'bg-emerald-50/80 border-emerald-200' : 'bg-slate-50 border-slate-200 opacity-90'} border rounded-2xl space-y-2.5">
+                        <div class="flex justify-between items-center pb-1.5 ${isOpen ? 'border-b border-emerald-200/60' : 'border-b border-slate-200'}">
+                            <span class="font-black ${isOpen ? 'text-emerald-950' : 'text-slate-700'} text-xs uppercase tracking-wide flex items-center gap-1.5">
+                                <span class="w-5 h-5 rounded-full ${isOpen ? 'bg-emerald-700 text-white' : 'bg-slate-400 text-white'} flex items-center justify-center text-[10px] font-bold">${idx + 1}</span>
                                 ${wave.name}
                             </span>
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-200 text-emerald-800">DIBUKA</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${isOpen ? 'bg-emerald-200 text-emerald-800' : 'bg-rose-100 text-rose-700 border border-rose-200'}">
+                                ${isOpen ? 'DIBUKA' : 'DITUTUP'}
+                            </span>
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-[11px]">
                             <div>
@@ -1600,7 +1609,9 @@
                             </div>
                             <div>
                                 <span class="text-[10px] text-slate-500 font-semibold block">Sisa Kuota:</span>
-                                <span class="font-black text-emerald-700 text-xs">${remaining} / ${totalQ} Siswa</span>
+                                <span class="font-black ${isOpen ? 'text-emerald-700' : 'text-slate-500'} text-xs">
+                                    ${isOpen ? `${remaining} / ${totalQ} Siswa` : `0 / ${totalQ} Siswa (Tutup)`}
+                                </span>
                             </div>
                             <div>
                                 <span class="text-[10px] text-slate-500 font-semibold block">Biaya Registrasi:</span>
@@ -1617,7 +1628,7 @@
 
                 content.innerHTML = `
                     <p class="text-slate-600 leading-relaxed text-justify">
-                        Ahlan Wa Sahlan! Pendaftaran Calon Murid Baru Madrasah Tahun Ajaran 2027/2028 saat ini sedang berlangsung. Berikut rincian gelombang pendaftaran yang sedang dibuka:
+                        Ahlan Wa Sahlan! Pendaftaran Calon Murid Baru Madrasah Tahun Ajaran 2027/2028 saat ini sedang berlangsung. Berikut rincian gelombang pendaftaran:
                     </p>
                     <div class="space-y-2.5">
                         ${waveCardsHtml}
@@ -2687,6 +2698,30 @@
         // ==========================================================
         // 6. KELOLA GELOMBANG & REKENING (ADMIN MODAL)
         // ==========================================================
+        function saveCurrentWaveModalInputs() {
+            const wave = wavesList.find(w => w.id === selectedWaveId);
+            if (!wave) return;
+            const nameEl = document.getElementById('inputGelombangName');
+            const startEl = document.getElementById('inputGelombangStartDate');
+            const endEl = document.getElementById('inputGelombangEndDate');
+            const quotaEl = document.getElementById('inputGelombangQuota');
+            const feeEl = document.getElementById('inputGelombangFee');
+            const statusEl = document.getElementById('inputGelombangStatus');
+
+            if (nameEl && nameEl.value.trim()) wave.name = nameEl.value.trim();
+            if (startEl && startEl.value) wave.startDate = startEl.value;
+            if (endEl && endEl.value) wave.endDate = endEl.value;
+            if (quotaEl) {
+                const q = parseInt(quotaEl.value);
+                if (!isNaN(q) && q > 0) wave.totalQuota = q;
+            }
+            if (feeEl) {
+                const f = parseInt(feeEl.value);
+                if (!isNaN(f) && f >= 0) wave.fee = f;
+            }
+            if (statusEl && statusEl.value) wave.status = statusEl.value;
+        }
+
         function openGelombangModal() {
             const modal = document.getElementById('modalGelombang');
             const sel = document.getElementById('inputGelombangSelect');
@@ -2713,6 +2748,9 @@
         }
 
         function onWaveSelectChange() {
+            // Amankan data input gelombang aktif sebelum beralih ke gelombang lain
+            saveCurrentWaveModalInputs();
+
             const sel = document.getElementById('inputGelombangSelect');
             if (!sel) return;
             selectedWaveId = sel.value;
@@ -2727,27 +2765,44 @@
             const statusEl = document.getElementById('inputGelombangStatus');
             const summary = document.getElementById('modalQuotaSummary');
 
-            if (nameEl) nameEl.value = wave.name || '';
-            if (startEl) startEl.value = wave.startDate || '';
-            if (endEl) endEl.value = wave.endDate || '';
+            if (nameEl) {
+                nameEl.value = wave.name || '';
+                nameEl.oninput = saveCurrentWaveModalInputs;
+            }
+            if (startEl) {
+                startEl.value = wave.startDate || '';
+                startEl.oninput = saveCurrentWaveModalInputs;
+            }
+            if (endEl) {
+                endEl.value = wave.endDate || '';
+                endEl.oninput = saveCurrentWaveModalInputs;
+            }
             
-            const totalQ = (wave.totalQuota !== undefined && wave.totalQuota !== null && !isNaN(wave.totalQuota) && wave.totalQuota !== '') ? Number(wave.totalQuota) : '';
+            const totalQ = (wave.totalQuota !== undefined && wave.totalQuota !== null && !isNaN(wave.totalQuota) && wave.totalQuota !== '') ? Number(wave.totalQuota) : 60;
             if (quotaEl) {
-                quotaEl.value = totalQ !== '' ? totalQ : '';
+                quotaEl.value = totalQ;
                 quotaEl.oninput = function() {
+                    saveCurrentWaveModalInputs();
                     const currentVal = parseInt(this.value);
                     const count = applicantsData.filter(a => a.waveId === wave.id).length;
                     if (summary) summary.innerText = `Terisi: ${count} dari ${!isNaN(currentVal) ? currentVal : '-'}`;
                 };
             }
-            if (feeEl) feeEl.value = wave.fee !== undefined ? wave.fee : 200000;
-            if (statusEl) statusEl.value = wave.status || 'OPEN';
+            if (feeEl) {
+                feeEl.value = wave.fee !== undefined ? wave.fee : 200000;
+                feeEl.oninput = saveCurrentWaveModalInputs;
+            }
+            if (statusEl) {
+                statusEl.value = wave.status || 'OPEN';
+                statusEl.onchange = saveCurrentWaveModalInputs;
+            }
 
             const registeredInWave = applicantsData.filter(a => a.waveId === wave.id).length;
-            if (summary) summary.innerText = `Terisi: ${registeredInWave} dari ${totalQ !== '' ? totalQ : '-'}`;
+            if (summary) summary.innerText = `Terisi: ${registeredInWave} dari ${totalQ}`;
         }
 
         function addNewWavePrompt() {
+            saveCurrentWaveModalInputs();
             const nextIdx = wavesList.length + 1;
             const newWave = {
                 id: `wave-${Date.now()}`,
@@ -2784,16 +2839,7 @@
         }
 
         function saveGelombangSetting() {
-            const wave = wavesList.find(w => w.id === selectedWaveId);
-            if (wave) {
-                wave.name = document.getElementById('inputGelombangName').value.trim();
-                wave.startDate = document.getElementById('inputGelombangStartDate').value;
-                wave.endDate = document.getElementById('inputGelombangEndDate').value;
-                const parsedQuota = parseInt(document.getElementById('inputGelombangQuota').value);
-                wave.totalQuota = !isNaN(parsedQuota) && parsedQuota > 0 ? parsedQuota : 60;
-                wave.fee = parseInt(document.getElementById('inputGelombangFee').value) || 200000;
-                wave.status = document.getElementById('inputGelombangStatus').value;
-            }
+            saveCurrentWaveModalInputs();
 
             bankSettings.bankName = document.getElementById('inputBankName').value.trim();
             bankSettings.bankHolder = document.getElementById('inputBankHolder').value.trim();
