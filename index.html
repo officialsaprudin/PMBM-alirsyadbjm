@@ -1096,6 +1096,7 @@
                     </div>
                     <select id="inputGelombangStatus" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                         <option value="OPEN">DIBUKA (Menerima Pendaftaran & Aktif di Landing Page)</option>
+                        <option value="UPCOMING">AKAN DIBUKA (Segera Hadir / Belum Menerima Pendaftaran)</option>
                         <option value="CLOSED">DITUTUP (Kuota Penuh / Lewat Tanggal)</option>
                     </select>
                 </div>
@@ -1575,11 +1576,12 @@
             if (!header || !badge || !title || !sub || !content || !btnGroup) return;
 
             const hasAnyOpen = wavesList.some(w => w.status === 'OPEN');
+            const hasAnyUpcoming = wavesList.some(w => w.status === 'UPCOMING');
 
-            if (wavesList.length > 0 && hasAnyOpen) {
+            if (wavesList.length > 0 && (hasAnyOpen || hasAnyUpcoming)) {
                 header.className = "bg-gradient-to-br from-[#14523E] to-[#0c3c2d] text-white p-6 relative overflow-hidden shrink-0";
                 badge.className = "inline-block px-3 py-1 bg-amber-400 text-slate-900 font-black text-[10px] uppercase rounded-full tracking-wider shadow-sm";
-                badge.innerText = "📢 PENDAFTARAN RESMI DIBUKA";
+                badge.innerText = hasAnyOpen ? "📢 PENDAFTARAN RESMI DIBUKA" : "⏳ INFORMASI PENDAFTARAN (SEGERA DIBUKA)";
                 title.innerText = wavesList.length > 1 ? `Pendaftaran PMBM (${wavesList.length} Gelombang)` : wavesList[0].name;
                 sub.innerText = "MI Al-Irsyad Al-Islamiyyah Kota Banjarmasin";
 
@@ -1590,16 +1592,43 @@
                     const remaining = Math.max(0, totalQ - waveApplicantsCount);
                     const feeVal = Number(wave.fee) || 200000;
                     const isOpen = wave.status === 'OPEN';
+                    const isUpcoming = wave.status === 'UPCOMING';
+
+                    let statusBadgeClass = 'bg-rose-100 text-rose-700 border border-rose-200';
+                    let statusBadgeText = 'DITUTUP';
+                    let cardBg = 'bg-slate-50 border-slate-200 opacity-90';
+                    let cardTitleColor = 'text-slate-700';
+                    let badgeCircleColor = 'bg-slate-400 text-white';
+                    let borderHeaderColor = 'border-slate-200';
+                    let quotaDisplay = `0 / ${totalQ} Siswa (Tutup)`;
+
+                    if (isOpen) {
+                        statusBadgeClass = 'bg-emerald-200 text-emerald-800';
+                        statusBadgeText = 'DIBUKA';
+                        cardBg = 'bg-emerald-50/80 border-emerald-200';
+                        cardTitleColor = 'text-emerald-950';
+                        badgeCircleColor = 'bg-emerald-700 text-white';
+                        borderHeaderColor = 'border-emerald-200/60';
+                        quotaDisplay = `${remaining} / ${totalQ} Siswa`;
+                    } else if (isUpcoming) {
+                        statusBadgeClass = 'bg-amber-100 text-amber-800 border border-amber-300';
+                        statusBadgeText = 'AKAN DIBUKA';
+                        cardBg = 'bg-amber-50/70 border-amber-200';
+                        cardTitleColor = 'text-amber-950';
+                        badgeCircleColor = 'bg-amber-600 text-white';
+                        borderHeaderColor = 'border-amber-200/60';
+                        quotaDisplay = `Segera Hadir (${totalQ} Kuota)`;
+                    }
 
                     return `
-                    <div class="p-4 ${isOpen ? 'bg-emerald-50/80 border-emerald-200' : 'bg-slate-50 border-slate-200 opacity-90'} border rounded-2xl space-y-2.5">
-                        <div class="flex justify-between items-center pb-1.5 ${isOpen ? 'border-b border-emerald-200/60' : 'border-b border-slate-200'}">
-                            <span class="font-black ${isOpen ? 'text-emerald-950' : 'text-slate-700'} text-xs uppercase tracking-wide flex items-center gap-1.5">
-                                <span class="w-5 h-5 rounded-full ${isOpen ? 'bg-emerald-700 text-white' : 'bg-slate-400 text-white'} flex items-center justify-center text-[10px] font-bold">${idx + 1}</span>
+                    <div class="p-4 ${cardBg} border rounded-2xl space-y-2.5">
+                        <div class="flex justify-between items-center pb-1.5 ${borderHeaderColor}">
+                            <span class="font-black ${cardTitleColor} text-xs uppercase tracking-wide flex items-center gap-1.5">
+                                <span class="w-5 h-5 rounded-full ${badgeCircleColor} flex items-center justify-center text-[10px] font-bold">${idx + 1}</span>
                                 ${wave.name}
                             </span>
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${isOpen ? 'bg-emerald-200 text-emerald-800' : 'bg-rose-100 text-rose-700 border border-rose-200'}">
-                                ${isOpen ? 'DIBUKA' : 'DITUTUP'}
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${statusBadgeClass}">
+                                ${statusBadgeText}
                             </span>
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-[11px]">
@@ -1609,8 +1638,8 @@
                             </div>
                             <div>
                                 <span class="text-[10px] text-slate-500 font-semibold block">Sisa Kuota:</span>
-                                <span class="font-black ${isOpen ? 'text-emerald-700' : 'text-slate-500'} text-xs">
-                                    ${isOpen ? `${remaining} / ${totalQ} Siswa` : `0 / ${totalQ} Siswa (Tutup)`}
+                                <span class="font-black ${isOpen ? 'text-emerald-700' : (isUpcoming ? 'text-amber-700' : 'text-slate-500')} text-xs">
+                                    ${quotaDisplay}
                                 </span>
                             </div>
                             <div>
@@ -1741,7 +1770,7 @@
         }
 
         function getActiveWave() {
-            return wavesList.find(w => w.status === 'OPEN') || wavesList[0] || null;
+            return wavesList.find(w => w.status === 'OPEN') || wavesList.find(w => w.status === 'UPCOMING') || wavesList[0] || null;
         }
 
         function togglePasswordVisibility(inputId, btn) {
@@ -1775,6 +1804,7 @@
 
         function updateWaveDisplay() {
             const hasOpen = wavesList.some(w => w.status === 'OPEN');
+            const hasUpcoming = wavesList.some(w => w.status === 'UPCOMING');
             const activeWave = getActiveWave();
             const quota = (activeWave && activeWave.totalQuota !== undefined && !isNaN(activeWave.totalQuota) && activeWave.totalQuota !== '') ? Number(activeWave.totalQuota) : 120;
             const remaining = Math.max(0, quota - applicantsData.length);
@@ -1796,6 +1826,18 @@
                     regBtn.innerText = "+ Daftar Akun Calon Murid Baru";
                 }
                 if (regStatus) regStatus.innerText = "Belum punya akun calon murid?";
+            } else if (hasUpcoming && activeWave) {
+                if (badge) {
+                    badge.className = "bg-amber-600 text-white border border-amber-300 text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider";
+                    badge.innerText = `⏳ ${activeWave.name} (Akan Dibuka: ${formatDateReadable(activeWave.startDate)})`;
+                }
+                if (quotaEl) quotaEl.innerText = quota;
+                if (regBtn) {
+                    regBtn.disabled = true;
+                    regBtn.className = "text-xs font-bold text-amber-600 block mx-auto mt-1 cursor-not-allowed opacity-90";
+                    regBtn.innerText = "⏳ Pendaftaran Segera Dibuka";
+                }
+                if (regStatus) regStatus.innerText = "Pendaftaran belum dibuka, nantikan jadwal resminya.";
             } else {
                 if (badge) {
                     badge.className = "bg-rose-600 text-white border border-rose-300 text-xs font-black px-4 py-2 rounded-full uppercase tracking-wider animate-pulse";
