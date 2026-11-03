@@ -769,7 +769,7 @@
                         <i data-lucide="clipboard-check" class="w-5 h-5 text-blue-600"></i>
                     </div>
                     <span id="statReadyAssess" class="text-2xl font-black text-blue-600">0</span>
-                    <span class="text-[11px] text-slate-400 block mt-1">Bayar verified & Form terisi</span>
+                    <span id="statReadyAssessSubtext" class="text-[11px] text-slate-400 block mt-1">Terjadwal & Siap Diuji</span>
                 </div>
 
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
@@ -2299,11 +2299,20 @@
             const statTotal = document.getElementById('statTotal');
             const statPending = document.getElementById('statPendingPay');
             const statReady = document.getElementById('statReadyAssess');
+            const statReadySub = document.getElementById('statReadyAssessSubtext');
             const statPassed = document.getElementById('statPassed');
+
+            const readyWithSchedule = applicantsData.filter(a => a.paymentStatus === 'VERIFIED' && a.scheduleDate && !a.scoreCompleted && a.finalStatus === 'MENUNGGU').length;
+            const waitingSchedule = applicantsData.filter(a => a.paymentStatus === 'VERIFIED' && !a.scheduleDate && a.finalStatus === 'MENUNGGU').length;
 
             if (statTotal) statTotal.innerText = applicantsData.length;
             if (statPending) statPending.innerText = applicantsData.filter(a => a.paymentStatus === 'PENDING').length;
-            if (statReady) statReady.innerText = applicantsData.filter(a => a.paymentStatus === 'VERIFIED' && a.formCompleted).length;
+            if (statReady) statReady.innerText = readyWithSchedule;
+            if (statReadySub) {
+                statReadySub.innerText = waitingSchedule > 0 
+                    ? `${readyWithSchedule} Terjadwal (${waitingSchedule} Antre)` 
+                    : `${readyWithSchedule} Terjadwal & Siap Diuji`;
+            }
             if (statPassed) statPassed.innerText = applicantsData.filter(a => a.finalStatus === 'LULUS').length;
 
             // Filter data
