@@ -1244,16 +1244,15 @@
     </div>
 
     <!-- MODAL 8: POP-UP IKLAN / PENGUMUMAN STATUS GELOMBANG (OTOMATIS MUNCUL SAAT BUKA WEB) -->
-    <div id="modalWaveAnnouncement" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div id="modalWaveAnnouncement" onclick="if(event.target === this) closeModal('modalWaveAnnouncement')" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl relative transform transition-all">
-            <!-- Close Icon -->
-            <button onclick="closeModal('modalWaveAnnouncement')" class="absolute top-4 right-4 text-white/80 hover:text-white bg-black/25 hover:bg-black/50 rounded-full p-1.5 transition z-10" title="Tutup">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-            
             <!-- Header Flyer Dinamis -->
             <div id="announcementBannerHeader" class="bg-gradient-to-br from-[#14523E] to-[#0c3c2d] text-white p-6 relative overflow-hidden">
-                <div class="relative z-10 space-y-1.5">
+                <!-- Close Icon diletakkan di dalam header dengan z-30 dan pointer-events-auto bebas hambatan -->
+                <button type="button" onclick="closeModal('modalWaveAnnouncement')" class="absolute top-4 right-4 text-white hover:text-amber-300 bg-black/30 hover:bg-black/50 rounded-full p-2 transition z-30 cursor-pointer shadow-md pointer-events-auto flex items-center justify-center" title="Tutup Pengumuman">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                <div class="relative z-10 space-y-1.5 pr-8">
                     <span id="announcementBadge" class="inline-block px-3 py-1 bg-amber-400 text-slate-900 font-black text-[10px] uppercase rounded-full tracking-wider shadow-sm">
                         📢 PENGUMUMAN GELOMBANG
                     </span>
@@ -2302,16 +2301,29 @@
             const statReadySub = document.getElementById('statReadyAssessSubtext');
             const statPassed = document.getElementById('statPassed');
 
-            const readyWithSchedule = applicantsData.filter(a => a.paymentStatus === 'VERIFIED' && a.scheduleDate && !a.scoreCompleted && a.finalStatus === 'MENUNGGU').length;
-            const waitingSchedule = applicantsData.filter(a => a.paymentStatus === 'VERIFIED' && !a.scheduleDate && a.finalStatus === 'MENUNGGU').length;
+            // Sinkronisasi presisi: setiap murid yang telah memiliki jadwal aktif otomatis terhitung
+            const scheduledApplicants = applicantsData.filter(a => 
+                a.scheduleDate && 
+                String(a.scheduleDate).trim() !== '' && 
+                a.finalStatus !== 'LULUS' && 
+                a.finalStatus !== 'TIDAK LULUS'
+            );
+
+            // Murid terverifikasi yang masih mengantre belum dijadwalkan
+            const waitingSchedule = applicantsData.filter(a => 
+                a.paymentStatus === 'VERIFIED' && 
+                (!a.scheduleDate || String(a.scheduleDate).trim() === '') && 
+                a.finalStatus !== 'LULUS' && 
+                a.finalStatus !== 'TIDAK LULUS'
+            );
 
             if (statTotal) statTotal.innerText = applicantsData.length;
             if (statPending) statPending.innerText = applicantsData.filter(a => a.paymentStatus === 'PENDING').length;
-            if (statReady) statReady.innerText = readyWithSchedule;
+            if (statReady) statReady.innerText = scheduledApplicants.length;
             if (statReadySub) {
-                statReadySub.innerText = waitingSchedule > 0 
-                    ? `${readyWithSchedule} Terjadwal (${waitingSchedule} Antre)` 
-                    : `${readyWithSchedule} Terjadwal & Siap Diuji`;
+                statReadySub.innerText = waitingSchedule.length > 0 
+                    ? `${scheduledApplicants.length} Terjadwal (${waitingSchedule.length} Antre Jadwal)` 
+                    : `${scheduledApplicants.length} Terjadwal & Siap Diuji`;
             }
             if (statPassed) statPassed.innerText = applicantsData.filter(a => a.finalStatus === 'LULUS').length;
 
@@ -2498,6 +2510,7 @@
             saveApplicantToFirestore(user);
             closeModal('modalSchedule');
             renderAdminTable();
+            if (currentRole === 'ASESMEN') renderAsesmenCandidates();
             showToast(`Jadwal asesmen untuk ${user.name} berhasil disimpan!`);
         }
 
