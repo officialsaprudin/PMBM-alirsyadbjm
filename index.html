@@ -1205,6 +1205,39 @@
         </div>
     </div>
 
+    <!-- MODAL 7: DETAIL STATUS FORMULIR PENDAFTARAN (ADMIN) -->
+    <div id="modalFormDetail" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl relative my-auto max-h-[90vh] flex flex-col justify-between">
+            <button onclick="closeModal('modalFormDetail')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="border-b border-slate-100 pb-3 flex items-center justify-between pr-8">
+                <div class="flex items-center gap-2">
+                    <div class="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+                        <i data-lucide="file-text" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Detail Isian Formulir Murid</h3>
+                        <p class="text-xs text-slate-500" id="formDetailSubTitle">Pemeriksaan status kelengkapan data pendaftaran</p>
+                    </div>
+                </div>
+                <span id="formDetailStatusBadge" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600">
+                    Memeriksa...
+                </span>
+            </div>
+            
+            <div id="formDetailContent" class="overflow-y-auto pr-1 space-y-4 text-xs">
+                <!-- Dynamic Form Data Rendered Here -->
+            </div>
+
+            <div class="flex justify-end pt-3 border-t border-slate-100">
+                <button onclick="closeModal('modalFormDetail')" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let isLoggedIn = false;
         let currentRole = 'LOGIN'; // LOGIN | USER | ADMIN | ASESMEN
@@ -2097,6 +2130,9 @@
                         <td class="p-3.5 text-right">
                             <div class="flex items-center justify-end gap-1">
                                 ${printActions}
+                                <button onclick="openFormDetailModal('${item.id}')" class="p-1.5 rounded-lg ${item.formCompleted ? 'bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200' : 'bg-slate-100 hover:bg-slate-200 text-slate-400 border border-slate-200'} transition" title="${item.formCompleted ? 'Lihat Formulir Pendaftaran (Sudah Terisi)' : 'Formulir Belum Diisi / Dikirim'}">
+                                    <i data-lucide="${item.formCompleted ? 'file-text' : 'file-clock'}" class="w-4 h-4"></i>
+                                </button>
                                 <button onclick="openPaymentProofModal('${item.id}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="Detail Bukti Transfer">
                                     <i data-lucide="eye" class="w-4 h-4"></i>
                                 </button>
@@ -2584,9 +2620,117 @@
             window.print();
         }
 
+        function openFormDetailModal(id) {
+            const item = applicantsData.find(a => a.id === id);
+            if (!item) return;
+
+            const modal = document.getElementById('modalFormDetail');
+            const badge = document.getElementById('formDetailStatusBadge');
+            const title = document.getElementById('formDetailSubTitle');
+            const content = document.getElementById('formDetailContent');
+
+            title.innerText = `${item.id} - ${item.name}`;
+
+            if (item.formCompleted) {
+                badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1';
+                badge.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Formulir Sudah Lengkap`;
+            } else {
+                badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1';
+                badge.innerHTML = `<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Formulir Belum Diisi / Dikirim`;
+            }
+
+            content.innerHTML = `
+                ${!item.formCompleted ? `
+                    <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center gap-2">
+                        <i data-lucide="info" class="w-5 h-5 text-amber-600 shrink-0"></i>
+                        <span>Calon murid / wali <strong>belum menekan Simpan & Kirim</strong> formulir pendaftaran. Rincian di bawah hanya data awal registrasi.</span>
+                    </div>
+                ` : `
+                    <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600 shrink-0"></i>
+                        <span>Calon murid telah melengkapi dan mengirimkan seluruh berkas formulir pendaftaran secara valid.</span>
+                    </div>
+                `}
+
+                <!-- A. Data Calon Murid -->
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                    <h4 class="font-bold text-emerald-800 uppercase text-[11px] flex items-center gap-1 pb-1 border-b border-slate-200">
+                        <i data-lucide="user" class="w-3.5 h-3.5"></i> A. Data Calon Murid
+                    </h4>
+                    <div class="grid grid-cols-2 gap-2 text-slate-800">
+                        <p><strong>Nama Lengkap:</strong> ${item.name || '-'}</p>
+                        <p><strong>Nama Panggilan:</strong> ${item.nickname || '-'}</p>
+                        <p><strong>NIK Siswa:</strong> <span class="font-mono">${item.nik || '-'}</span></p>
+                        <p><strong>Jenis Kelamin:</strong> ${item.gender || '-'}</p>
+                        <p><strong>Tempat, Tgl Lahir:</strong> ${item.birthPlace || '-'}, ${item.birthDate ? formatDateReadable(item.birthDate) : '-'}</p>
+                        <p><strong>Sekolah Asal:</strong> ${item.sekolahAsal || '-'}</p>
+                        <p class="col-span-2"><strong>Status Kebutuhan Khusus:</strong> <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.statusAbk && item.statusAbk !== 'Non-ABK / Reguler' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-700'}">${item.statusAbk || 'Non-ABK / Reguler'}</span> ${item.detailAbk ? `(${item.detailAbk})` : ''}</p>
+                    </div>
+                </div>
+
+                <!-- B. Data Orang Tua / Wali -->
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                    <h4 class="font-bold text-emerald-800 uppercase text-[11px] flex items-center gap-1 pb-1 border-b border-slate-200">
+                        <i data-lucide="users" class="w-3.5 h-3.5"></i> B. Data Orang Tua / Wali
+                    </h4>
+                    <div class="grid grid-cols-2 gap-2 text-slate-800">
+                        <p><strong>Ayah Kandung:</strong> ${item.ayah || '-'}</p>
+                        <p><strong>Pekerjaan Ayah:</strong> ${item.pekerjaanAyah || '-'}</p>
+                        <p><strong>Penghasilan Ayah:</strong> ${item.penghasilanAyah || '-'}</p>
+                        <p><strong>No. WhatsApp:</strong> <span class="font-mono text-emerald-700 font-bold">${item.wa || '-'}</span></p>
+                        <p><strong>Ibu Kandung:</strong> ${item.ibu || '-'}</p>
+                        <p><strong>Pekerjaan Ibu:</strong> ${item.pekerjaanIbu || '-'}</p>
+                        <p><strong>Penghasilan Ibu:</strong> ${item.penghasilanIbu || '-'}</p>
+                        <p><strong>Wali (Jika Ada):</strong> ${item.wali ? `${item.wali} (${item.hubunganWali || 'Wali'})` : '-'}</p>
+                        <p class="col-span-2"><strong>Alamat Lengkap:</strong> ${item.alamat || '-'}</p>
+                    </div>
+                </div>
+
+                <!-- C. Berkas Persyaratan Terlampir -->
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                    <h4 class="font-bold text-emerald-800 uppercase text-[11px] flex items-center gap-1 pb-1 border-b border-slate-200">
+                        <i data-lucide="file-check" class="w-3.5 h-3.5"></i> C. Berkas Persyaratan Terlampir
+                    </h4>
+                    <div class="grid grid-cols-3 gap-2 pt-1">
+                        <div class="p-2 bg-white rounded-lg border border-slate-200 text-center">
+                            <p class="font-bold text-[10px] text-slate-500 mb-1">Kartu Keluarga (KK)</p>
+                            ${item.kkFileBase64 || item.kkFileName ? `
+                                <button type="button" onclick="window.previewBase64File('${item.kkFileBase64}')" class="px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[10px] font-bold hover:bg-emerald-100 flex items-center justify-center gap-1 w-full">
+                                    <i data-lucide="file-text" class="w-3 h-3"></i> Buka KK
+                                </button>
+                            ` : `<span class="text-[10px] text-slate-400 italic">Belum Ada</span>`}
+                        </div>
+                        <div class="p-2 bg-white rounded-lg border border-slate-200 text-center">
+                            <p class="font-bold text-[10px] text-slate-500 mb-1">Akta Kelahiran</p>
+                            ${item.aktaFileBase64 || item.aktaFileName ? `
+                                <button type="button" onclick="window.previewBase64File('${item.aktaFileBase64}')" class="px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[10px] font-bold hover:bg-emerald-100 flex items-center justify-center gap-1 w-full">
+                                    <i data-lucide="file-text" class="w-3 h-3"></i> Buka Akta
+                                </button>
+                            ` : `<span class="text-[10px] text-slate-400 italic">Belum Ada</span>`}
+                        </div>
+                        <div class="p-2 bg-white rounded-lg border border-slate-200 text-center">
+                            <p class="font-bold text-[10px] text-slate-500 mb-1">Surat Medis ABK</p>
+                            ${item.abkSuratBase64 || item.abkSuratName ? `
+                                <button type="button" onclick="window.previewBase64File('${item.abkSuratBase64}')" class="px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[10px] font-bold hover:bg-amber-100 flex items-center justify-center gap-1 w-full">
+                                    <i data-lucide="file-plus" class="w-3 h-3"></i> Buka Medis
+                                </button>
+                            ` : `<span class="text-[10px] text-slate-400 italic">-</span>`}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-            document.getElementById('modalPrintCard').classList.remove('flex');
+            const m = document.getElementById(modalId);
+            if (m) {
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+            }
         }
 
         function copyAccountNo() {
