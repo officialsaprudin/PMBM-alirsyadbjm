@@ -1245,9 +1245,9 @@
 
     <!-- MODAL 8: POP-UP IKLAN / PENGUMUMAN STATUS GELOMBANG (OTOMATIS MUNCUL SAAT BUKA WEB) -->
     <div id="modalWaveAnnouncement" onclick="if(event.target === this) closeModal('modalWaveAnnouncement')" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl relative transform transition-all">
+        <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl relative transform transition-all">
             <!-- Header Flyer Dinamis -->
-            <div id="announcementBannerHeader" class="bg-gradient-to-br from-[#14523E] to-[#0c3c2d] text-white p-6 relative overflow-hidden">
+            <div id="announcementBannerHeader" class="bg-gradient-to-br from-[#14523E] to-[#0c3c2d] text-white p-6 relative overflow-hidden shrink-0">
                 <!-- Close Icon diletakkan di dalam header dengan z-30 dan pointer-events-auto bebas hambatan -->
                 <button type="button" onclick="closeModal('modalWaveAnnouncement')" class="absolute top-4 right-4 text-white hover:text-amber-300 bg-black/30 hover:bg-black/50 rounded-full p-2 transition z-30 cursor-pointer shadow-md pointer-events-auto flex items-center justify-center" title="Tutup Pengumuman">
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -1265,14 +1265,14 @@
                 </div>
             </div>
 
-            <!-- Konten Isi Flyer -->
-            <div class="p-6 space-y-4 text-xs">
+            <!-- Konten Isi Flyer (Mendukung Multi-Kartu Gelombang) -->
+            <div class="p-6 space-y-4 text-xs overflow-y-auto">
                 <div id="announcementContent" class="space-y-3">
                     <!-- Diinjeksi otomatis via JavaScript -->
                 </div>
 
                 <!-- Tombol Aksi -->
-                <div id="announcementActionBtnGroup" class="pt-2 flex flex-col sm:flex-row gap-2">
+                <div id="announcementActionBtnGroup" class="pt-2 flex flex-col sm:flex-row gap-2 sticky bottom-0 bg-white">
                     <!-- Diinjeksi otomatis via JavaScript -->
                 </div>
             </div>
@@ -1547,8 +1547,8 @@
             const modal = document.getElementById('modalWaveAnnouncement');
             if (!modal) return;
 
-            const hasOpenWave = wavesList.some(w => w.status === 'OPEN');
-            const activeWave = getActiveWave();
+            const openWaves = wavesList.filter(w => w.status === 'OPEN');
+            const hasOpenWave = openWaves.length > 0;
             const header = document.getElementById('announcementBannerHeader');
             const badge = document.getElementById('announcementBadge');
             const title = document.getElementById('announcementTitle');
@@ -1556,38 +1556,57 @@
             const content = document.getElementById('announcementContent');
             const btnGroup = document.getElementById('announcementActionBtnGroup');
 
-            if (hasOpenWave && activeWave) {
-                const remaining = Math.max(0, activeWave.totalQuota - applicantsData.length);
-                header.className = "bg-gradient-to-br from-[#14523E] to-[#0c3c2d] text-white p-6 relative overflow-hidden";
+            if (hasOpenWave) {
+                header.className = "bg-gradient-to-br from-[#14523E] to-[#0c3c2d] text-white p-6 relative overflow-hidden shrink-0";
                 badge.className = "inline-block px-3 py-1 bg-amber-400 text-slate-900 font-black text-[10px] uppercase rounded-full tracking-wider shadow-sm";
                 badge.innerText = "📢 PENDAFTARAN RESMI DIBUKA";
-                title.innerText = activeWave.name;
+                title.innerText = openWaves.length > 1 ? `Pendaftaran PMBM (${openWaves.length} Gelombang Aktif)` : openWaves[0].name;
                 sub.innerText = "MI Al-Irsyad Al-Islamiyyah Kota Banjarmasin";
+
+                // Generate kartu dinamis untuk setiap gelombang yang OPEN
+                const waveCardsHtml = openWaves.map((wave, idx) => {
+                    const waveApplicantsCount = applicantsData.filter(a => a.waveId === wave.id).length;
+                    const remaining = Math.max(0, wave.totalQuota - waveApplicantsCount);
+                    return `
+                    <div class="p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl space-y-2.5">
+                        <div class="flex justify-between items-center pb-1.5 border-b border-emerald-200/60">
+                            <span class="font-black text-emerald-950 text-xs uppercase tracking-wide flex items-center gap-1.5">
+                                <span class="w-5 h-5 rounded-full bg-emerald-700 text-white flex items-center justify-center text-[10px] font-bold">${idx + 1}</span>
+                                ${wave.name}
+                            </span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-200 text-emerald-800">DIBUKA</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                            <div>
+                                <span class="text-[10px] text-slate-500 font-semibold block">Masa Pendaftaran:</span>
+                                <span class="font-bold text-slate-800">${formatDateReadable(wave.startDate)} - ${formatDateReadable(wave.endDate)}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500 font-semibold block">Sisa Kuota:</span>
+                                <span class="font-black text-emerald-700 text-xs">${remaining} / ${wave.totalQuota} Siswa</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500 font-semibold block">Biaya Registrasi:</span>
+                                <span class="font-bold text-slate-800">Rp ${wave.fee.toLocaleString('id-ID')}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500 font-semibold block">Bank Tujuan:</span>
+                                <span class="font-bold text-slate-800">${bankSettings.bankName}</span>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
 
                 content.innerHTML = `
                     <p class="text-slate-600 leading-relaxed text-justify">
-                        Ahlan Wa Sahlan! Pendaftaran Calon Murid Baru Madrasah Tahun Ajaran 2027/2028 untuk <strong>${activeWave.name}</strong> saat ini sedang berlangsung.
+                        Ahlan Wa Sahlan! Pendaftaran Calon Murid Baru Madrasah Tahun Ajaran 2027/2028 saat ini sedang berlangsung. Berikut rincian gelombang pendaftaran yang sedang dibuka:
                     </p>
-                    <div class="grid grid-cols-2 gap-2 p-3 bg-emerald-50/80 border border-emerald-200 rounded-2xl">
-                        <div>
-                            <span class="text-[10px] text-slate-500 font-semibold block">Masa Pendaftaran:</span>
-                            <span class="font-bold text-slate-800 text-[11px]">${formatDateReadable(activeWave.startDate)} - ${formatDateReadable(activeWave.endDate)}</span>
-                        </div>
-                        <div>
-                            <span class="text-[10px] text-slate-500 font-semibold block">Sisa Kuota:</span>
-                            <span class="font-black text-emerald-700 text-sm">${remaining} / ${activeWave.totalQuota} Siswa</span>
-                        </div>
-                        <div>
-                            <span class="text-[10px] text-slate-500 font-semibold block">Biaya Registrasi:</span>
-                            <span class="font-bold text-slate-800 text-[11px]">Rp ${activeWave.fee.toLocaleString('id-ID')}</span>
-                        </div>
-                        <div>
-                            <span class="text-[10px] text-slate-500 font-semibold block">Bank Tujuan:</span>
-                            <span class="font-bold text-slate-800 text-[11px]">${bankSettings.bankName}</span>
-                        </div>
+                    <div class="space-y-2.5">
+                        ${waveCardsHtml}
                     </div>
                     <p class="text-[11px] text-amber-800 bg-amber-50 p-2.5 rounded-xl border border-amber-200 leading-tight">
-                        ⚡ <strong>Penting:</strong> Kuota terbatas! Pendaftaran akan otomatis tertutup apabila kuota telah terpenuhi.
+                        ⚡ <strong>Penting:</strong> Kuota terbatas! Pendaftaran tiap gelombang akan otomatis tertutup apabila kuota telah terpenuhi atau batas tanggal berakhir.
                     </p>
                 `;
 
@@ -1600,7 +1619,7 @@
                     </button>
                 `;
             } else {
-                header.className = "bg-gradient-to-br from-rose-800 to-rose-950 text-white p-6 relative overflow-hidden";
+                header.className = "bg-gradient-to-br from-rose-800 to-rose-950 text-white p-6 relative overflow-hidden shrink-0";
                 badge.className = "inline-block px-3 py-1 bg-white text-rose-800 font-black text-[10px] uppercase rounded-full tracking-wider shadow-sm";
                 badge.innerText = "⛔ PEMBERITAHUAN RESMI";
                 title.innerText = "Pendaftaran Ditutup";
