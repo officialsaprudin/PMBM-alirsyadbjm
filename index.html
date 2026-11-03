@@ -2249,7 +2249,7 @@
             }
 
             container.innerHTML = readyCandidates.map(c => `
-                <div onclick="selectAsesmenCandidate('${c.id}')" class="p-3.5 rounded-xl border transition-all cursor-pointer ${c.id === selectedAsesmenCandidateId ? 'bg-emerald-50 border-emerald-500 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'}">
+                <div data-id="${c.id}" onclick="selectAsesmenCandidate('${c.id}')" class="p-3.5 rounded-xl border transition-all cursor-pointer ${c.id === selectedAsesmenCandidateId ? 'bg-emerald-50 border-emerald-500 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'}">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="font-bold text-xs text-slate-900">${c.name}</p>
@@ -2269,6 +2269,16 @@
             selectedAsesmenCandidateId = id;
             const item = applicantsData.find(a => a.id === id);
             if (!item) return;
+
+            // Sinkronisasi highlight warna hijau di panel daftar kartu kiri
+            const cards = document.querySelectorAll('#asesmenCandidateList > div');
+            cards.forEach(card => {
+                if (card.getAttribute('data-id') === id) {
+                    card.className = "p-3.5 rounded-xl border transition-all cursor-pointer bg-emerald-50 border-emerald-500 shadow-sm";
+                } else {
+                    card.className = "p-3.5 rounded-xl border transition-all cursor-pointer bg-white border-slate-200 hover:border-slate-300";
+                }
+            });
 
             document.getElementById('asesmenTargetName').innerText = item.name;
             document.getElementById('asesmenTargetDetail').innerText = `No. Reg: ${item.id} | Wali: ${item.ayah || '-'}`;
